@@ -1,0 +1,88 @@
+{
+  "features": [
+    {
+      "name": "user-authentication",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "All Users",
+      "businessGoal": "Enable secure user access",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    },
+    {
+      "name": "tutoring-interface",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "Sarah, Marcus, Elena",
+      "businessGoal": "Provide interactive learning experience",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    },
+    {
+      "name": "study-session-framework",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "Sarah, Marcus, Elena",
+      "businessGoal": "Enable structured learning sessions",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    },
+    {
+      "name": "progress-tracking",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "Sarah, Marcus, James",
+      "businessGoal": "Track and visualize learning progress",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    },
+    {
+      "name": "ai-tutoring-engine",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "Sarah, Marcus, Elena",
+      "businessGoal": "Provide personalized AI-powered tutoring",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    },
+    {
+      "name": "content-recommendations",
+      "state": "PROPOSED",
+      "owner": "Franklin",
+      "persona": "Sarah, Marcus, Elena",
+      "businessGoal": "Personalize learning content",
+      "created": "2026-03-29",
+      "lastUpdated": "2026-03-29",
+      "metrics": {
+        "usage": null,
+        "errorRate": null,
+        "performance": null
+      }
+    }
+  ]
+}
