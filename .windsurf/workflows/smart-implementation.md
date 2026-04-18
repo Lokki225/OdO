@@ -36,15 +36,207 @@ Execute implementation with continuous validation, automatic confidence scoring,
 Before writing ANY code, AI agents MUST:
 
 1. **Read and acknowledge** ALL Product Layer files:
-   - `docs/specifications/[FEATURE].md`
-   - `docs/acceptance-criteria/[FEATURE].md`
-   - `docs/test-scenarios/[FEATURE].md`
-   - `docs/risks/[FEATURE].md` 
+   - `lib/product/features/[FEATURE]/spec.md`
+   - `lib/product/features/[FEATURE]/acceptance-criteria.md`
+   - `lib/product/features/[FEATURE]/test-scenarios.md`
+   - `lib/product/features/[FEATURE]/risks.md`
+   - `lib/product/features/[FEATURE]/1-data-implementation-plan.md`
+   - `lib/product/features/[FEATURE]/2-domain-implementation-plan.md`
+   - `lib/product/features/[FEATURE]/3-ui-implementation-plan.md`
 
 2. **Create implementation checklist** from acceptance criteria
 3. **Verify** every item will be implemented
 4. **Confirm** no simplifications or omissions
 5. **Document** the implementation approach for EACH criterion
+
+---
+
+## 🏗️ Phase 0: Epic Product Layer Scaffolding (MANDATORY FIRST STEP)
+
+### Purpose
+
+Before ANY code is written, the agent MUST create the **Epic Product Layer** — a complete set of product documentation and implementation plans for the current epic. This ensures every epic has its own specification, acceptance criteria, risk assessment, test scenarios, and **layered implementation plans** (Data, Domain, UI) following Clean Architecture.
+
+### 📂 Two-Folder Architecture
+
+- **`lib/product/features/[feature]/`** — Product documentation & implementation plans (specs, AC, risks, tests, plans)
+- **`lib/features/[feature]/`** — Actual code implementation (data/, domain/, presentation/)
+
+The product folder guides the implementation. The code folder receives the implementation. They are always kept in sync.
+
+### Trigger Condition
+
+**When starting a NEW epic** (no `lib/product/features/[feature-slug]/` folder exists for this epic), execute Phase 0 BEFORE anything else.
+
+**If the folder already exists and is populated** → skip to Pre-Flight Safety Check.
+
+### Step P0.1: Create Epic Product Folder
+
+```text
+🏗️ EPIC PRODUCT LAYER SCAFFOLDING
+
+Epic: [EPIC_NAME]
+Feature Slug: [feature-slug] (e.g., foundation, agenda, practice, ai, proactive, polish)
+
+□ Create folder: lib/product/features/[feature-slug]/
+□ Copy and populate from templates: lib/product/features/_TEMPLATE/
+
+Files to create:
+  ✅ lib/product/features/[feature-slug]/spec.md
+  ✅ lib/product/features/[feature-slug]/acceptance-criteria.md
+  ✅ lib/product/features/[feature-slug]/risks.md
+  ✅ lib/product/features/[feature-slug]/test-scenarios.md
+  ✅ lib/product/features/[feature-slug]/1-data-implementation-plan.md
+  ✅ lib/product/features/[feature-slug]/2-domain-implementation-plan.md
+  ✅ lib/product/features/[feature-slug]/3-ui-implementation-plan.md
+```
+
+### Step P0.2: Populate Product Documents from Epic Source
+
+**Source Documents:**
+- `_bmad-output/planning-artifacts/epics.md` — Epic stories and acceptance criteria
+- `_bmad-output/prd.md` — Product requirements
+- `_bmad-output/planning-artifacts/architecture.md` — Architecture decisions
+- `_bmad-output/planning-artifacts/ux-design-specification.md` — UX requirements
+- `docs/IMPLEMENTATION_PLAN.md` — Implementation sequence
+
+**For each document, the agent MUST:**
+
+1. **spec.md** — Extract from epics.md:
+   - Epic goal and rationale
+   - All screens/pages required
+   - User flows from story acceptance criteria
+   - Technical constraints from architecture.md
+   - Dependencies on other epics
+   - Clean Architecture component breakdown (Domain entities, Data models, Presentation pages)
+
+2. **acceptance-criteria.md** — Extract from epics.md:
+   - ALL acceptance criteria from EVERY story in this epic
+   - Cross-reference with PRD functional requirements (FR1-FR26)
+   - Cross-reference with UX design requirements (UX-DR1-UX-DR28)
+   - Cross-reference with non-functional requirements (NFR1-NFR16)
+   - Group by: Functional, Integration, Edge Cases, Error Handling, Quality, Security
+
+3. **risks.md** — Analyze:
+   - Technical risks specific to this epic's stories
+   - Integration risks with dependent epics
+   - Performance risks per platform thresholds
+   - Data integrity risks (SQLite/Drift specific)
+
+4. **test-scenarios.md** — Derive from acceptance criteria:
+   - Data layer test scenarios (model serialization, DAO queries, repository delegation)
+   - Domain layer test scenarios (entity validation, use case logic, error cases)
+   - Presentation layer test scenarios (widget rendering, state management, navigation)
+   - Edge case and error scenarios
+   - Performance test scenarios
+
+### Step P0.3: Create Layered Implementation Plans (Clean Architecture)
+
+**CRITICAL**: These plans guide the ENTIRE implementation. They must be thorough.
+
+```text
+📐 IMPLEMENTATION PLAN CREATION
+
+For each plan, the agent MUST:
+
+1️⃣  1-data-implementation-plan.md (Data Layer):
+  □ List ALL models with field-by-field mapping to domain entities
+  □ List ALL Drift DAO queries with SQL operations
+  □ List ALL repository implementations with error mapping
+  □ Define file paths: lib/features/[feature]/data/models/, datasources/, repositories/
+  □ Map each item to a specific story ID
+  □ Define test file paths mirroring lib/ structure
+
+2️⃣  2-domain-implementation-plan.md (Domain Layer):
+  □ List ALL entities with properties and validation rules
+  □ List ALL use cases with input/output and business logic
+  □ List ALL repository contracts (abstract interfaces)
+  □ Define ALL failure types and when they trigger
+  □ Define file paths: lib/features/[feature]/domain/entities/, usecases/, repositories/
+  □ Map each item to a specific story ID
+
+3️⃣  3-ui-implementation-plan.md (Presentation Layer):
+  □ List ALL screens/pages with routes and purpose
+  □ List ALL widgets with responsibilities
+  □ List ALL Riverpod providers with types and dependencies
+  □ List ALL UI states (loading, loaded, empty, error)
+  □ Map ALL UX-DR requirements to specific screens
+  □ Define navigation flow between screens
+  □ Define file paths: lib/features/[feature]/presentation/pages/, widgets/, providers/
+  □ Map each item to a specific story ID
+```
+
+### Step P0.4: Validate Epic Product Layer Completeness
+
+```text
+✅ EPIC PRODUCT LAYER VALIDATION
+
+□ spec.md is complete — NOT a template, filled with real epic data
+□ acceptance-criteria.md is complete — ALL story ACs extracted and organized
+□ risks.md is complete — ALL risks identified with mitigations
+□ test-scenarios.md is complete — ALL layers have test scenarios
+□ 1-data-implementation-plan.md is complete — ALL models, DAOs, repos listed
+□ 2-domain-implementation-plan.md is complete — ALL entities, use cases, contracts listed
+□ 3-ui-implementation-plan.md is complete — ALL screens, widgets, providers listed
+
+Cross-Reference Check:
+□ Every story in epics.md for this epic is covered in at least one implementation plan
+□ Every acceptance criterion maps to a test scenario
+□ Every screen in spec.md appears in 3-ui-implementation-plan.md
+□ Every entity in spec.md appears in 2-domain-implementation-plan.md
+□ Every model in spec.md appears in 1-data-implementation-plan.md
+□ Implementation order respects Clean Architecture: Domain → Data → Presentation
+
+🎯 RESULT: [PASS/FAIL] — CANNOT proceed to Pre-Flight with FAIL
+```
+
+### 🚫 BLOCKING RULE
+
+**DO NOT proceed to Pre-Flight Safety Check or write ANY code until Phase 0 is COMPLETE.**
+
+- ❌ No code before product layer exists
+- ❌ No implementation before plans are filled out
+- ❌ No story work before ALL 7 files exist and are populated
+- ✅ Only after Phase 0 PASSES → proceed to Pre-Flight Safety Check
+
+### 📂 Directory Structure After Phase 0
+
+```text
+lib/
+├── product/
+│   └── features/
+│       ├── _TEMPLATE/              ← Source templates (never edited directly)
+│       │   ├── spec.md
+│       │   ├── acceptance-criteria.md
+│       │   ├── risks.md
+│       │   ├── test-scenarios.md
+│       │   ├── 1-data-implementation-plan.md
+│       │   ├── 2-domain-implementation-plan.md
+│       │   └── 3-ui-implementation-plan.md
+│       └── [feature-slug]/         ← Populated for current epic
+│           ├── spec.md
+│           ├── acceptance-criteria.md
+│           ├── risks.md
+│           ├── test-scenarios.md
+│           ├── 1-data-implementation-plan.md
+│           ├── 2-domain-implementation-plan.md
+│           └── 3-ui-implementation-plan.md
+│
+├── features/
+│   └── [feature-slug]/             ← Actual code (populated AFTER Phase 0)
+│       ├── data/
+│       │   ├── models/
+│       │   ├── datasources/
+│       │   └── repositories/
+│       ├── domain/
+│       │   ├── entities/
+│       │   ├── usecases/
+│       │   └── repositories/
+│       └── presentation/
+│           ├── pages/
+│           ├── widgets/
+│           └── providers/
+```
 
 ---
 
@@ -58,7 +250,7 @@ Before writing ANY code, AI agents MUST:
 ✅ Product Layer Checklist for [FEATURE_NAME]:
 
 📋 Specifications:
-  □ Feature specification exists at product/features/[FEATURE]/spec.md
+  □ Feature specification exists at lib/product/features/[FEATURE]/spec.md
   □ Problem statement is clear and specific
   □ Goals are well-defined
   □ Non-goals are documented
@@ -68,7 +260,7 @@ Before writing ANY code, AI agents MUST:
   □ Success metrics are defined
 
 ✅ Acceptance Criteria:
-  □ Acceptance criteria exists at product/features/[FEATURE]/acceptance-criteria.md
+  □ Acceptance criteria exists at lib/product/features/[FEATURE]/acceptance-criteria.md
   □ ALL functional requirements are testable
   □ ALL integration requirements are specific
   □ ALL quality requirements have measurable criteria
@@ -79,7 +271,7 @@ Before writing ANY code, AI agents MUST:
   □ Definition of Done is complete
 
 ✅ Test Scenarios:
-  □ Test scenarios exist at product/features/[FEATURE]/test-scenarios.md
+  □ Test scenarios exist at lib/product/features/[FEATURE]/test-scenarios.md
   □ ALL test scenarios map to acceptance criteria
   □ Input/output for each scenario is defined
   □ Validation rules are specific
@@ -90,7 +282,7 @@ Before writing ANY code, AI agents MUST:
   □ Test data requirements are documented
 
 ✅ Risk Assessment:
-  □ Risk assessment exists at product/features/[FEATURE]/risks.md
+  □ Risk assessment exists at lib/product/features/[FEATURE]/risks.md
   □ Technical risks are identified
   □ Product risks are identified
   □ Performance risks are identified
@@ -99,14 +291,14 @@ Before writing ANY code, AI agents MUST:
   □ Mitigation strategies are defined
   □ Monitoring metrics are specified
 
-✅ Implementation Tasks:
-  □ Copy product/features/_TEMPLATE/implementation_tasks.md to product/features/[FEATURE]/
-  □ Fill out implementation_tasks.md with feature-specific tasks
-  □ Break down each acceptance criterion into granular tasks
-  □ Identify exact file paths for all files to create/modify
-  □ Add dependencies between tasks
-  □ Add verification commands for each phase
-  □ Use as your task tracking checklist throughout implementation
+✅ Implementation Plans (Clean Architecture):
+  □ lib/product/features/[FEATURE]/1-data-implementation-plan.md filled out (models, DAOs, repos)
+  □ lib/product/features/[FEATURE]/2-domain-implementation-plan.md filled out (entities, use cases, contracts)
+  □ lib/product/features/[FEATURE]/3-ui-implementation-plan.md filled out (screens, widgets, providers)
+  □ Each plan lists exact file paths under lib/features/[FEATURE]/data|domain|presentation/
+  □ Each plan maps items to specific story IDs from epics.md
+  □ Implementation order follows Clean Architecture: Domain → Data → Presentation
+  □ Use implementation plans as task tracking checklists throughout development
 
 🎯 RESULT: [PASS/FAIL] - CANNOT proceed with FAIL
 ```
@@ -255,6 +447,29 @@ After implementing EACH requirement:
 
 For each feature:
 
+### **Pre-Step: Verify Epic Product Layer Exists (Phase 0 Gate)**
+
+Before entering the implementation loop, verify Phase 0 has been completed:
+
+```text
+📋 PHASE 0 GATE CHECK
+
+□ lib/product/features/[FEATURE]/ folder exists
+□ spec.md is populated (not a template)
+□ acceptance-criteria.md is populated
+□ risks.md is populated
+□ test-scenarios.md is populated
+□ 1-data-implementation-plan.md is populated
+□ 2-domain-implementation-plan.md is populated
+□ 3-ui-implementation-plan.md is populated
+
+🎯 ALL 7 files exist and are filled with real epic data
+
+❌ IF ANY FILE MISSING OR STILL A TEMPLATE:
+   → GO BACK to Phase 0 and complete it first
+   → DO NOT proceed to Step 0
+```
+
 ### **Step 0: Product Layer Deep Dive (MANDATORY)**
 
 ```
@@ -291,7 +506,7 @@ Before ANY coding, extract and document ALL screens/pages from product specs:
 ```
 📱 SCREEN INVENTORY FOR [FEATURE_NAME]:
 
-Source: product/features/[feature-name]/spec.md
+Source: lib/product/features/[feature-name]/spec.md
 
 Screens Section Analysis:
 □ Located "Screens" section in spec.md
@@ -333,7 +548,7 @@ Establish completion criteria BEFORE starting:
 📊 FEATURE COMPLETENESS BASELINE:
 
 Feature: [FEATURE_NAME]
-Product Spec: product/features/[feature-name]/spec.md
+Product Spec: lib/product/features/[feature-name]/spec.md
 
 REQUIRED COMPONENTS INVENTORY:
 
@@ -378,16 +593,21 @@ REQUIRED COMPONENTS INVENTORY:
 ### **Step 2: Analyze**
 - Read all context files
 - **RE-READ** Product Layer files (specifications, acceptance criteria, test scenarios, risks)
+- **READ** Implementation Plans (1-data, 2-domain, 3-ui) from `lib/product/features/[FEATURE]/`
 - Create detailed notes on EVERY requirement
 
 ### **Step 3: Plan**
 - Create implementation strategy
 - **Map strategy to EVERY acceptance criterion**
-- Identify files to create/modify for EACH requirement
+- **Follow implementation plans** from `lib/product/features/[FEATURE]/` for layer ordering
+- Identify files to create/modify for EACH requirement (cross-check with implementation plans)
 - Plan test implementation for EACH requirement
+- **Implementation order**: Domain (Step 4) → Data (Step 5) → Presentation (Step 6)
 - **NO SIMPLIFICATIONS ALLOWED**
 
 ### **Step 4: Domain Layer Implementation**
+
+**📐 Reference Plan**: `lib/product/features/[FEATURE]/2-domain-implementation-plan.md`
 
 **For EACH acceptance criterion requiring domain logic:**
 
@@ -414,6 +634,8 @@ REQUIRED COMPONENTS INVENTORY:
 
 ### **Step 5: Data Layer Implementation**
 
+**📐 Reference Plan**: `lib/product/features/[FEATURE]/1-data-implementation-plan.md`
+
 **For EACH data requirement:**
 
 ```
@@ -438,6 +660,8 @@ REQUIRED COMPONENTS INVENTORY:
 ```
 
 ### **Step 6: Presentation Layer Implementation**
+
+**📐 Reference Plan**: `lib/product/features/[FEATURE]/3-ui-implementation-plan.md`
 
 **For EACH UI requirement:**
 
@@ -750,7 +974,7 @@ Acceptance Criteria Audit:
 📱 SCREEN COMPLETENESS AUDIT:
 
 Feature: [FEATURE_NAME]
-Source: product/features/[feature-name]/spec.md
+Source: lib/product/features/[feature-name]/spec.md
 
 Step 1: Extract Required Screens from Spec
 □ Opened spec.md file
@@ -798,7 +1022,7 @@ Screen-by-Screen Verification:
 🔗 INTEGRATION COMPLETENESS AUDIT:
 
 Feature: [FEATURE_NAME]
-Source: product/features/[feature-name]/spec.md (Dependencies section)
+Source: lib/product/features/[feature-name]/spec.md (Dependencies section)
 
 Required Integrations (from spec.md):
 ┌──────────────────────────────────────────────────────────┐
@@ -1624,9 +1848,9 @@ Current State:
 □ Session memory updated with completion status
 
 Validation Expectations:
-□ Validate against product/features/[feature]/spec.md
-□ Validate against product/features/[feature]/acceptance-criteria.md
-□ Validate against product/features/[feature]/test-scenarios.md
+□ Validate against lib/product/features/[feature]/spec.md
+□ Validate against lib/product/features/[feature]/acceptance-criteria.md
+□ Validate against lib/product/features/[feature]/test-scenarios.md
 □ Check all screens/pages exist
 □ Verify all integrations complete
 □ Confirm performance targets met

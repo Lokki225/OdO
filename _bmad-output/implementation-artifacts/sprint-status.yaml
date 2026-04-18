@@ -66,14 +66,14 @@ epic-5: backlog
 ### Epic 6: Polish & Resilience
 epic-6: backlog
 
-6-1-light-mode-implementation: backlog
-6-2-completion-animation-400ms-scale-down: backlog
-6-3-empty-states-and-placeholder-ui: backlog
-6-4-error-state-handling: backlog
-6-5-offline-fallback-pulse-animation: backlog
-6-6-accessibility-compliance: backlog
-6-7-locale-formatting-xof-dd-mm-yyyy-utc-0: backlog
-6-8-settings-screen-with-data-clearing: backlog
-6-9-performance-optimization-and-testing: backlog
+6-1-light-mode-implementation: ready-for-dev
+6-2-completion-animation-400ms-scale-down: ready-for-dev
+6-3-empty-states-and-placeholder-ui: ready-for-dev
+6-4-error-state-handling: ready-for-dev
+6-5-offline-fallback-pulse-animation: ready-for-dev
+6-6-accessibility-compliance: ready-for-dev
+6-7-locale-formatting-xof-dd-mm-yyyy-utc-0: ready-for-dev
+6-8-settings-screen-with-data-clearing: ready-for-dev
+6-9-performance-optimization-and-testing: ready-for-dev
 
 last_updated: 2026-03-29
