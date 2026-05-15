@@ -10,7 +10,7 @@
 ## Epic Sequence & Dependencies
 
 ### Epic 1: Foundation (Stories 1.1–1.8) — 8 stories
-**Status:** PENDING  
+**Status:** COMPLETE (2026-05-15) — 129/129 tests passing, flutter analyze clean  
 **Dependencies:** None (prerequisite epic)  
 **User Value:** Technical foundation enabling all subsequent epics  
 **Estimated Scope:** Large (project scaffold, design tokens, SQLite schema, AiProvider abstraction, core services, router)
@@ -210,5 +210,5 @@ Final phase after all core epics complete. Implements all 7 themes, French local
 
 ---
 
-**Last Updated:** 2026-05-13  
-**Next Step:** Begin Epic 1 (Foundation) implementation starting with Story 1.1
+**Last Updated:** 2026-05-15  
+**Next Step:** Begin Epic 2 (Agenda Module) starting with Story 2.1
