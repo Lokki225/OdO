@@ -1,394 +1,334 @@
-# 🔐 BMAD Design Contracts
+# OdO Clean Architecture Contracts
 
-**Version**: 1.1  
-**Last Updated**: 2026-03-29  
-**Purpose**: Define strict layer separation and communication rules for TooXTips
-
----
-
-## 🧱 BMAD Layers (Authoritative)
-
-BMAD consists of exactly four layers:
-
-1. **backend/** → Business logic & services
-2. **model/** → Pure data structures & validation
-3. **api/** → External interfaces & controllers
-4. **database/** → Persistence & queries
-
-No other layers may perform these roles.
+**Version**: 2.0  
+**Last Updated**: 2026-05-13  
+**Purpose**: Define strict layer separation and communication rules for OdO (Flutter/Dart)
 
 ---
 
-## 🔁 Allowed Communication Paths
+## Layers (Authoritative)
 
-Only the following communication is allowed:
+OdO uses exactly three layers per feature:
 
 ```
-api/ → backend/ → model/
-backend/ → database/ → model/
+lib/features/[feature]/
+  domain/        Pure Dart. No Flutter, no Drift, no http imports.
+  data/          Imports domain only.
+  presentation/  Imports domain only. NEVER imports data directly.
 ```
 
-### 🚫 Forbidden Paths
+### `domain/`
 
-- api/ → database/ (Direct database access from API)
-- api/ → model/ directly (API should use backend)
-- backend/ → api/ (Backend should not call API)
-- model/ → database/ (Models should not access database)
-- database/ → api/ (Database should not call API)
+**Contents:** Entities, abstract repository interfaces, use cases  
+**Dart imports allowed:** `dart:core`, `dart:async`, `package:result_dart` (or equivalent)  
+**Forbidden imports:** `flutter/`, `drift/`, `http`, any data-layer file  
+**Rule:** All validation and business logic lives here. Entities return `Result<T, AppFailure>`.
+
+### `data/`
+
+**Contents:** Drift DAOs, repository implementations, mappers (entity ↔ Drift row)  
+**Imports allowed:** `domain/` (entities, interfaces), `drift/`, `core/database/`  
+**Forbidden imports:** `presentation/`, `flutter/widgets`  
+**Rule:** DAOs extend `DatabaseAccessor<AppDatabase>`. Repository impls implement domain interfaces. No business logic here — only persistence and mapping.
+
+### `presentation/`
+
+**Contents:** Riverpod providers, pages, widgets  
+**Imports allowed:** `domain/` (entities, use cases, repository interfaces via providers)  
+**Forbidden imports:** `data/` (never import a DAO, repository impl, or Drift model directly)  
+**Rule:** All Riverpod providers for a feature live in `[feature]_providers.dart`. Widgets consume `AsyncValue<T>` and always handle loading / data / error states.
 
 ---
 
-## 📦 Data Transfer Rules
+## Allowed Communication Paths
 
-Each layer uses its own data type:
+```
+presentation/ ──ref.watch──► domain interfaces (via Riverpod DI)
+                                     ▲
+data/ ──implements──────────────────►│
+                                     │
+domain/ ◄──── no external deps ──────┘
+```
 
-### API Layer
-- **Data Type**: DTO (Data Transfer Object)
-- **Purpose**: External communication
-- **Rules**:
-  - Must NOT return database entities
-  - Must NOT expose internal models
-  - Must validate all inputs
-  - Must transform data for clients
-
-### Backend Layer
-- **Data Type**: Domain Objects
-- **Purpose**: Business logic
-- **Rules**:
-  - Must NOT expose ORM models
-  - Must NOT expose database schemas
-  - Must encapsulate business rules
-  - Must handle all validation
-
-### Model Layer
-- **Data Type**: Schemas / Types
-- **Purpose**: Data structure definition
-- **Rules**:
-  - Must NOT contain business logic
-  - Must NOT contain I/O operations
-  - Must be pure data structures
-  - Must define validation rules
-
-### Database Layer
-- **Data Type**: Raw Records
-- **Purpose**: Persistence
-- **Rules**:
-  - Must NOT contain validation logic
-  - Must NOT contain business rules
-  - Must handle transactions
-  - Must manage relationships
+Only these paths are valid:
+- `presentation` reads domain entities and calls use cases through Riverpod providers
+- `data` implements domain repository interfaces and maps Drift rows to domain entities
+- `domain` has zero outward dependencies
 
 ---
 
-## 📋 Layer Responsibilities
+## Forbidden Paths
 
-### API Layer (`api/`)
-
-**Responsibilities**:
-- Handle HTTP/RPC input & output
-- Perform request validation
-- Map DTOs to domain inputs
-- Map domain outputs to DTOs
-- Handle authentication/authorization
-- Return appropriate HTTP status codes
-- Format error responses
-
-**What NOT to do**:
-- Business logic
-- Database queries
-- Data transformation (beyond DTO mapping)
-- Caching logic
-
-**Example Structure**:
-```
-api/
-├── routes/
-│   ├── auth.ts
-│   ├── tutoring.ts
-│   └── progress.ts
-├── controllers/
-│   ├── authController.ts
-│   ├── tutoringController.ts
-│   └── progressController.ts
-├── middleware/
-│   ├── auth.ts
-│   ├── validation.ts
-│   └── errorHandler.ts
-└── dtos/
-    ├── authDtos.ts
-    ├── tutoringDtos.ts
-    └── progressDtos.ts
-```
-
-### Backend Layer (`backend/`)
-
-**Responsibilities**:
-- Contain all business logic
-- Orchestrate workflows
-- Call model and database via interfaces
-- Handle domain-level validation
-- Implement business rules
-- Manage transactions
-
-**What NOT to do**:
-- HTTP handling
-- Database queries (use database layer)
-- API response formatting
-- Request validation (use API layer)
-
-**Example Structure**:
-```
-backend/
-├── services/
-│   ├── authService.ts
-│   ├── tutoringService.ts
-│   └── progressService.ts
-├── domain/
-│   ├── User.ts
-│   ├── TutoringSession.ts
-│   └── Progress.ts
-├── repositories/
-│   ├── IUserRepository.ts
-│   ├── ITutoringRepository.ts
-│   └── IProgressRepository.ts
-└── validators/
-    ├── userValidator.ts
-    └── sessionValidator.ts
-```
-
-### Model Layer (`model/`)
-
-**Responsibilities**:
-- Define data schemas
-- Define TypeScript types
-- Define validation rules
-- Define constants
-- Define enums
-
-**What NOT to do**:
-- Business logic
-- I/O operations
-- Database queries
-- API calls
-- Side effects
-
-**Example Structure**:
-```
-model/
-├── schemas/
-│   ├── user.schema.ts
-│   ├── tutoring.schema.ts
-│   └── progress.schema.ts
-├── types/
-│   ├── user.types.ts
-│   ├── tutoring.types.ts
-│   └── progress.types.ts
-├── validation/
-│   ├── user.validation.ts
-│   └── session.validation.ts
-└── constants/
-    └── index.ts
-```
-
-### Database Layer (`database/`)
-
-**Responsibilities**:
-- Handle persistence
-- Execute queries
-- Manage migrations
-- Manage relationships
-- Handle transactions
-- Implement repositories
-
-**What NOT to do**:
-- Business logic
-- Validation logic
-- API logic
-- Caching logic
-
-**Example Structure**:
-```
-database/
-├── migrations/
-│   ├── 001_create_users.ts
-│   ├── 002_create_sessions.ts
-│   └── 003_create_progress.ts
-├── repositories/
-│   ├── UserRepository.ts
-│   ├── TutoringRepository.ts
-│   └── ProgressRepository.ts
-├── models/
-│   ├── User.ts
-│   ├── TutoringSession.ts
-│   └── Progress.ts
-└── seeds/
-    └── index.ts
-```
+| From | To | Why |
+|------|----|-----|
+| `presentation/` | `data/` | Widgets must never depend on persistence details |
+| `data/` | `presentation/` | No reverse dependency |
+| `domain/` | `data/` or `presentation/` | Domain must be infrastructure-free |
+| Any layer | Flutter widgets in `domain/` | Domain is pure Dart |
+| Any widget | Drift row types directly | Only domain entities cross the presentation boundary |
 
 ---
 
-## 🔄 Data Flow Examples
+## Data Transfer Rules
 
-### Example 1: User Registration
+### Domain Layer — Entities
 
-```
-1. API receives POST /auth/register with DTO
-   ↓
-2. API validates DTO (request validation)
-   ↓
-3. API calls backend.registerUser(userData)
-   ↓
-4. Backend validates business rules
-   ↓
-5. Backend calls database.createUser(userData)
-   ↓
-6. Database creates user record
-   ↓
-7. Database returns raw record
-   ↓
-8. Backend transforms to domain object
-   ↓
-9. API transforms to response DTO
-   ↓
-10. API returns HTTP 201 with DTO
-```
+- Pure Dart classes, no annotations
+- Immutable (use `final` fields, optionally `copyWith`)
+- Validation returns `Result<Entity, AppFailure>`
+- No `toJson` / `fromJson` in entities (that belongs in mappers)
 
-### Example 2: Get User Progress
+```dart
+// CORRECT — pure Dart entity
+class Skill {
+  final String id;
+  final String name;
+  final DateTime createdAt;
 
-```
-1. API receives GET /progress/:userId
-   ↓
-2. API validates userId parameter
-   ↓
-3. API calls backend.getUserProgress(userId)
-   ↓
-4. Backend calls database.getProgress(userId)
-   ↓
-5. Database queries and returns raw records
-   ↓
-6. Backend transforms to domain objects
-   ↓
-7. Backend applies business logic (calculations, etc.)
-   ↓
-8. API transforms to response DTO
-   ↓
-9. API returns HTTP 200 with DTO
-```
+  const Skill({required this.id, required this.name, required this.createdAt});
 
----
-
-## ✅ Contract Enforcement Checklist
-
-Before any PR or task completion, verify:
-
-- [ ] API only uses DTOs for input/output
-- [ ] API does not call database directly
-- [ ] Backend only uses domain objects
-- [ ] Backend does not expose ORM models
-- [ ] Model only contains schemas/types
-- [ ] Model contains no business logic
-- [ ] Database only contains queries/migrations
-- [ ] Database contains no validation logic
-- [ ] All data flows through proper layers
-- [ ] No forbidden communication paths exist
-
----
-
-## 🚫 Common Violations
-
-### ❌ Violation 1: API Calling Database
-```typescript
-// WRONG - API calling database directly
-app.get('/users/:id', async (req, res) => {
-  const user = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
-  res.json(user);
-});
-
-// CORRECT - API calling backend
-app.get('/users/:id', async (req, res) => {
-  const user = await userService.getUser(req.params.id);
-  res.json(userDTO.fromDomain(user));
-});
-```
-
-### ❌ Violation 2: Backend Exposing ORM Models
-```typescript
-// WRONG - Backend returning ORM model
-async getUser(id: string) {
-  return await User.findById(id); // Returns ORM model
-}
-
-// CORRECT - Backend returning domain object
-async getUser(id: string) {
-  const record = await userRepository.findById(id);
-  return new User(record.id, record.name, record.email);
-}
-```
-
-### ❌ Violation 3: Model Containing Logic
-```typescript
-// WRONG - Model with business logic
-export class User {
-  calculateScore() {
-    // Business logic in model
-    return this.points * this.multiplier;
+  static Result<Skill, AppFailure> create({required String name}) {
+    if (name.trim().isEmpty) return Failure(AppFailure.validation('Name required'));
+    return Success(Skill(id: const Uuid().v4(), name: name.trim(), createdAt: DateTime.now()));
   }
 }
 
-// CORRECT - Logic in backend service
-export class UserService {
-  calculateScore(user: User): number {
-    return user.points * user.multiplier;
+// WRONG — entity with Drift annotation
+@DataClassName('SkillRow')  // ← Drift annotation; belongs in data layer only
+class SkillsTable extends Table { ... }
+```
+
+### Data Layer — DAOs
+
+- Extend `DatabaseAccessor<AppDatabase>`
+- Methods return `Stream<List<SkillRow>>` or `Future<void>`
+- No business logic — only SQL operations
+
+```dart
+// CORRECT — DAO with only persistence operations
+part 'skills_dao.g.dart';
+
+@DriftAccessor(tables: [SkillsTable])
+class SkillsDao extends DatabaseAccessor<AppDatabase> with _$SkillsDaoMixin {
+  SkillsDao(super.db);
+
+  Stream<List<SkillRow>> watchAllSkills() => select(skillsTable).watch();
+
+  Future<void> insertSkill(SkillRow row) => into(skillsTable).insert(row);
+
+  Future<void> deleteSkill(String id) =>
+      (delete(skillsTable)..where((t) => t.id.equals(id))).go();
+}
+
+// WRONG — business logic in DAO
+Future<void> addSkillIfNotDuplicate(String name) async {
+  final exists = await (select(skillsTable)..where((t) => t.name.equals(name))).getSingleOrNull();
+  if (exists != null) throw Exception('Duplicate');  // ← business rule; belongs in domain
+  await into(skillsTable).insert(SkillRow(id: uuid(), name: name, createdAt: DateTime.now()));
+}
+```
+
+### Data Layer — Repository Implementations
+
+- Implement domain repository interfaces
+- Inject the DAO; map Drift rows ↔ domain entities via mappers
+- Error mapping: `SqliteException` → `AppFailure`
+
+```dart
+// CORRECT — repository impl mapping rows to entities
+class SkillRepositoryImpl implements SkillRepository {
+  SkillRepositoryImpl(this._dao);
+  final SkillsDao _dao;
+
+  @override
+  Stream<List<Skill>> watchAllSkills() =>
+      _dao.watchAllSkills().map((rows) => rows.map(SkillMapper.fromRow).toList());
+
+  @override
+  Future<Result<void, AppFailure>> addSkill(Skill skill) async {
+    try {
+      await _dao.insertSkill(SkillMapper.toRow(skill));
+      return const Success(null);
+    } on SqliteException catch (e) {
+      return Failure(AppFailure.database(e.message));
+    }
+  }
+}
+
+// WRONG — repository impl importing a widget
+import 'package:flutter/material.dart';  // ← forbidden in data layer
+```
+
+### Presentation Layer — Riverpod Providers
+
+- `@riverpod` annotation + code generation
+- `AsyncNotifier` for CRUD; `StreamProvider` for reactive Drift queries
+- Never import `data/` — inject repository via `ref.watch(skillRepositoryProvider)`
+
+```dart
+// CORRECT — AsyncNotifier using domain interface only
+@riverpod
+class SkillsNotifier extends _$SkillsNotifier {
+  @override
+  Stream<List<Skill>> build() {
+    final repo = ref.watch(skillRepositoryProvider);
+    return repo.watchAllSkills();  // domain interface, not DAO
+  }
+
+  Future<void> addSkill(String name) async {
+    final result = Skill.create(name: name);
+    if (result.isFailure()) {
+      // surface error via state
+      return;
+    }
+    await ref.read(skillRepositoryProvider).addSkill(result.getOrThrow());
+  }
+}
+
+// WRONG — provider importing data layer directly
+import 'package:odo/features/practice/data/datasources/skills_dao.dart';  // ← forbidden
+```
+
+---
+
+## Contract Enforcement Checklist
+
+Before any story is marked done, verify:
+
+- [ ] No `domain/` file imports `flutter/`, `drift/`, or `data/`
+- [ ] No `presentation/` file imports anything from `data/`
+- [ ] All Drift row types are confined to `data/` (mappers, DAOs, repository impls)
+- [ ] All domain entities are pure Dart classes with no framework annotations
+- [ ] Repository interfaces in `domain/` are abstract classes only — no implementations
+- [ ] All Riverpod providers live in `[feature]/presentation/[feature]_providers.dart`
+- [ ] Every `AsyncNotifier` handles all three `AsyncValue` states in the UI
+- [ ] No business logic in DAOs or repository impls — only persistence operations
+- [ ] `flutter analyze` passes on all changed files before story is marked done
+
+---
+
+## Common Violations
+
+### Violation 1: Widget importing DAO directly
+
+```dart
+// WRONG
+import 'package:odo/features/practice/data/datasources/skills_dao.dart';
+
+class SkillsPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dao = SkillsDao(ref.read(appDatabaseProvider));  // ← bypasses domain
+    ...
+  }
+}
+
+// CORRECT — use the provider, which injects domain interface
+class SkillsPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final skills = ref.watch(skillsNotifierProvider);
+    ...
   }
 }
 ```
 
-### ❌ Violation 4: Database Containing Validation
-```typescript
-// WRONG - Validation in database
-async createUser(data: any) {
-  if (!data.email) throw new Error('Email required');
-  return await db.insert('users', data);
+### Violation 2: Drift row type crossing into presentation
+
+```dart
+// WRONG — Drift row in a widget
+Widget build(BuildContext context, WidgetRef ref) {
+  final AsyncValue<List<SkillRow>> rows = ref.watch(skillsProvider);  // ← SkillRow is a Drift type
+  ...
 }
 
-// CORRECT - Validation in backend
-async createUser(data: any) {
-  validateUserData(data); // Validation in backend
-  return await userRepository.create(data);
+// CORRECT — domain entity in widget
+Widget build(BuildContext context, WidgetRef ref) {
+  final AsyncValue<List<Skill>> skills = ref.watch(skillsNotifierProvider);  // ← Skill is a domain entity
+  ...
+}
+```
+
+### Violation 3: Business logic in repository impl
+
+```dart
+// WRONG — validation in data layer
+@override
+Future<Result<void, AppFailure>> addSkill(Skill skill) async {
+  if (skill.name.isEmpty) return Failure(AppFailure.validation('Name required'));  // ← belongs in entity
+  await _dao.insertSkill(SkillMapper.toRow(skill));
+  return const Success(null);
+}
+
+// CORRECT — validation stays in domain entity; repository only persists
+@override
+Future<Result<void, AppFailure>> addSkill(Skill skill) async {
+  try {
+    await _dao.insertSkill(SkillMapper.toRow(skill));
+    return const Success(null);
+  } on SqliteException catch (e) {
+    return Failure(AppFailure.database(e.message));
+  }
+}
+```
+
+### Violation 4: Domain entity importing Flutter
+
+```dart
+// WRONG
+import 'package:flutter/foundation.dart';  // ← forbidden in domain
+
+@immutable
+class Skill { ... }
+
+// CORRECT — use Dart's own const/final; no Flutter annotations needed
+class Skill {
+  final String id;
+  const Skill({required this.id, ...});
 }
 ```
 
 ---
 
-## 📊 Dependency Direction
-
-The dependency direction must always be:
+## Dependency Direction
 
 ```
-API → Backend → Model
-      ↓
-    Database → Model
+presentation/
+     │  ref.watch(provider)
+     ▼
+domain/ ◄──── data/
+(interfaces)  (implements)
 ```
 
-**Never reverse these dependencies.**
+**Never reverse these dependencies.**  
+`domain/` must compile without `data/` or `presentation/` on the classpath.
 
 ---
 
-## 🔐 Security Implications
+## Core Layer Contracts (`lib/core/`)
 
-Strict layer separation provides security benefits:
+### `core/types/result.dart`
 
-1. **Input Validation**: All external input validated at API layer
-2. **Authorization**: Enforced at API and backend layers
-3. **Data Protection**: Sensitive data transformations in backend
-4. **Audit Trail**: Clear data flow for logging and monitoring
-5. **Vulnerability Isolation**: Bugs in one layer don't compromise others
+- `Result<S, F>` sealed class: `Success<S, F>` and `Failure<S, F>`
+- Used by all domain entity factory methods and repository interfaces
+- No Flutter imports
 
----
+### `core/database/app_database.dart`
 
-## 📚 References
+- Single `AppDatabase` class; Drift `@DriftDatabase` annotation
+- `onCreate` callback runs all `CREATE TABLE` and `CREATE INDEX` statements
+- `schemaVersion` incremented for every migration
+- Provided via `appDatabaseProvider` (`FutureProvider<AppDatabase>` or lazy singleton)
 
-- BMAD Architecture Pattern
-- Clean Architecture Principles
-- Separation of Concerns
-- Dependency Inversion Principle
+### `core/services/`
+
+- `AiProvider` — abstract interface; `ClaudeAiProvider` is the V1 implementation
+- `LocaleService` — static methods: `formatXof`, `formatDate`, `formatTime` — pure Dart, no Flutter
+- `NotificationService` — wraps `flutter_local_notifications`; no business logic
+- `BackgroundTaskService` — wraps `workmanager`; registers and cancels tasks only
+
+### `core/constants/`
+
+- `app_colors.dart` — raw palette (never used directly in widgets)
+- `app_spacing.dart` / `app_typography.dart` — spacing and text style tokens
+- `ai_constants.dart` — `contextMaxChars = 4000`, model ID, timeout values

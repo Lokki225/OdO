@@ -1,103 +1,79 @@
-# Product Roadmap
+# TooXTips — Product Roadmap
 
-**Project:** TooXTips  
-**Version:** 1.0.0  
-**Last Updated:** 2026-03-29
+**Vision:** A personal AI chief of staff — one app that connects your schedule, your long-term goals, and your spending, so the AI always has the context to give useful, specific guidance.
 
----
-
-## 🎯 Product Vision
-
-TooXTips is a comprehensive platform designed to help users master complex topics through intelligent tutoring, interactive learning, and personalized study sessions.
+**Target user:** Franklin Ouattara (sole user, personal app)  
+**Last updated:** 2026-04-28
 
 ---
 
-## 👥 Target Users
+## MVP — v1.0 (Current)
 
-- Students seeking personalized learning experiences
-- Professionals looking to upskill in specific domains
-- Lifelong learners interested in structured knowledge acquisition
-- Educators wanting to leverage AI-powered tutoring tools
+**Theme:** The core loop — Agenda + Wills + AI
 
----
+### What's in scope
+| Module | Status |
+|---|---|
+| Foundation (project setup, theme, DB, core services) | Not started |
+| Agenda module (events, calendar, CRUD, categories) | Not started |
+| Practice / Wills module (skills, sessions, streaks, pattern detection) | Not started |
+| AI Layer (Claude API, context builder, chat UI, quick commands, offline degradation) | Not started |
+| Proactive system (suggestion engine, background tasks, 8pm notification, confirmation UI) | Not started |
+| Polish & resilience (light mode, animations, empty states, accessibility, performance) | Not started |
 
-## 💼 Business Goal
+### Success criteria for v1.0
+- Agenda and Wills work fully offline
+- AI has cross-module context (agenda + wills + sessions)
+- Proactive 8pm notification fires reliably
+- Persistent agenda strip visible on all slides
+- Dark and light themes work
+- No crashes on normal usage flows
+- `flutter analyze` clean, >= 90% test pass rate
 
-Establish TooXTips as the leading AI-powered tutoring platform with 10,000+ active users within 12 months and achieve sustainable revenue through subscription models.
-
----
-
-## 📊 Success Metrics
-
-- **User Adoption**: 10,000+ active users by end of Year 1
-- **Engagement**: 80%+ weekly active user retention
-- **Learning Outcomes**: 90%+ user satisfaction with learning progress
-- **Revenue**: $100K+ MRR by end of Year 1
-- **Performance**: <300ms interactive response time
-- **Reliability**: 99.9% uptime
-
----
-
-## 🚀 Milestones
-
-### M1: Foundation (Month 1-2)
-- Core platform infrastructure
-- User authentication and profiles
-- Basic tutoring interface
-- Initial content library
-
-**Target**: Beta launch with 100 users
-
-### M2: Core Features (Month 3-4)
-- AI-powered tutoring engine
-- Study session framework
-- Progress tracking
-- Content recommendations
-
-**Target**: 1,000 active users
-
-### M3: Expansion (Month 5-6)
-- Advanced analytics
-- Social learning features
-- Mobile app launch
-- Content partnerships
-
-**Target**: 5,000 active users
-
-### M4: Scale (Month 7-12)
-- Enterprise features
-- API for third-party integrations
-- Advanced personalization
-- Global expansion
-
-**Target**: 10,000+ active users
+### What's explicitly out of scope for v1.0
+- Expenses module
+- Voice input
+- Cloud sync
+- Recurring events
+- Export / sharing
+- Home screen widget
+- Watch support
+- Multi-user
 
 ---
 
-## 📈 Current Phase
+## v1.1 — Post-MVP (Target: Q3 2026)
 
-**Phase**: Foundation (M1)  
-**Status**: In Progress  
-**Focus**: Core infrastructure and initial feature development
+**Theme:** Expand the context — money and voice
+
+| Feature | Priority | Estimated effort |
+|---|---|---|
+| Expenses module (manual logging, categories, budget alerts, AI analysis) | High | 5-7 days |
+| Voice commands (voice-to-text for events / sessions / expenses) | High | 4-5 days |
+| Weekly AI review (Sunday reflection, week summary, next week prep) | High | 2-3 days |
+| Optional cloud sync (Firebase, bidirectional, conflict resolution) | Medium | 6-8 days |
+| Smart scheduling (AI suggests when to work on a Will based on agenda gaps) | Medium | 3-4 days |
+| Habit anchoring (link a Will session to a recurring time slot) | Medium | 4-5 days |
+| Receipt scanning (photo to expense entry via Claude vision) | Lower | 5-7 days |
+| Home screen widget (next event + AI tip) | Lower | 3-4 days |
+| French language support | Lower | 4-5 days |
+| Watch companion (quick session log from wrist) | Lower | 6-8 days |
 
 ---
 
-## 🔄 Feature Pipeline
+## v1.2 and beyond (Exploratory)
 
-### High Priority (Next Sprint)
-1. User authentication system
-2. Basic tutoring interface
-3. Study session framework
-4. Progress tracking
+- NLP natural language event / expense entry
+- Skill progression system (levels, milestones for Wills)
+- Advanced analytics (session frequency trends, spending patterns, goal velocity)
+- Calendar integrations (Google Calendar import/export)
+- Overcommitment alerts (AI warns when schedule + wills are unrealistic)
 
-### Medium Priority (Next Month)
-1. AI tutoring engine
-2. Content recommendations
-3. User analytics
-4. Mobile responsiveness
+---
 
-### Low Priority (Future)
-1. Social learning
-2. Enterprise features
-3. API platform
-4. Advanced personalization
+## Guiding principles for roadmap decisions
+
+1. Does it serve Franklin's daily workflow? If not, it's a nice-to-have.
+2. Offline first. No feature should break the app when there's no internet.
+3. AI must have real context. Features are only useful if the AI can reference them.
+4. Minimal surface area. Fewer, better features over a long list of half-finished ones.

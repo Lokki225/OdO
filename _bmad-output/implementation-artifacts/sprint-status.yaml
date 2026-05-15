@@ -1,79 +1,98 @@
 ---
-projectName: TooXTips
-date: 2026-03-29
-sprintDuration: 2 weeks
-totalStories: 48
+projectName: OdO
+date: 2026-05-13
+sprintDuration: 4 weeks (28 days)
+totalStories: 41
 totalEpics: 6
 ---
 
-# TooXTips Sprint Status
+# OdO Sprint Status
 
 ## Development Status
 
 ### Epic 1: Foundation
-epic-1: in-progress
+# Goal: Project scaffold, design tokens, 7-theme color system, SQLite schema (6 tables),
+# AiProvider abstraction (5 impls), core services, Result type, router + project structure.
+epic-1: ready-for-dev
 
 1-1-project-setup-and-dependency-configuration: ready-for-dev
 1-2-design-tokens-and-color-system: ready-for-dev
-1-3-theme-system-with-dark-mode-default: ready-for-dev
+1-3-theme-system-with-runtime-swap: ready-for-dev
 1-4-sqlite-database-schema-with-drift: ready-for-dev
-1-5-aiprovider-abstraction-with-multiple-implementations: ready-for-dev
-1-6-conventions-md-documentation: ready-for-dev
-1-7-main-dart-initialization-with-service-setup: ready-for-dev
+1-5-aiprovider-abstraction-with-five-implementations: ready-for-dev
+1-6-core-services: ready-for-dev
+1-7-result-type-and-error-handling: ready-for-dev
+1-8-router-and-project-structure: ready-for-dev
 
 ### Epic 2: Agenda Module
+# Goal: Persistent strip (3 states), day timeline, event CRUD (3 categories), monthly calendar.
+# Depends on: Epic 1
 epic-2: backlog
 
-2-1-event-data-access-layer: backlog
-2-2-persistent-agenda-strip-widget: backlog
-2-3-calendar-view-day-and-week-modes: backlog
-2-4-event-crud-operations: backlog
-2-5-agenda-state-management-with-riverpod: backlog
-2-6-agenda-strip-integration-with-main-app: backlog
+2-1-agenda-repository-and-dao: backlog
+2-2-persistent-agenda-strip-three-states: backlog
+2-3-day-timeline-view: backlog
+2-4-event-crud-with-three-categories: backlog
+2-5-monthly-calendar: backlog
 
 ### Epic 3: Practice Module
+# Goal: Skill cards, session logging, streak computation, unanchored flagging, pattern detection.
+# Depends on: Epic 1
 epic-3: backlog
 
-3-1-practice-data-access-layer: backlog
-3-2-practice-module-ui-shell-and-skill-cards: backlog
-3-3-first-launch-skill-prompt: backlog
-3-4-session-logging-with-duration-and-notes: backlog
-3-5-streak-computation-and-display: backlog
-3-6-unanchored-session-flagging: backlog
-3-7-pattern-detection-for-unanchored-sessions: backlog
-3-8-practice-state-management-with-riverpod: backlog
+3-1-practice-repository-and-dao: backlog
+3-2-first-launch-skill-prompt: backlog
+3-3-skill-card: backlog
+3-4-session-logging: backlog
+3-5-streak-computation: backlog
+3-6-pattern-detection-unanchored-sessions: backlog
 
 ### Epic 4: AI Layer
+# Goal: Context builder (4k cap), persistent bottom bar, chat sheet, voice tap-to-speak, offline degradation.
+# Depends on: Epics 1, 2, 3
 epic-4: backlog
 
-4-1-ai-context-builder: backlog
-4-2-claude-api-client-with-error-handling: backlog
-4-3-ai-chat-interface: backlog
-4-4-quick-command-dropdown: backlog
-4-5-offline-degradation-for-ai: backlog
-4-6-ai-state-management-with-riverpod: backlog
+4-1-context-builder: backlog
+4-2-persistent-ai-bottom-bar: backlog
+4-3-chat-sheet: backlog
+4-4-voice-tap-to-speak-pipeline: backlog
+4-5-offline-graceful-degradation: backlog
 
-### Epic 5: Proactive System
+### Epic 5: Glance + Evening + Proactive
+# Goal: Glance Screen, Orb widget, Evening Session, SuggestionEngine, Confirmation Sheet,
+# background tasks, suppression algorithm.
+# Depends on: Epics 1, 2, 3, 4
 epic-5: backlog
 
-5-1-suggestion-storage-and-suppression-algorithm: backlog
-5-2-suggestionengine-with-slot-detection: backlog
-5-3-background-task-scheduling-8pm-check-in: backlog
-5-4-confirmation-sheet-with-stale-slot-guard: backlog
-5-5-proactive-notification-delivery: backlog
-5-6-sunday-reflection-notification: backlog
+5-1-glance-screen-layout-and-states: backlog
+5-2-glance-screen-authentication: backlog
+5-3-orb-widget: backlog
+5-4-evening-session-orchestration: backlog
+5-5-evening-session-persistence-until-midnight: backlog
+5-6-suggestion-engine-on-device: backlog
+5-7-confirmation-sheet: backlog
+5-8-background-tasks: backlog
+5-9-suppression-algorithm: backlog
 
 ### Epic 6: Polish & Resilience
+# Goal: All 7 themes, light mode QA, animations, empty/error states, accessibility,
+# locale QA, first-launch flow, performance.
+# Depends on: Epics 1-5
 epic-6: backlog
 
-6-1-light-mode-implementation: ready-for-dev
-6-2-completion-animation-400ms-scale-down: ready-for-dev
-6-3-empty-states-and-placeholder-ui: ready-for-dev
-6-4-error-state-handling: ready-for-dev
-6-5-offline-fallback-pulse-animation: ready-for-dev
-6-6-accessibility-compliance: ready-for-dev
-6-7-locale-formatting-xof-dd-mm-yyyy-utc-0: ready-for-dev
-6-8-settings-screen-with-data-clearing: ready-for-dev
-6-9-performance-optimization-and-testing: ready-for-dev
+6-1-all-seven-themes: backlog
+6-2-light-mode-outdoor-readability: backlog
+6-3-empty-states-and-error-states: backlog
+6-4-animations-and-motion: backlog
+6-5-accessibility-audit: backlog
+6-6-locale-qa-french-and-xof: backlog
+6-7-first-launch-flow: backlog
+6-8-performance-and-crash-free-resilience: backlog
 
-last_updated: 2026-03-29
+last_updated: 2026-05-13
+
+# STATUS DEFINITIONS
+# backlog       - story exists in epics.md; story file not yet created
+# ready-for-dev - story file created in _bmad-output/implementation-artifacts/; ready to implement
+# in-progress   - developer actively implementing this story
+# done          - story implemented, tests pass, flutter analyze clean, marked complete in IMPLEMENTATION_STATUS.json

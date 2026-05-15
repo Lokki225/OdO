@@ -1,30 +1,17 @@
----
-stepsCompleted: ["step-01-init", "step-02-context", "step-03-starter", "step-04-decisions", "step-05-patterns"]
-inputDocuments: ["prd.md", "project-brief.md", "TooXTips_MVP_Spec_v2.0_REVISED.md", "ux-design-specification.md"]
-workflowType: 'architecture'
-project_name: 'TooXTips'
-user_name: 'Lokki'
-date: '2026-03-29'
-status: 'Architecture Complete - Ready for Implementation'
----
+# OdO — Architecture Specification
 
-# Architecture Decision Document — TooXTips
-
-_This document builds collaboratively through step-by-step discovery. Sections are appended as we work through each architectural decision together._
-
-**Project:** TooXTips — Personal AI Productivity Hub  
-**Author:** Lokki  
-**Date:** March 29, 2026  
-**Status:** Architecture Discovery in Progress
+**Project:** OdO — Personal AI Daily Companion
+**Author:** Lokki
+**Date:** May 13, 2026
+**Status:** Locked for V1 MVP Implementation
 
 ---
 
 ## Input Documents Loaded
 
-✅ **PRD** (`prd.md`) — Complete product requirements with MVP scope, user journeys, success criteria, and technical architecture overview  
-✅ **Project Brief** (`project-brief.md`) — Executive summary, problem statement, core value proposition, and implementation roadmap  
-✅ **MVP Spec v2.0 Revised** (`TooXTips_MVP_Spec_v2.0_REVISED.md`) — Detailed UX architecture, feature specifications, design system, and technical stack  
-✅ **UX Design Specification** (`ux-design-specification.md`) — Visual design patterns and component specifications
+- **Project Brief** (`project-brief.md`) — Executive summary, MVP scope, success criteria, roadmap
+- **UX Design Specification** (`ux-design-specification.md`) — Visual design system, interaction patterns, emotional design
+- **Epics** (`epics.md`) — Six epics with stories and acceptance criteria
 
 ---
 
@@ -33,40 +20,51 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Requirements Overview
 
 **Functional Requirements:**
-- Agenda Module: calendar view (day/week), event CRUD, persistent strip showing next 2-3 events
-- Practice Module: skill cards, session logging, streak tracking, unanchored session flagging
-- AI Component: chat interface, quick-command dropdown, cross-module context aggregation, proactive notifications (8pm daily)
-- Offline-First Architecture: all data stored locally (SQLite), app functions completely without connectivity
-- Dark/Light Mode: both themes fully supported with OLED optimization
+- **Glance Screen** — ambient lock surface with orb, lock state, info cards, voice/text/quick-add bottom bar; slide-up unlock; vocal-password + typed-password + optional biometric auth
+- **Home Screen** — persistent Agenda strip, one-slide Practice carousel, persistent AI bottom bar
+- **Agenda Module** — event CRUD with three categories (Personal/Work/Practice), day timeline with 30-min grid, monthly calendar within Agenda slide, persistent strip with three states (events today / no more today / nothing scheduled)
+- **Practice Module** — user-defined skills, session logging, automatic streak computation, 7-day activity bar, unanchored session silent flagging, pattern detection (3 sessions at similar times across ≥2 weeks)
+- **AI Layer** — selective context payload (≤4,000 chars), swappable provider abstraction, chat sheet, voice tap-to-speak, offline graceful degradation
+- **Evening Session** — 8pm invitation, 5-min ceiling ritual, headline → 3–4 highlights with tag/expand/dismiss → one cross-domain insight → close summary, "wrap up" jump
+- **Proactive Suggestions** — on-device, fully offline; ranked by longest-idle skill → shortest fitting slot → earliest window; one per evening (non-negotiable); throughout-day on data shifts; suppression algorithm
+- **Voice (V1)** — tap-to-speak via mic button; one-shot commit when possible; configurable voice output per surface
+- **Themes** — seven presets + custom color picker; dark default; light mode optimized for outdoor Abidjan brightness
+- **Background Tasks** — 8pm session invitation, 5-min pre-event reminders; best-effort with fallback on app open
+- **Offline-Tolerant** — every feature works without connectivity
 
 **Non-Functional Requirements:**
-- Performance: sub-500ms perceived latency via optimistic UI and local-first rendering
-- Reliability: 99%+ crash-free sessions, no data loss on restart
-- Offline Capability: 100% core feature functionality without connectivity
-- Accessibility: WCAG AA compliance, 44dp minimum touch targets
-- Locale Awareness: XOF currency, DD/MM/YYYY dates, French support planned (v1.1)
+- **Performance:** sub-500ms perceived latency via optimistic UI and local-first rendering
+- **Reliability:** 99%+ crash-free sessions; no data loss on restart; session persistence until midnight on interruption
+- **Offline Capability:** 100% core features without connectivity; AI degrades silently
+- **Privacy:** all user data local; only AI context payload over HTTPS; no analytics, no telemetry, no third-party SDKs, no ad IDs
+- **Accessibility:** WCAG AA contrast; 44dp minimum touch targets; voice as equal-priority input; high-contrast outdoor-readable light mode
+- **Locale:** XOF currency (no decimals), DD/MM/YYYY, UTC+0, French-primary UI with English support
+- **Security:** API keys via `--dart-define` build-time only, never in source control
 
 **Scale & Complexity:**
-- Primary Domain: Mobile-first Flutter application with local-first architecture
-- Complexity Level: Medium-High (cross-module AI reasoning, offline-first design, background task scheduling)
-- Estimated Architectural Components: 6 true architectural components with 4 supporting services
+- **Primary Domain:** Mobile-first Flutter application with local-first architecture
+- **Complexity Level:** Medium-High — Glance Screen state machine, voice integration, on-device suggestion engine, evening session orchestration, multi-theme system
+- **Estimated Components:** 7 core architectural components, 5 supporting services
 
 ### Technical Constraints & Dependencies
 
-- Solo Development: one person, full responsibility — feature scope must be ruthlessly prioritized
-- Flutter Framework: cross-platform requirement (iOS/Android from single codebase)
-- Local-First Data: all user data stays on-device; only AI context payload transmitted to Claude API
-- Claude API Integration: context-aware reasoning with token limit constraints
-- Background Task Scheduling: 8pm proactive check-in via workmanager with platform-specific reliability constraints
-- Intermittent Connectivity: users in Abidjan may have inconsistent connectivity — graceful degradation essential
+- **Solo development** — one person, full responsibility, scope ruthlessly prioritized
+- **Flutter cross-platform** — one codebase, iOS + Android from V1
+- **Local-first data** — no backend, no user accounts, no sync in V1
+- **AI provider abstraction** — Claude default, but Gemini/Groq/OpenAI/offline-stub swappable via single constant
+- **Background task reliability** — workmanager and iOS background fetch are best-effort; fallback essential
+- **Voice on V1** — platform STT (Apple Speech, Android SpeechRecognizer) via tap-to-speak; ambient wake-word deferred to V2
+- **Two-device model** — V1 ships phone-only; watch (V2) reads phone-computed state
 
 ### Cross-Cutting Concerns Identified
 
-1. **AI Context Aggregation** — spans Agenda + Practice modules; requires real-time state synchronization
-2. **Offline-First Design** — affects all modules; requires local-first rendering and graceful AI degradation
-3. **Background Task Scheduling** — proactive notifications require reliable scheduling with fallback triggers
-4. **Data Persistence** — SQLite schema must support efficient querying for free-slot detection and idle-skill matching
-5. **Temporal Reasoning** — all AI interactions require accurate datetime context and timezone handling (UTC+0)
+1. **AI Context Aggregation** — spans Agenda + Practice + suggestion history; real-time state sync; hard 4k char cap
+2. **Offline Tolerance** — every feature; ConnectivityService is a dependency for AI layer only
+3. **Background Task Scheduling** — 8pm evening session + 5-min event reminders + throughout-day data-shift triggers
+4. **Data Persistence** — SQLite schema supports free-slot detection, idle-skill ranking, pattern detection queries
+5. **Temporal Reasoning** — UTC+0 throughout; "today" boundary at midnight local; session persistence until midnight
+6. **Theme Coherence** — orb + active dot + cards + accents all inherit active theme via semantic tokens
+7. **Voice State Machine** — idle → listening → parsing → committed → confirmation; orb animation tightly coupled
 
 ---
 
@@ -74,21 +72,23 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### Core Architectural Components (Own Data & State)
 
-1. **AgendaModule** — events, calendar state, strip data
-2. **PracticeModule** — skills, sessions, streak computation
-3. **AiService** — Claude API client, context builder, response parser
-4. **SuggestionEngine** — on-device proactive logic, slot detection, idle ranking
-5. **PersistenceLayer** — SQLite via Drift, all DB access centralized
-6. **ThemeSystem** — tokens, both themes, locale formatting
+1. **GlanceModule** — lock state, orb animation state, auth (vocal/typed/biometric), quick-capture pipeline
+2. **AgendaModule** — events, calendar state, strip data, category coloring
+3. **PracticeModule** — skills, sessions, streak computation, unanchored flagging, pattern detection
+4. **AiService** — provider abstraction, context builder, response parser, chat sheet state
+5. **EveningSession** — 8pm orchestration, highlight ranking, tag/expand/dismiss state, close summary, persistence-until-midnight
+6. **SuggestionEngine** — on-device proactive logic, slot detection, idle ranking, suppression algorithm
+7. **ThemeSystem** — seven presets + custom picker, semantic tokens, runtime swap
 
 ### Supporting Services (Stateless, Injected as Dependencies)
 
 1. **NotificationService** — local notification scheduling and delivery
-2. **BackgroundTaskService** — workmanager scheduling, 8pm trigger
+2. **BackgroundTaskService** — workmanager scheduling, 8pm trigger, data-shift trigger, fallback on app open
 3. **ConnectivityService** — online/offline state, AI availability flag
-4. **LocaleService** — XOF formatting, DD/MM/YYYY, timezone (UTC+0)
+4. **VoiceService** — platform STT wrapper, TTS wrapper, voice state machine
+5. **LocaleService** — XOF formatting, DD/MM/YYYY, UTC+0 timezone, French/English string lookup
 
-**Architectural Principle:** Components own Riverpod providers and DB access. Supporting services are plain Dart classes. This distinction prevents maintenance debt in folder structure and dependency injection.
+**Architectural Principle:** Components own Riverpod providers and DB access. Supporting services are plain Dart classes injected via providers. This distinction prevents folder-structure debt as the codebase grows.
 
 ---
 
@@ -96,87 +96,171 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### Background Task Reliability (Platform-Specific)
 
-**Risk:** `workmanager` on Android is subject to battery optimization killing background tasks. On iOS, background fetch is throttled by OS based on usage patterns. Neither platform guarantees 8pm task execution.
+**Risk:** `workmanager` on Android is subject to battery optimization killing background tasks. On iOS, background fetch is throttled by OS based on usage. Neither platform guarantees 8pm task execution.
 
 **Mitigation Strategy:**
 - Product decision: 8pm notification is best-effort, not guaranteed
-- UI never implies notification will definitely arrive
-- Fallback trigger: when user opens app in morning, if no suggestion delivered in last 18 hours, run suggestion engine synchronously and surface result as inline AI component message
-- This covers background task failure without user awareness
+- UI never implies the notification will definitely arrive
+- **Fallback trigger:** when the user opens the app, if no evening session has been delivered or completed in the last 18 hours and current local time is between 8pm and midnight, surface the session inline as the first home-screen interaction
+- After-midnight policy: today's session is gone — no retroactive surfacing
+- This covers background failure without user awareness
 
 ### Suggestion Staleness (Time-Sensitive Slots)
 
-**Risk:** Background task may arrive at 9:47pm instead of 8:00pm; calendar slot may have changed by then.
+**Risk:** A suggestion is generated at 8pm Wednesday for a Thursday 2pm slot. The user does not tap until Thursday 11am. The slot may no longer exist.
 
-**Mitigation:** Add staleness check when user confirms suggestion — verify slot still exists before creating event. Slot validity window: 30 minutes from suggestion time.
+**Mitigation:** When the confirmation sheet opens, recheck the Agenda locally before rendering. If the slot is gone, display a single line: *"This slot is no longer available"* with a single button: "Close." No alternative suggestion. The AI will try again tonight.
+
+**Slot validity window:** 30 minutes between suggestion creation and confirmation tap. Beyond that, re-validate.
+
+### Context Payload Overflow (4k Hard Cap)
+
+**Risk:** As the user accumulates skills, agenda density, and suggestion history, the context payload grows beyond what the AI provider can usefully reason over.
+
+**Mitigation:**
+- Hard cap enforced in `ContextBuilder`: payload must be ≤4,000 characters before send
+- Priority order when truncating: (1) today's agenda + 48h ahead, (2) all skills with current streak only, (3) last 7 days unanchored sessions, (4) last 3 suggestions with outcomes, (5) current datetime + active screen
+- Full data (full agenda week, full session history, complete suggestion log) stays on-device for local SuggestionEngine reasoning
+- Truncation is silent — the user never sees a "context too large" error
+
+### Voice Failure Modes
+
+**Risk:** Platform STT fails on Ivorian French accent, ambient noise, or short utterances. AI parsing produces ambiguous intent.
+
+**Mitigation:**
+- Platform STT (Apple Speech / Google SpeechRecognizer) is already accent-tolerant for standard French
+- On STT failure: orb returns to idle, no error banner; user can retap and retry
+- On AI parsing ambiguity: follow-up question appears only when intent is genuinely unclear — never for optional enrichments
+- Optional enrichments (notes, category) offered after the action is already saved, never blocking commit
+
+### Theme System Performance
+
+**Risk:** Seven theme presets + custom color picker means many possible accent combinations. Hardcoded colors anywhere in the widget tree break this.
+
+**Mitigation:**
+- **Two-layer color token system** (see Design System section below) — semantic tokens only used in widgets, raw palette never directly referenced
+- `AppColors` is the single source of truth; `AppTheme` builds `ThemeData` from active theme
+- Theme switch at runtime via `ProviderScope` rebuild — no app restart
+- Custom picker computes only the accent token; surface/text/border tokens stay locked to the active mode (dark or light)
+
+### Evening Session Interruption
+
+**Risk:** User starts the 8:01pm session, gets a phone call at 8:03pm, returns at 11:47pm. Session state must survive.
+
+**Mitigation:**
+- Session state persisted to SQLite (`evening_sessions` table) on every tag/expand/dismiss
+- On app reopen between 8pm and midnight, if an in-progress session exists, resume from current step
+- At midnight, in-progress session is marked `abandoned_at = midnight_timestamp` and is no longer resumable
+- Tomorrow's session begins fresh
 
 ---
 
-## SQLite Schema Decisions (Foundation for All Features)
+## SQLite Schema (Foundation for All Features)
 
-### `suggestions` Table
+The complete schema. Drift code generation produces type-safe DAOs from these tables.
 
-```sql
-id, skill_id, slot_start, slot_duration,
-suggested_at, accepted_at, dismissed_at, thumbs_down_at,
-suppressed_until
-```
-
-**Critical Column:** `suppressed_until` — computed when dismissed or thumbed-down (current timestamp + 7 days). SuggestionEngine filters out any skill where `suppressed_until > now()`. This is the entire learning algorithm in one column.
-
-### `sessions` Table
+### `skills`
 
 ```sql
-id, skill_id, started_at, duration_minutes,
-notes, is_anchored, suggested_time
+id              INTEGER PRIMARY KEY AUTOINCREMENT
+name            TEXT NOT NULL
+created_at      INTEGER NOT NULL              -- epoch ms
+last_session_at INTEGER                        -- epoch ms, nullable
 ```
 
-**Critical Columns:**
-- `is_anchored = false` when session logged without corresponding agenda event
+### `sessions`
+
+```sql
+id                INTEGER PRIMARY KEY AUTOINCREMENT
+skill_id          INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE
+started_at        INTEGER NOT NULL              -- epoch ms
+duration_minutes  INTEGER NOT NULL
+notes             TEXT
+is_anchored       INTEGER NOT NULL DEFAULT 0    -- 0/1 bool
+suggested_time    INTEGER                        -- epoch ms, nullable
+```
+
+**Critical columns:**
+- `is_anchored = 0` when session was logged without a corresponding agenda event
 - `suggested_time` populated when session was logged from a suggestion
-- Pattern detection query: `SELECT suggested_time FROM sessions WHERE skill_id = ? AND is_anchored = 0 ORDER BY started_at DESC LIMIT 2`
-- If both timestamps within 90 minutes of each other, AI asks once about anchoring
+- **Pattern detection query:**
+  ```sql
+  SELECT started_at FROM sessions
+  WHERE skill_id = ? AND is_anchored = 0
+  ORDER BY started_at DESC LIMIT 3
+  ```
+  If all three timestamps fall within a 90-minute window-of-day and span ≥2 distinct calendar weeks, the evening session asks once about anchoring.
 
-**Architectural Principle:** Get these two tables right before writing any feature code. Everything else queries them.
+### `events`
+
+```sql
+id          INTEGER PRIMARY KEY AUTOINCREMENT
+title       TEXT NOT NULL
+start_time  INTEGER NOT NULL              -- epoch ms
+end_time    INTEGER NOT NULL              -- epoch ms
+category    TEXT NOT NULL                 -- 'personal' | 'work' | 'practice'
+notes       TEXT
+```
+
+### `suggestions`
+
+```sql
+id                INTEGER PRIMARY KEY AUTOINCREMENT
+skill_id          INTEGER REFERENCES skills(id) ON DELETE SET NULL
+slot_start        INTEGER NOT NULL              -- epoch ms
+slot_duration     INTEGER NOT NULL              -- minutes
+suggested_at      INTEGER NOT NULL              -- epoch ms
+accepted_at       INTEGER                        -- epoch ms, nullable
+dismissed_at      INTEGER                        -- epoch ms, nullable
+thumbs_down_at    INTEGER                        -- epoch ms, nullable
+suppressed_until  INTEGER                        -- epoch ms, nullable
+```
+
+**Critical column:** `suppressed_until` — computed when dismissed (now + 3 days), thumbs-down (now + 7 days), or accepted (now + 1 day). `SuggestionEngine` filters out any skill where `suppressed_until > now()`. This is the entire learning algorithm in one column.
+
+### `evening_sessions`
+
+```sql
+id              INTEGER PRIMARY KEY AUTOINCREMENT
+session_date    TEXT NOT NULL                  -- 'YYYY-MM-DD' local date
+started_at      INTEGER NOT NULL               -- epoch ms
+completed_at    INTEGER                         -- epoch ms, nullable
+abandoned_at    INTEGER                         -- epoch ms, nullable (set at midnight if not completed)
+headline        TEXT NOT NULL
+close_summary   TEXT
+```
+
+### `evening_highlights`
+
+```sql
+id                  INTEGER PRIMARY KEY AUTOINCREMENT
+evening_session_id  INTEGER NOT NULL REFERENCES evening_sessions(id) ON DELETE CASCADE
+display_order       INTEGER NOT NULL
+content             TEXT NOT NULL                -- the highlight text
+source_type         TEXT NOT NULL                -- 'session' | 'event' | 'pattern' | 'insight'
+source_ref_id       INTEGER                       -- nullable FK depending on source_type
+user_tag            TEXT                          -- 'significant' | 'dismiss' | 'expand' | NULL
+tagged_at           INTEGER                       -- epoch ms, nullable
+```
+
+**Architectural Principle:** Get these six tables right before writing any feature code. Everything else queries them. Schema changes after Epic 1 require a migration and are costly — review the schema in full before Day 1.
 
 ---
 
-## Confirmed Architectural Decisions (Non-Negotiable)
-
-- **State Management:** Riverpod — no alternatives
-- **Database:** Drift (type-safe SQLite ORM) — no raw SQLite
-- **Background Tasks:** workmanager with fallback trigger on app open
-- **Navigation:** go_router for navigation (bottom sheets as routes, not imperative pushes)
-- **Theme Default:** ThemeMode.dark hardcoded, user toggle persisted via SharedPreferences
-- **Notifications:** flutter_local_notifications for delivery
-- **Colour System:** Two-layer system (raw palette → semantic tokens)
-- **AI Context:** All context payload construction in AiService, never in UI widgets
-
----
-
----
-
-## Starter Template Evaluation
+## Starter Template & Project Initialization
 
 ### Primary Technology Domain
 
 Mobile Application (Flutter) — cross-platform requirement with offline-first architecture, local SQLite persistence, and Riverpod state management.
 
-### Starter Options Considered
-
-1. **Flutter Official `flutter create` Command** — Basic starter, minimal setup, requires manual architecture scaffolding
-2. **Very Good CLI (Very Good Core Template)** — Production-ready but optimized for web/API, not offline-first mobile with AI reasoning
-3. **Custom Architecture Starter (Recommended)** — Leverage confirmed architectural decisions with Flutter official template as foundation
-
 ### Selected Starter: Custom Architecture Scaffold
 
-**Rationale for Selection:**
-Architectural decisions are already locked in (Riverpod, Drift, go_router, workmanager). A generic starter would impose patterns conflicting with offline-first + AI context aggregation design. Custom scaffold is more efficient for this specific architecture.
+**Rationale:** Architectural decisions are locked (Riverpod, Drift, go_router, workmanager). A generic starter would impose patterns conflicting with the offline-first + AI context aggregation + multi-theme design. Custom scaffold is more efficient.
 
 **Initialization Command:**
 
 ```bash
-flutter create --org com.tooxips tooxips
+flutter create --org com.odo odo
 ```
 
 ### Production-Ready `pubspec.yaml`
@@ -191,28 +275,37 @@ dependencies:
   riverpod_annotation: ^2.3.5
 
   # Navigation
-  go_router: ^13.2.0
+  go_router: ^14.0.0
 
   # Local persistence
   drift: ^2.18.0
   sqlite3_flutter_libs: ^0.5.22
   path_provider: ^2.1.3
   path: ^1.9.0
+  shared_preferences: ^2.2.3
 
   # Notifications + background
   flutter_local_notifications: ^17.1.2
   workmanager: ^0.5.2
+  timezone: ^0.9.4
 
   # AI + connectivity
   http: ^1.2.1
   connectivity_plus: ^6.0.3
 
+  # Voice (V1: tap-to-speak)
+  speech_to_text: ^6.6.0
+  flutter_tts: ^4.0.2
+
+  # Auth (optional biometric)
+  local_auth: ^2.2.0
+
   # Calendar + locale
   table_calendar: ^3.1.2
   intl: ^0.19.0
 
-  # Shared preferences (theme toggle)
-  shared_preferences: ^2.2.3
+  # Animations + UI
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_test:
@@ -223,19 +316,22 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 ```
 
-**Critical Dependencies:**
-- `connectivity_plus` required for ConnectivityService (offline state detection)
-- `riverpod_annotation` + `riverpod_generator` required for code-gen Riverpod (`@riverpod` syntax) — strongly preferred for solo maintainability
-
-### Project Structure (Corrected)
+### Project Structure
 
 ```
 lib/
 ├── main.dart
 ├── app/
 │   ├── app.dart
-│   └── theme.dart
+│   ├── theme.dart                       # seven presets + custom; semantic tokens
+│   └── router.dart                      # go_router config, bottom sheets as routes
 ├── features/
+│   ├── glance/
+│   │   ├── data/
+│   │   ├── domain/
+│   │   └── presentation/
+│   ├── home/
+│   │   └── presentation/                # carousel shell, persistent strip wiring
 │   ├── agenda/
 │   │   ├── data/
 │   │   ├── domain/
@@ -244,27 +340,42 @@ lib/
 │   │   ├── data/
 │   │   ├── domain/
 │   │   └── presentation/
-│   └── ai/
-│       ├── data/           # Claude API client
-│       ├── domain/         # context builder, suggestion engine
-│       └── presentation/   # AI component widget, chat sheet
-├── core/                   # foundational, not feature-specific
+│   ├── ai/
+│   │   ├── data/                        # provider clients (Claude, Gemini, etc.)
+│   │   ├── domain/                      # AiProvider interface, context builder
+│   │   └── presentation/                # chat sheet, persistent bottom bar
+│   ├── evening_session/
+│   │   ├── data/
+│   │   ├── domain/                      # highlight ranking, persistence-until-midnight
+│   │   └── presentation/                # session screen, tag UI, wrap-up
+│   └── settings/
+│       ├── data/
+│       └── presentation/                # theme picker, voice toggles, lock options
+├── core/
 │   ├── database/
 │   │   ├── app_database.dart
-│   │   └── app_database.g.dart
+│   │   └── app_database.g.dart          # generated
 │   ├── services/
 │   │   ├── connectivity_service.dart
 │   │   ├── notification_service.dart
 │   │   ├── background_task_service.dart
+│   │   ├── voice_service.dart
 │   │   └── locale_service.dart
 │   ├── widgets/
+│   │   ├── orb.dart                     # the AI orb, idle + active states
+│   │   └── ...
 │   ├── constants/
-│   │   ├── app_colors.dart
+│   │   ├── app_colors.dart              # raw palette + semantic tokens + 7 themes
 │   │   ├── app_spacing.dart
 │   │   └── app_typography.dart
+│   ├── domain/
+│   │   ├── result.dart                  # Result<T, AppError> sealed type
+│   │   └── app_error.dart
 │   └── utils/
 │       ├── date_utils.dart
 │       └── currency_utils.dart
+test/
+└── (parallel structure mirroring lib/)
 ```
 
 **Architectural Principle:** `core/` (not `shared/`) signals foundational, not feature-specific. This convention matters for codebase navigation as it grows.
@@ -275,6 +386,9 @@ lib/
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Timezone DB initialization (required by flutter_local_notifications)
+  tz.initializeTimeZones();
+
   // Background task registration must happen before runApp
   await BackgroundTaskService.initialize();
 
@@ -283,378 +397,110 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: TooXTipsApp(),
+      child: OdoApp(),
     ),
   );
 }
 ```
 
 **Critical Sequencing:**
-- `WidgetsFlutterBinding.ensureInitialized()` must be first — workmanager and flutter_local_notifications fail silently without it
-- `BackgroundTaskService.initialize()` before `runApp` — workmanager requires this sequencing or dispatcher isn't registered
-- `ProviderScope` wraps entire app — all code needs Riverpod provider access
+- `WidgetsFlutterBinding.ensureInitialized()` first — workmanager and flutter_local_notifications fail silently otherwise
+- `tz.initializeTimeZones()` before notification service — scheduled notifications need the timezone DB
+- `BackgroundTaskService.initialize()` before `runApp` — workmanager dispatcher must be registered
+- `ProviderScope` wraps entire app
 
 ### Foundation Files (Write in This Order)
 
-1. **`core/constants/app_colors.dart`** — raw palette + semantic tokens. Nothing renders without this.
-2. **`app/theme.dart`** — ThemeData for dark/light modes, semantic tokens only. Include `FontFeature.tabularFigures()` for clock display.
-3. **`core/database/app_database.dart`** — Drift schema with `suggestions` and `sessions` tables. Run `dart run build_runner build` immediately after.
+1. **`core/constants/app_colors.dart`** — raw palette + semantic tokens + seven theme maps. Nothing renders without this.
+2. **`app/theme.dart`** — `ThemeData` for dark, light, and five accent variants. Include `FontFeature.tabularFigures()` for clock display.
+3. **`core/database/app_database.dart`** — Drift schema with all six tables. Run `dart run build_runner build` immediately after.
+4. **`features/ai/domain/ai_provider.dart`** — abstract `AiProvider` interface + `OfflineStubAiProvider` concrete fallback.
 
-Do not write any feature widgets until these three files compile cleanly.
+Do not write any feature widgets until these four files compile cleanly.
 
 ### Android Platform Configuration
 
-Add to `AndroidManifest.xml` for workmanager + notifications:
+Add to `AndroidManifest.xml`:
 
 ```xml
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 <uses-permission android:name="android.permission.VIBRATE"/>
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+<uses-permission android:name="android.permission.INTERNET"/>
 ```
 
 Inside `<application>`:
+
 ```xml
 <receiver
-    android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-    android:exported="false" />
+  android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+  android:exported="false" />
 ```
 
-**iOS:** flutter_local_notifications requires setup in `AppDelegate.swift` — package documentation covers this.
+### iOS Platform Configuration
 
-### Architectural Decisions Provided by This Approach
+Add to `Info.plist`:
 
-**Language & Runtime:** Dart 3.x with null safety, Flutter 3.x stable channel
+- `NSMicrophoneUsageDescription` — voice input
+- `NSSpeechRecognitionUsageDescription` — STT
+- `NSFaceIDUsageDescription` — biometric unlock (optional)
+- `UIBackgroundModes` → include `fetch` and `processing`
 
-**Styling Solution:** Flutter Material Design 3, custom ThemeData with two-layer colour system, dark mode default with light mode toggle via SharedPreferences
-
-**Build Tooling:** Flutter build system (Gradle/Xcode), code generation via Drift and Riverpod, no additional build tools
-
-**Testing Framework:** Flutter test framework (built-in), Riverpod testing utilities, unit tests for services, widget tests for UI
-
-**Code Organization:** Feature-based structure (agenda, practice, ai), clear data → domain → presentation separation, supporting services as plain Dart classes, Riverpod providers as glue layer
-
-**Development Experience:** Hot reload for rapid iteration, Dart DevTools for debugging, type-safe database access via Drift, reactive state management via Riverpod
+`flutter_local_notifications` setup in `AppDelegate.swift` per package docs.
 
 ---
 
 ## Core Architectural Decisions
 
-### 1. AI Context Payload Strategy → Selective Context
+### 1. Language & Runtime
 
-**Decision:** Selective context with defined boundaries, not full context or tiered approach.
+**Decision:** Dart 3.x with null safety, Flutter 3.x stable channel.
 
-**Rationale:** Full context becomes a trap at month three when session history grows and API calls timeout. Tiered context is architecturally correct long-term but doubles implementation surface for solo MVP.
-
-**Context Payload Composition:**
-
-```dart
-// What always goes in the payload
-- Agenda: today + next 48 hours (tomorrow is actionable, day-after-tomorrow is noise)
-- Skills: all skills with name, streak, last_session_at (not full session history)
-- Sessions: last 7 days, unanchored sessions only (anchored sessions are resolved, irrelevant)
-- Suggestions: last 3 suggestions with accepted/dismissed status (behavioural context)
-- Meta: current_datetime, timezone (UTC+0), active_screen
-```
-
-**Key Constraint:** 48-hour agenda window is deliberate tightening from week view. Week of events = 7x tokens for marginal reasoning improvement. AI suggesting something for next Thursday from today's context is lower-value than it sounds.
-
-**Hard Cap:** `contextMaxChars = 4000` — if selective context payload exceeds 4000 characters, `AiService` truncates session history first, then extends agenda window, and logs warning locally. AI never receives malformed or oversized request.
+**Pattern:** Sealed classes for state, records for value bundles, pattern matching for state destructuring. No conflict, no mapping layer.
 
 ---
 
-### 2. Suggestion Suppression Algorithm → Adaptive Suppression
+### 2. Riverpod Provider Naming → Suffix Convention
 
-**Decision:** Three-tier suppression based on user feedback type, not flat 7-day suppression.
-
-**Rationale:** Dismissal ("not now") and thumbs-down ("wrong skill") are different signals requiring different windows. Accepted suggestions need suppression to prevent redundancy.
-
-**Suppression Windows:**
-
-```dart
-const suppressionDismissed   = Duration(days: 3);  // "not now" — try again in 3 days
-const suppressionThumbsDown  = Duration(days: 7);  // "wrong skill" — avoid for a week
-const suppressionAccepted    = Duration(days: 1);  // just scheduled — don't suggest again tomorrow
-```
-
-**Implementation:** `SuggestionEngine` filters out any skill where `suppressed_until > now()`. This is the entire learning algorithm in one column.
-
-**Critical Addition to Schema:** `suppressed_until` column in `suggestions` table must be computed when dismissed or thumbed-down. Accepted suppression prevents AI redundancy immediately after being helpful.
-
----
-
-### 3. Offline Fallback Behavior → Inline Message + Single Pulse
-
-**Decision:** When background task fails and no suggestion delivered in 18 hours, surface suggestion as inline message with single pulse animation on app open.
-
-**Rationale:**
-- Silent wait (Option C) wastes a day of value; user never knows
-- Toast/snackbar (Option B) introduces inconsistent UI pattern
-- Inline message (Option A) is consistent but needs visibility signal
-
-**Implementation Detail:** When fallback trigger fires on app open:
-- AI component's pulse dot animates once — single slow pulse, never continuous
-- No badge count, no persistent indicator, no second pulse
-- If user taps AI bar, suggestion appears as first message in chat thread
-- If user doesn't tap, suggestion stays queued for next 8pm check
-
-**Principle:** Signal presence without forcing interaction. One pulse, once, on app open.
-
----
-
-### 4. Unanchored Session Pattern Detection → Three Sessions, Two Weeks
-
-**Decision:** Suggest anchoring after detecting 3 unanchored sessions at similar times across 2+ different calendar weeks.
-
-**Rationale:** Two sessions is a Tuesday-Thursday coincidence. Three sessions is a pattern. Confidence gain from three over two is worth one-session delay — false positive here makes AI look dumb.
-
-**Pattern Detection Algorithm:**
-
-```dart
-bool isPattern(List<DateTime> sessionTimes) {
-  if (sessionTimes.length < 3) return false;
-  final times = sessionTimes.map((t) => t.hour * 60 + t.minute).toList();
-  final spread = times.reduce(max) - times.reduce(min);
-  final weeks = sessionTimes.map((t) => weekNumber(t)).toSet();
-  return spread <= 90 && weeks.length >= 2;
-}
-```
-
-**Constraints:**
-- 90-minute similarity window (time-of-day tolerance)
-- Must span 2+ different calendar weeks (prevents one productive week from triggering)
-- 20 lines of Dart, no ML required
-
----
-
-### 5. Claude Model Version → Pinned to `claude-sonnet-4-6`
-
-**Decision:** Lock to specific model version, not "latest available". Revisit at v1.1.
-
-**Rationale:** "Latest available" is a debugging nightmare when model behaviour changes between sessions. Pin the version, update intentionally when you have usage data to evaluate upgrade value.
-
-**Constants:**
-
-```dart
-// core/constants/ai_constants.dart
-const claudeModel      = 'claude-sonnet-4-6';
-const maxTokens        = 1024;    // sufficient for structured responses
-const contextMaxChars  = 4000;    // self-imposed payload limit before truncation
-```
-
-**Cost Justification:** Right balance of capability and cost for personal-use app where every interaction comes from your own API key.
-
----
-
-## AI Provider Abstraction (Swappable Without Feature Code Changes)
-
-**Core Interface:**
-
-```dart
-// core/services/ai_provider.dart
-abstract class AiProvider {
-  Future<String> complete({
-    required String systemPrompt,
-    required String userMessage,
-    int maxTokens = 1024,
-  });
-}
-```
-
-**Principle:** `AiService` depends only on `AiProvider`, never on concrete implementation. Switching providers is one line in Riverpod provider registration.
-
-**Pre-Built Provider Stubs:**
-
-```dart
-// Anthropic Claude — current default
-class ClaudeProvider implements AiProvider { ... }
-
-// Google Gemini — free tier is genuinely useful for MVP testing
-class GeminiProvider implements AiProvider { ... }
-
-// Groq — fastest inference available, Llama 3 models, very cheap
-class GroqProvider implements AiProvider { ... }
-
-// OpenAI — fallback everyone knows
-class OpenAiProvider implements AiProvider { ... }
-
-// Local/offline stub — returns null-safe empty responses, never throws
-class OfflineProvider implements AiProvider {
-  @override
-  Future<String> complete({required String systemPrompt,
-      required String userMessage, int maxTokens = 1024}) async {
-    return '';
-  }
-}
-```
-
-**Critical:** `OfflineProvider` is what `ConnectivityService` swaps in when offline. No try/catch scattered across codebase, no null checks. Offline state is just a different provider.
-
-**Configuration:**
-
-```dart
-// core/constants/ai_constants.dart
-enum AiProviderType { claude, gemini, groq, openai, offline }
-
-class AiConfig {
-  final AiProviderType provider;
-  final String apiKey;
-  final String model;
-  final int maxTokens;
-  final int contextMaxChars;
-
-  const AiConfig({
-    required this.provider,
-    required this.apiKey,
-    required this.model,
-    this.maxTokens = 1024,
-    this.contextMaxChars = 4000,
-  });
-}
-
-// Presets — swap by changing activeConfig
-const claudeConfig = AiConfig(
-  provider: AiProviderType.claude,
-  apiKey: String.fromEnvironment('CLAUDE_API_KEY'),
-  model: 'claude-sonnet-4-6',
-);
-
-const geminiConfig = AiConfig(
-  provider: AiProviderType.gemini,
-  apiKey: String.fromEnvironment('GEMINI_API_KEY'),
-  model: 'gemini-1.5-flash',   // free tier, generous limits
-);
-
-const groqConfig = AiConfig(
-  provider: AiProviderType.groq,
-  apiKey: String.fromEnvironment('GROQ_API_KEY'),
-  model: 'llama-3.1-8b-instant', // fastest, cheapest
-);
-```
-
-**API Key Security:** Via `String.fromEnvironment` — keys never touch source code, passed at build time via `--dart-define=CLAUDE_API_KEY=sk-...`
-
-**Riverpod Provider Wiring:**
-
-```dart
-// core/providers/ai_provider_provider.dart
-@riverpod
-AiProvider aiProvider(AiProviderRef ref) {
-  final isOnline = ref.watch(connectivityProvider);
-  if (!isOnline) return OfflineProvider();
-
-  // Change this one line to switch providers
-  const config = geminiConfig; // ← swap here during testing
-
-  return switch (config.provider) {
-    AiProviderType.claude  => ClaudeProvider(config),
-    AiProviderType.gemini  => GeminiProvider(config),
-    AiProviderType.groq    => GroqProvider(config),
-    AiProviderType.openai  => OpenAiProvider(config),
-    AiProviderType.offline => OfflineProvider(),
-  };
-}
-```
-
----
-
-## AI Provider Cost Analysis & MVP Recommendation
-
-**Cost per ~1K Tokens (Current Pricing):**
-
-| Provider | Model | Cost | Notes |
-|----------|-------|------|-------|
-| Claude | Sonnet 4.6 | ~$0.003 | Best reasoning, most expensive |
-| Gemini | 1.5 Flash | Free tier | 1M tokens/day free, sufficient |
-| Groq | Llama 3.1 8B | ~$0.00005 | Fastest, near-free, weaker reasoning |
-| OpenAI | GPT-4o mini | ~$0.00015 | Good balance |
-
-**MVP Recommendation:** Start with Gemini 1.5 Flash on free tier. Reasoning quality is sufficient for structured context payloads — you're reading JSON-like context and returning suggestions, not writing poetry. When sharing with beta testers and volume increases, evaluate staying on Gemini or moving to Groq for cost, Claude for quality.
-
-**Abstraction Benefit:** One afternoon to build correctly, saves you from ever being locked in to a single provider.
-
----
-
-## Decision Summary
-
-| Decision | Choice | Key Constraint |
-|----------|--------|----------------|
-| Context payload | Selective (48hr agenda, 7-day unanchored sessions) | `contextMaxChars = 4000` hard cap |
-| Suppression | Adaptive (dismissed: 3d, thumbs-down: 7d, accepted: 1d) | Accepted suppression is new — add to schema |
-| Offline fallback | Inline message + single pulse animation | One pulse only, never persistent |
-| Pattern threshold | 3 sessions, 90-min window, 2+ different weeks | Week-spread condition prevents false positives |
-| Claude model | `claude-sonnet-4-6`, pinned | Single constant in `ai_constants.dart` |
-| AI provider | Swappable abstraction with 5 implementations | Offline state is just a different provider |
-
----
-
----
-
-## Implementation Patterns & Consistency Rules
-
-### 1. Database Naming Convention → snake_case
-
-**Decision:** Write SQL like SQL, let Drift generate Dart like Dart.
-
-**Pattern:** All database columns use snake_case. Drift handles translation to Dart automatically via `@JsonKey` and column overrides.
-
-**Example:**
-
-```dart
-// In Drift table definition — snake_case
-class Sessions extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get skillId => integer().references(Skills, #id)();
-  DateTimeColumn get startedAt => dateTime()();
-  IntColumn get durationMinutes => integer()();
-  BoolColumn get isAnchored => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get suggestedTime => dateTime().nullable()();
-}
-```
-
-Drift generates `SessionsCompanion` and `Session` data classes with camelCase Dart fields automatically. No conflict, no mapping layer needed.
-
----
-
-### 2. Riverpod Provider Naming → Descriptive Pattern with Suffix Convention
-
-**Decision:** Suffix encodes what the provider returns — this information matters when scanning a file.
+**Decision:** Suffix encodes what the provider returns.
 
 **Pattern:**
 
 ```dart
-// Repositories — expose data access
-final agendaRepositoryProvider       // returns AgendaRepository
-final practiceRepositoryProvider     // returns PracticeRepository
+// Repositories — read-only data access
+final agendaRepositoryProvider           // returns AgendaRepository
+final practiceRepositoryProvider         // returns PracticeRepository
 
-// Notifiers — expose mutable state + actions
-final agendaNotifierProvider         // returns AgendaNotifier (StateNotifier)
-final practiceNotifierProvider       // returns PracticeNotifier
+// Notifiers — read + write
+final agendaNotifierProvider             // returns AgendaNotifier
+final eveningSessionNotifierProvider     // returns EveningSessionNotifier
 
 // Services — stateless, single responsibility
-final aiProviderServiceProvider      // returns AiProvider (the abstraction)
-final connectivityServiceProvider    // returns ConnectivityService
+final aiProviderServiceProvider          // returns AiProvider (the abstraction)
+final connectivityServiceProvider        // returns ConnectivityService
+final voiceServiceProvider               // returns VoiceService
 
 // Computed values — derived state, no actions
-final todayAgendaProvider            // returns List<AgendaEvent>
-final idleSkillsProvider             // returns List<Skill>
-final nextSuggestionProvider         // returns Suggestion?
+final todayAgendaProvider                // returns List<AgendaEvent>
+final idleSkillsProvider                 // returns List<Skill>
+final nextSuggestionProvider             // returns Suggestion?
+final activeThemeProvider                // returns OdoTheme
 ```
 
-**Rule:** `RepositoryProvider` = read-only data access. `NotifierProvider` = read and write. `ServiceProvider` = call methods on. Computed providers have descriptive names with no suffix. Anyone reading the code knows the contract from the name alone.
+**Rule:** `RepositoryProvider` = read. `NotifierProvider` = read + write. `ServiceProvider` = methods to call. Computed providers carry descriptive names with no suffix.
 
 ---
 
-### 3. Error Handling → AsyncValue at Boundaries, Result Type Internally
+### 3. Error Handling → Three Patterns by Context
 
-**Decision:** Use three different error handling patterns for different contexts.
+**Decision:** `AsyncValue<T>` at UI boundary, `Result<T, AppError>` internally, plain `try/catch` only for third-party calls.
 
-**Pattern:**
-
-`AsyncValue<T>` for UI state — loading, data, error. Riverpod provides it for free on any `asyncProvider`:
+**At the widget:**
 
 ```dart
-// In widget
 ref.watch(todayAgendaProvider).when(
   data: (events) => AgendaTimeline(events: events),
   loading: () => const AgendaShimmer(),
@@ -662,10 +508,9 @@ ref.watch(todayAgendaProvider).when(
 );
 ```
 
-`Result<T, AppError>` for service and repository internals — operations that can fail for known reasons:
+**Inside services:**
 
 ```dart
-// Sealed Result type — define once in core/
 sealed class Result<T> {
   const Result();
 }
@@ -678,16 +523,17 @@ class Failure<T> extends Result<T> {
   const Failure(this.error);
 }
 
-// AppError — known failure cases
 enum AppError {
   aiUnavailable,
   databaseWriteFailed,
   suggestionSuppressed,
   contextPayloadTooLarge,
+  voiceCaptureFailed,
+  voiceParseAmbiguous,
+  slotNoLongerAvailable,
+  authFailed,
 }
 ```
-
-Plain `try/catch` for unexpected exceptions only — wrap third-party library calls that can throw unpredictably.
 
 **Rule of Thumb:** `Result` inside services and repositories, `AsyncValue` at the provider boundary, `try/catch` only around external library calls.
 
@@ -695,42 +541,41 @@ Plain `try/catch` for unexpected exceptions only — wrap third-party library ca
 
 ### 4. File Organization → Strict Separation with Provider Convention
 
-**Decision:** `data/domain/presentation/` structure with enforced internal organization and single `_providers.dart` file per feature.
+**Decision:** `data/domain/presentation/` structure with enforced imports and a single `_providers.dart` per feature.
 
 **Pattern:**
 
 ```
 features/agenda/
 ├── data/
-│   ├── agenda_repository.dart       # implements domain interface
-│   └── agenda_dao.dart              # Drift DAO, only file that touches DB
+│   ├── agenda_repository.dart           # implements domain interface
+│   └── agenda_dao.dart                  # Drift DAO, only file that touches DB
 ├── domain/
-│   ├── agenda_event.dart            # entity (plain Dart class, no Flutter imports)
-│   ├── agenda_repository.dart       # abstract interface
-│   └── agenda_notifier.dart         # StateNotifier, business logic lives here
+│   ├── agenda_event.dart                # entity (plain Dart, no Flutter imports)
+│   ├── agenda_repository.dart           # abstract interface
+│   └── agenda_notifier.dart             # StateNotifier, business logic
 └── presentation/
-    ├── agenda_slide.dart            # top-level screen widget
+    ├── agenda_slide.dart
     ├── widgets/
     │   ├── agenda_strip.dart
     │   ├── event_card.dart
+    │   ├── monthly_calendar.dart
     │   └── add_event_sheet.dart
-    └── agenda_providers.dart        # all Riverpod providers for this feature
+    └── agenda_providers.dart            # all Riverpod providers for this feature
 ```
 
-**Hard Rules on Imports:**
-- `domain/` files import nothing from `data/` or `presentation/`
-- `data/` imports `domain/` interfaces only
-- `presentation/` imports `domain/` entities and providers only
+**Hard import rules:**
+- `domain/` imports nothing from `data/` or `presentation/`
+- `data/` imports only `domain/` interfaces
+- `presentation/` imports only `domain/` entities and providers
 
-**Provider Convention:** Every feature has a single `_providers.dart` file in `presentation/`. All Riverpod provider definitions for that feature live there, nowhere else. When you need to find a provider, you know exactly where to look.
+**Provider Convention:** Every feature has one `_providers.dart` in `presentation/`. All Riverpod definitions live there. When you need to find a provider, you know exactly where to look.
 
 ---
 
-### 5. Test Organization → Separate Tree Mirroring lib/
+### 5. Test Organization → Separate Tree Mirroring `lib/`
 
-**Decision:** Separate `test/` tree mirroring `lib/` structure, not co-located tests.
-
-**Pattern:**
+**Decision:** Separate `test/` tree, not co-located.
 
 ```
 test/
@@ -743,41 +588,349 @@ test/
 │   ├── practice/
 │   │   └── domain/
 │   │       ├── streak_calculator_test.dart
-│   │       └── suggestion_engine_test.dart
-│   └── ai/
+│   │       └── pattern_detector_test.dart
+│   ├── ai/
+│   │   └── domain/
+│   │       └── context_builder_test.dart
+│   └── evening_session/
 │       └── domain/
-│           └── context_builder_test.dart
+│           └── highlight_ranker_test.dart
 └── core/
     └── services/
         └── connectivity_service_test.dart
 ```
 
-**Rationale:** Co-located tests create noise in the file tree. Separate tree is lower friction for solo development — `test/` is the one place you look for all tests.
-
-**Priority:** `SuggestionEngine` and `StreakCalculator` get unit tests first — they're pure logic with no Flutter dependency, fast to write, and the most likely place for subtle bugs.
-
----
-
-## Conventions Reference Card
-
-**Pin this as `CONVENTIONS.md` in project root:**
-
-```
-DATABASE         snake_case columns, Drift generates camelCase Dart
-PROVIDERS        {feature}{Layer}Provider — Repository/Notifier/Service suffix
-ERROR HANDLING   AsyncValue at UI boundary, Result<T> in services, try/catch for externals
-FEATURES         data/ domain/ presentation/ with _providers.dart in presentation/
-TESTS            Separate test/ tree mirroring lib/ structure
-AI PAYLOAD       Selective context, 4000 char cap, 48hr agenda window
-IMPORTS          domain → nothing, data → domain, presentation → domain only
-MODELS           claude-sonnet-4-6 default, AiProvider abstraction for swapping
-API KEYS         --dart-define at build time, never in source
-THEME            ThemeMode.dark hardcoded default, SharedPreferences toggle
-```
+**Priority targets for unit tests** (pure logic, fast to write, most likely place for bugs):
+1. `SuggestionEngine` — ranking algorithm, suppression logic
+2. `StreakCalculator` — date math edge cases
+3. `PatternDetector` — 90-minute window-of-day, ≥2-week span
+4. `ContextBuilder` — 4k char cap, truncation priority order
+5. `HighlightRanker` — evening session relevance ranking
 
 ---
 
-## Next Steps
+### 6. AI Provider Abstraction → Single Constant Swap
 
-Ready to generate actual implementation files and project structure.
+**Decision:** Abstract `AiProvider` interface with concrete implementations. Active provider selected by one constant.
 
+**Interface:**
+
+```dart
+abstract class AiProvider {
+  String get name;
+  Future<Result<AiResponse>> sendContext(AiContextPayload payload);
+  Future<Result<Stream<String>>> streamResponse(AiContextPayload payload);
+}
+
+class ClaudeAiProvider implements AiProvider { ... }
+class GeminiAiProvider implements AiProvider { ... }
+class GroqAiProvider implements AiProvider { ... }
+class OpenAiAiProvider implements AiProvider { ... }
+class OfflineStubAiProvider implements AiProvider { ... }
+```
+
+**Selection:** A single constant in `core/constants/ai_config.dart`:
+
+```dart
+const kActiveAiProvider = AiProviderType.claude;
+```
+
+**Key delivery:** `--dart-define=AI_API_KEY=xxx` at build time. Never in source control. `.env.example` documents required keys. Real `.env` is git-ignored.
+
+**Architectural rule:** Feature code imports the `AiProvider` interface from `domain/`, never a concrete implementation. The Riverpod `aiProviderServiceProvider` injects the active implementation. Swapping providers touches one file.
+
+---
+
+### 7. AI Context Payload → Hard Cap, Priority-Ordered
+
+**Decision:** `ContextBuilder` produces a payload of strictly ≤4,000 characters, with truncation priority defined.
+
+**Priority order (build until cap is reached):**
+
+1. Current datetime + active screen (fixed cost, ~80 chars)
+2. Today's agenda + next 48h (target: ~1,200 chars)
+3. All skills with current streak only (target: ~600 chars, scales with skill count)
+4. Last 7 days unanchored sessions (target: ~500 chars)
+5. Last 3 suggestions with outcomes (target: ~400 chars)
+6. Compact representation of trailing data if budget remains
+
+**Hard cap enforced in `ContextBuilder.build()`** — returns `Failure(AppError.contextPayloadTooLarge)` only as a defensive check. The truncation logic should make this unreachable in normal use.
+
+**Where AI context is built:** Only in `AiService`. Never in widgets. UI calls `aiService.send(intent)` and the service composes the payload.
+
+---
+
+### 8. Suggestion Engine → On-Device, Fully Offline
+
+**Decision:** `SuggestionEngine` runs entirely on-device. No AI provider call. Pure Dart logic over local SQLite.
+
+**Algorithm:**
+
+1. Query all skills with `last_session_at` older than 24h, ordered by idleness DESC
+2. Query agenda for next 48h, compute free slots (gaps ≥30 min)
+3. Filter out skills where `suppressed_until > now()`
+4. Match longest-idle skill to shortest fitting slot to earliest available window
+5. First match wins; algorithm stops
+6. Persist as a row in `suggestions` table
+
+**Trigger points:**
+- 8pm evening session preparation (one suggestion at most, surfaced inside session as the cross-domain insight if relevant)
+- Throughout-day on meaningful data shift (event canceled, streak at risk, pattern threshold crossed)
+- Fallback on app open if no recent suggestion delivered
+
+**Non-negotiable:** **One AI voice per day.** If a throughout-day suggestion has fired, the evening session's cross-domain insight is suppressed or downgraded.
+
+---
+
+### 9. Theme System → Seven Presets + Custom Picker
+
+**Decision:** `ThemeSystem` holds seven theme maps, each defining a complete set of semantic tokens. Custom picker overrides the accent token only.
+
+**Two-layer token system:**
+
+**Layer 1 — Raw palette** (never used directly in widgets):
+
+```
+violetPrimary    = #7C4DFF
+cyanPrimary      = #00C2D4
+greenPrimary     = #1D9E75
+emberOrange      = #FF6B35
+cosmicMagenta    = #C770FF
+auroraTeal       = #2DD4BF
+darkBg           = #0D0D0F
+darkSurface      = #1A1A1F
+lightBg          = #FDFBF7
+lightSurface     = #FFFFFF
+mutedTextDark    = #6B6B80
+mutedTextLight   = #6B6B6B
+primaryTextDark  = #E8E8F0
+primaryTextLight = #1A1A1A
+```
+
+**Layer 2 — Semantic tokens** (used in all widgets):
+
+```
+colorAccent              // active theme accent
+colorAccentAgenda        // Personal category
+colorAccentWork          // Work category
+colorAccentPractice      // Practice category
+colorSurface
+colorBackground
+colorTextPrimary
+colorTextMuted
+colorBorder
+colorOrbIdle
+colorOrbActive
+```
+
+**Seven theme maps:**
+
+| Theme | Mode | Accent |
+|---|---|---|
+| Violet Dark (default) | dark | violetPrimary |
+| Cyan Dark | dark | cyanPrimary |
+| Green Dark | dark | greenPrimary |
+| Light Mode | light | violetPrimary |
+| Cosmic | dark | cosmicMagenta |
+| Ember | dark | emberOrange |
+| Aurora | dark | auroraTeal |
+
+**Custom picker:** overrides `colorAccent` only; all other semantic tokens inherit from the active mode (dark or light).
+
+**Persistence:** Active theme name + custom accent hex (if any) stored in `SharedPreferences`.
+
+---
+
+### 10. Navigation → go_router with Bottom Sheets as Routes
+
+**Decision:** `go_router` handles all navigation. Bottom sheets are routes, not imperative `showModalBottomSheet` calls.
+
+**Top-level routes:**
+
+```
+/glance                              # ambient lock screen
+/home                                # home with persistent strip + carousel
+/home/agenda                         # full agenda slide
+/home/agenda/event/:id               # event detail
+/home/agenda/calendar                # monthly calendar
+/home/practice                       # full practice slide
+/home/practice/skill/:id             # skill detail
+/evening                             # evening session screen
+/settings                            # all settings
+/settings/themes                     # theme picker
+```
+
+**Bottom sheets as routes:**
+
+```
+/home/agenda/add-event               # bottom sheet
+/home/practice/add-skill             # bottom sheet
+/home/practice/log-session/:id       # bottom sheet
+/confirm-suggestion/:id              # bottom sheet
+```
+
+**Rationale:** Deep linking works. Back button behavior is consistent. State restoration is centralized. No imperative navigation scattered across widgets.
+
+---
+
+### 11. Background Tasks → Best-Effort with Fallback
+
+**Decision:** `workmanager` schedules the 8pm trigger. `flutter_local_notifications` handles scheduled pre-event reminders. Fallback trigger runs on app open.
+
+**Scheduled work:**
+
+| Task | When | Mechanism |
+|---|---|---|
+| Evening session invitation | Daily 8pm local | workmanager periodic + flutter_local_notifications scheduled |
+| 5-min pre-event reminder | 5 min before each event | flutter_local_notifications scheduled at event create/update |
+| Throughout-day suggestion | On data shift (event canceled, streak risk) | Triggered synchronously when data changes; debounced |
+| Fallback evening check | On app open | If now ≥ 8pm and no session in last 18h, surface inline |
+
+**No long-running background AI calls.** The on-device `SuggestionEngine` runs in milliseconds. Any AI provider call is gated by user interaction in the foreground.
+
+---
+
+### 12. Voice → Tap-to-Speak in V1
+
+**Decision:** V1 uses platform STT via `speech_to_text` package, triggered by mic tap. Ambient wake-word ("Hey OdO") deferred to V2.
+
+**State machine:**
+
+```
+idle → (mic tap) → listening
+listening → (silence timeout 1.5s) → parsing
+listening → (mic tap again) → cancelled → idle
+parsing → (intent clear) → committing → committed → idle
+parsing → (intent ambiguous) → follow-up → listening
+parsing → (STT failure) → idle (silent)
+```
+
+**Orb animation tightly coupled:**
+- idle = breathing animation
+- listening = waveform
+- parsing = quick pulse
+- committing = single bright pulse
+- committed = brief checkmark overlay
+
+**Voice output (TTS):**
+- Phone V1: silent banners default, TTS toggleable in settings
+- Watch (V2): voice on by default, TTS reads notifications aloud
+- Never speaks first on a device the user isn't wearing or holding
+
+---
+
+### 13. Persistence Until Midnight (Evening Session)
+
+**Decision:** Evening session state persists across app lifecycle until local midnight, then is finalized.
+
+**Implementation:**
+- Every tag/expand/dismiss writes to `evening_highlights` table immediately
+- On app reopen between 8pm and midnight, if `evening_sessions` row exists with `session_date = today` and `completed_at IS NULL` and `abandoned_at IS NULL`, resume
+- A background job (or app-open check) at local midnight marks any incomplete session as `abandoned_at = midnight_timestamp`
+- Tomorrow's session creates a fresh row
+
+---
+
+## Confirmed Architectural Decisions (Non-Negotiable)
+
+- **State Management:** Riverpod with code-gen — no alternatives
+- **Database:** Drift (type-safe SQLite ORM) — no raw SQLite
+- **Background Tasks:** workmanager with fallback on app open
+- **Navigation:** go_router with bottom sheets as routes
+- **Theme:** seven presets via two-layer token system; dark default; light optimized for outdoor Abidjan
+- **Notifications:** flutter_local_notifications
+- **AI Context:** all payload construction in `AiService`, never in widgets
+- **AI Provider:** abstract interface, swappable via single constant
+- **AI Keys:** `--dart-define` at build time, never in source control
+- **Privacy:** local-first, no analytics, no telemetry, no third-party SDKs, no ad IDs
+- **Locale:** XOF (no decimals), DD/MM/YYYY, UTC+0, French-primary UI
+
+---
+
+## Component Interaction Map
+
+```
+                    ┌─────────────────────────┐
+                    │  GlanceModule (V1)      │
+                    │  + Watch Surface (V2)   │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+        ┌───────────────────────────────────────────────────┐
+        │                    HomeScreen                      │
+        │  ┌─────────────────────────────────────────────┐  │
+        │  │       Persistent Agenda Strip               │  │
+        │  ├─────────────────────────────────────────────┤  │
+        │  │   AgendaModule  │   PracticeModule          │  │
+        │  │   (slide)       │   (slide)                 │  │
+        │  ├─────────────────────────────────────────────┤  │
+        │  │       AI Component (persistent bar)          │  │
+        │  └─────────────────────────────────────────────┘  │
+        └────────────────────┬─────────────────────────────┘
+                             │
+                  ┌──────────┴──────────┐
+                  ▼                     ▼
+        ┌──────────────────┐   ┌─────────────────────┐
+        │   AiService      │   │ SuggestionEngine    │
+        │ (online, ext.)   │   │ (on-device, offline)│
+        └────────┬─────────┘   └──────────┬──────────┘
+                 │                        │
+                 ▼                        ▼
+        ┌─────────────────────────────────────────────┐
+        │           PersistenceLayer (Drift)          │
+        │   skills · sessions · events · suggestions  │
+        │   evening_sessions · evening_highlights     │
+        └─────────────────────────────────────────────┘
+                             ▲
+                             │
+        ┌────────────────────┴────────────────────────┐
+        │           EveningSession (8pm orchestrator)  │
+        └─────────────────────────────────────────────┘
+
+Supporting services injected everywhere:
+  NotificationService · BackgroundTaskService
+  ConnectivityService · VoiceService · LocaleService
+  ThemeSystem (active theme via Riverpod)
+```
+
+---
+
+## Data Flow: A Day in the Life
+
+**Morning (8:42am):** Phone wakes → Glance Screen renders → orb breathing → tile shows next event (10:00 standup).
+
+**Morning (9:55am):** `flutter_local_notifications` fires the 5-min pre-event reminder scheduled when the standup was created.
+
+**Midday (12:30pm):** User says "Hey OdO" mic-tap → "rendez-vous client at 4pm jeudi" → `VoiceService` returns transcript → `AiService.parseCommand()` returns intent {create_event, title: "Rendez-vous client", start: Thursday 16:00, category: work} → `AgendaModule` commits → banner confirmation, optional note enrichment offered.
+
+**Afternoon (3:00pm):** Wednesday 4pm standup is canceled. `AgendaNotifier` writes the delete → `SuggestionEngine` detects the new free slot → idle-skill ranking returns Japanese (5 days idle) → throughout-day notification: "45 minutes just opened up. Japanese is 5 days idle. Block it?"
+
+**Evening (7:12pm):** User opens Practice → logs 25 min Japanese session → no calendar event → `sessions` row written with `is_anchored = 0`. Streak updated. Silent flag.
+
+**Evening (8:00pm):** `workmanager` fires the evening session task → notification: "Your evening with OdO is ready."
+
+**Evening (8:03pm):** User taps. `EveningSession.start()` creates `evening_sessions` row, runs the headline generator over today's data, queries `HighlightRanker` for top 3–4 items, prepends the cross-domain insight if `PatternDetector` returns a match. Session renders. User tags. Each tag writes immediately to `evening_highlights`.
+
+**Evening (8:06pm):** Phone call interrupts. User returns at 9:14pm. App opens → `EveningSession.resume()` finds the in-progress row → renders from current step.
+
+**Evening (9:18pm):** User taps "wrap up" → close summary written, `completed_at` set. Session closes.
+
+**Midnight (00:00):** No background work fires. Tomorrow's session row will be created at 8pm tomorrow. If user had abandoned today's session mid-stream, an app-open check at any time after midnight marks `abandoned_at = midnight` for cleanup.
+
+---
+
+## Open Architectural Questions (V1 Pre-Build)
+
+These need answers before Day 1 of Epic 1:
+
+1. **Glance auth fallback:** if vocal password fails three times, does the typed password become required, or does the user remain on the Glance Screen indefinitely? **Recommendation:** three failures → typed password becomes the only path for the next 5 minutes.
+2. **Custom theme picker — color space:** HSL, RGB hex, or palette swatches? **Recommendation:** swatches first (24 curated), full picker behind "advanced" toggle.
+3. **Pattern detection sensitivity:** the spec says "3 sessions at similar times across ≥2 weeks". Is "similar times" ±45 min or ±60 min? **Recommendation:** ±45 min (tight enough to be meaningful, loose enough to catch real patterns).
+4. **AI provider default for V1 launch:** Claude (highest quality, simplest billing) — confirm.
+5. **Locale string source:** ARB files via `intl_utils` or simple Dart maps? **Recommendation:** simple Dart maps for V1, migrate to ARB in V1.5 when French AI responses ship.
+
+---
+
+**Document Status:** Locked for V1 MVP Implementation
+**Last Updated:** May 13, 2026
+**Owner:** Lokki (Solo Developer, Abidjan)

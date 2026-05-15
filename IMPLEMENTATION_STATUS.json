@@ -1,31 +1,158 @@
 {
-  "projectName": "TooXTips",
+  "projectName": "OdO",
   "platformType": "mobile",
   "status": "IN_PROGRESS",
-  "date": "2026-03-30",
-  "completedEpics": [],
-  "currentEpic": "Epic 1: Foundation",
-  "currentStory": "1.1 - Project Setup and Dependency Configuration (COMPLETED)",
-  "completionPercentage": 14,
+  "date": "2026-05-15",
+  "currentEpic": 1,
+  "currentStory": null,
+  "totalStories": 41,
+  "completionPercentage": 20,
   "performanceThresholds": {
-    "mobileUIInteractions": "200ms",
-    "claudeAPIResponse": "300ms",
+    "mobileUIInteractions": "500ms",
+    "claudeAPIResponse": "3000ms",
     "sqliteQueries": "50ms",
     "backgroundTasks": "5000ms",
-    "aiContextBuilding": "100ms",
+    "aiContextBuilding": "50ms",
     "offlineOperations": "50ms"
   },
-  "productLayerStatus": {
-    "prd": "✅ Complete",
-    "architecture": "✅ Complete",
-    "epics": "✅ Complete (48 stories)",
-    "uxDesign": "✅ Complete",
-    "implementationReadiness": "✅ PASS"
-  },
-  "dependencyStatus": {
-    "prerequisiteStoriesComplete": true,
-    "blockingDependenciesExist": false,
-    "readyToBegin": true
-  },
-  "notes": "Project passed implementation readiness check. All Product Layer documentation complete. Zero forward dependencies. Ready to begin Epic 1 (Foundation)."
+  "epics": [
+    {
+      "id": 1,
+      "name": "Foundation",
+      "status": "COMPLETE",
+      "storiesComplete": 8,
+      "storiesTotal": 8,
+      "stories": [
+        "1-1-project-setup-and-dependency-configuration",
+        "1-2-design-tokens-and-color-system",
+        "1-3-theme-system-with-runtime-swap",
+        "1-4-sqlite-database-schema-with-drift",
+        "1-5-aiprovider-abstraction-with-five-implementations",
+        "1-6-core-services",
+        "1-7-result-type-and-error-handling",
+        "1-8-router-and-project-structure"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Agenda Module",
+      "status": "NOT_STARTED",
+      "storiesComplete": 0,
+      "storiesTotal": 5,
+      "stories": [
+        "2-1-agenda-repository-and-dao",
+        "2-2-persistent-agenda-strip-three-states",
+        "2-3-day-timeline-view",
+        "2-4-event-crud-with-three-categories",
+        "2-5-monthly-calendar"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Practice Module",
+      "status": "NOT_STARTED",
+      "storiesComplete": 0,
+      "storiesTotal": 6,
+      "stories": [
+        "3-1-practice-repository-and-dao",
+        "3-2-first-launch-skill-prompt",
+        "3-3-skill-card",
+        "3-4-session-logging",
+        "3-5-streak-computation",
+        "3-6-pattern-detection-unanchored-sessions"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "AI Layer",
+      "status": "NOT_STARTED",
+      "storiesComplete": 0,
+      "storiesTotal": 5,
+      "stories": [
+        "4-1-context-builder",
+        "4-2-persistent-ai-bottom-bar",
+        "4-3-chat-sheet",
+        "4-4-voice-tap-to-speak-pipeline",
+        "4-5-offline-graceful-degradation"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Glance + Evening + Proactive",
+      "status": "NOT_STARTED",
+      "storiesComplete": 0,
+      "storiesTotal": 9,
+      "stories": [
+        "5-1-glance-screen-layout-and-states",
+        "5-2-glance-screen-authentication",
+        "5-3-orb-widget",
+        "5-4-evening-session-orchestration",
+        "5-5-evening-session-persistence-until-midnight",
+        "5-6-suggestion-engine-on-device",
+        "5-7-confirmation-sheet",
+        "5-8-background-tasks",
+        "5-9-suppression-algorithm"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Polish & Resilience",
+      "status": "NOT_STARTED",
+      "storiesComplete": 0,
+      "storiesTotal": 8,
+      "stories": [
+        "6-1-all-seven-themes",
+        "6-2-light-mode-outdoor-readability",
+        "6-3-empty-states-and-error-states",
+        "6-4-animations-and-motion",
+        "6-5-accessibility-audit",
+        "6-6-locale-qa-french-and-xof",
+        "6-7-first-launch-flow",
+        "6-8-performance-and-crash-free-resilience"
+      ]
+    }
+  ],
+  "completedStories": [
+    {
+      "id": "1-1-project-setup-and-dependency-configuration",
+      "completedDate": "2026-05-15",
+      "notes": "All 19 required runtime deps added, pubspec name changed to odo, Android permissions configured (7), iOS Info.plist configured, CONVENTIONS.md expanded with naming+zero-lint sections, folder structure created, main.dart initialization order correct."
+    },
+    {
+      "id": "1-2-design-tokens-and-color-system",
+      "completedDate": "2026-05-15",
+      "notes": "Two-file split: odo_theme.dart (OdoTheme immutable data class, withCustomAccent method) + app_colors.dart (8 raw palette constants @visibleForTesting, 3 fixed category tokens, 3 agenda semantic aliases, 7 const OdoTheme presets, allThemes list). orbIdle = accent @ 0x4D alpha (30%). 41 tests, 100% pass. flutter analyze clean."
+    },
+    {
+      "id": "1-8-router-and-project-structure",
+      "completedDate": "2026-05-15",
+      "notes": "GoRouter with initialLocation=/glance, ShellRoute wrapping /home tabs with 5-tab NavigationBar (Accueil/Agenda/Pratique/Insights/Profil in French), all 10 top-level routes + 4 bottom-sheet routes (slide-up CustomTransitionPage), PlaceholderScreen, CONVENTIONS.md updated with Import Rules + Navigation sections. 129/129 tests pass."
+    },
+    {
+      "id": "1-7-result-type-and-error-handling",
+      "completedDate": "2026-05-15",
+      "notes": "sealed Result<T> with Success/Failure, .when()/.getOrNull()/.isSuccess/.isFailure. AppError enum (8 variants) in lib/core/domain/app_error.dart. Migrated AppFailure → AppError across all AI providers and tests. 11 tests pass."
+    },
+    {
+      "id": "1-6-core-services",
+      "completedDate": "2026-05-15",
+      "notes": "ConnectivityService (connectivity_plus Stream<bool>), NotificationService (flutter_local_notifications, Africa/Abidjan TZ, event reminders), BackgroundTaskService (workmanager, top-level callbackDispatcher, evening_check periodic task), VoiceService (idle/listening/parsing/committing/committed state machine, sync broadcast stream), LocaleService (formatXof thin-space, formatDate, formatTime), service_providers.dart. 16 tests pass."
+    },
+    {
+      "id": "1-5-aiprovider-abstraction-with-five-implementations",
+      "completedDate": "2026-05-15",
+      "notes": "AiProvider abstract + ChatMessage/AiContextPayload/AiResponse value types. ClaudeAiProvider uses http.Client injection, targets claude-sonnet-4-6, AI_API_KEY from dart-define. Stubs: Gemini/Groq/OpenAI return aiUnavailable. OfflineStub returns canned text. aiProviderServiceProvider switches on kActiveAiProvider. 6 tests pass."
+    },
+    {
+      "id": "1-4-sqlite-database-schema-with-drift",
+      "completedDate": "2026-05-15",
+      "notes": "6 Drift tables (Skills, Sessions, Events, Suggestions, EveningSessions, EveningHighlights), PRAGMA foreign_keys=ON, 5 performance indexes, @DataClassName row types, AppDatabase.forTesting constructor, appDatabaseProvider Riverpod singleton. 8/8 tests pass including cascade delete verification."
+    },
+    {
+      "id": "1-3-theme-system-with-runtime-swap",
+      "completedDate": "2026-05-15",
+      "notes": "AppSpacing (sp2-sp32 + radius scale), AppDurations (fast/default/slow), AppTypography (Fraunces + DM Sans, 7 getters), AppTheme.fromOdoTheme (Material3 ThemeData from OdoTheme), sharedPreferencesProvider (keepAlive), ActiveTheme Riverpod Notifier (persists to SharedPreferences). 88/88 tests pass. google_fonts async errors in tests isolated using runZonedGuarded pattern."
+    }
+  ],
+  "notes": "Story files created 2026-05-13. 41 stories across 6 epics derived from epics.md. All story artifacts in _bmad-output/implementation-artifacts/. Sprint plan in _bmad-output/planning-artifacts/sprint-plan-2026-05-13.md."
 }

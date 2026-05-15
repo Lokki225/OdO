@@ -1,271 +1,360 @@
-# TooXTips Project Brief
+# OdO — Project Brief
 
-**Project Name:** TooXTips — Personal AI Productivity Hub  
-**Version:** 1.0 (MVP)  
-**Date Created:** March 29, 2026  
-**Status:** Ready for Implementation  
+**Project Name:** OdO — Personal AI Daily Companion
+**Version:** 1.0 (V1 MVP)
+**Date:** May 13, 2026
+**Status:** Ready for Implementation
+**Owner:** Lokki (Solo Developer, Abidjan)
 
 ---
 
 ## Executive Summary
 
-TooXTips is a personal AI productivity app that helps users optimize their time, practice habits, and spending through intelligent cross-domain insights. The MVP focuses on two core modules — **Agenda** and **Practice** — with AI as an enhancement layer that proactively suggests how to use free time for skill development.
+OdO is a personal AI companion built natively for the Ivorian context. It is **not a productivity app**. It is a daily ritual — a five-minute evening conversation with an AI that learns what matters to the user across their time, their habits, and their life, and stays with them throughout the day through timely, voice-first interactions.
 
-**Key Differentiator:** The AI understands your schedule and practice patterns, surfacing actionable suggestions at the right moment (e.g., "You have 45 free minutes Thursday. Japanese is idle. Block it?").
+The product holds two design tensions in perfect balance: **minimal in surface, deep in substance.** The UI is intentionally restrained. The AI is intentionally proactive. Together they create something that feels less like an app and more like a presence.
+
+**Key Differentiator:** The evening session is the moat. Most products optimize for daily active users, session count, and screen time. OdO optimizes for cumulative understanding. The longer the user uses it, the more it knows them — and that knowledge stays local, on their device, with no copy anywhere else.
 
 ---
 
 ## Problem Statement
 
-Users struggle to:
-1. **Find time for skill development** amid busy schedules
-2. **Maintain consistent practice habits** without external structure
-3. **Understand spending patterns** in relation to their time and priorities
+The modern personal-productivity landscape is saturated with tools that optimize for the wrong thing:
 
-Current solutions (calendar apps, habit trackers, expense apps) operate in silos. TooXTips unifies these domains so the AI can reason across them.
+1. **Tools demand attention.** Calendars, habit trackers, journaling apps each ask the user to come to them, fill in fields, manage state. Each is a new surface to maintain.
+2. **AI assistants are reactive.** They wait for the user to ask. They do not observe, reflect, or surface what matters.
+3. **Personal data leaves the device.** Most "smart" companions are smart precisely because they ship user data elsewhere to be processed and retained.
+4. **Local cultural context is ignored.** Apps designed for North American or European defaults — USD, MM/DD/YYYY, English-first, glossy aesthetics — feel imported, never native.
+
+There is no daily companion that is genuinely **proactive, local-first, voice-first, and contextually Ivorian**. OdO is built to occupy that gap.
 
 ---
 
 ## Target User
 
-**Primary:** Knowledge workers and students in West Africa (Côte d'Ivoire focus) who:
-- Use mobile as primary computing device
-- Value time optimization and skill development
-- Have inconsistent connectivity
-- Manage multiple life domains (work, learning, finances)
+**Primary (V1):** Lokki — the builder. A knowledge worker in Abidjan with a full work calendar, ongoing skill practice commitments (Japanese, others), intermittent connectivity, and a preference for restraint over feature density. The product is built for one person first, and that constraint is a feature, not a limitation.
 
-**Secondary:** Anyone building personal productivity systems who wants AI-powered cross-domain insights.
+**Secondary (V1 Beta):** A small circle of testers in Côte d'Ivoire and the West African francophone region who:
+- Use mobile as their primary computing device
+- Value reflection over engagement metrics
+- Have predictable but evolving daily patterns (work, learning, social)
+- Manage multiple life domains and want a single trusted surface
+
+**Explicitly not the target user:**
+- Anyone wanting a feature-dense productivity suite
+- Anyone wanting gamified habit streaks with XP, badges, and competition
+- Anyone wanting a chatty AI that initiates throughout the day
+- Anyone wanting cloud sync, multi-device handoff, or shared awareness in V1
+
+OdO is not for everyone, and that is correct.
 
 ---
 
 ## Core Value Proposition
 
 **For the User:**
-- One app to see your day, track practice, and understand spending
-- AI that learns your patterns and suggests the best time to practice
-- Works offline; AI enhances but doesn't require connectivity
-- Respects privacy — all data stays on your device
+- A five-minute evening ritual that compounds over weeks into a model of what they value
+- Timely, voice-first nudges throughout the day — never noisy, never demanding
+- Total local privacy — data lives on the device, with the only outbound traffic being the AI context payload over HTTPS when the user explicitly interacts with the AI layer
+- Native Ivorian formatting and language — XOF currency without decimals, DD/MM/YYYY dates, French UI by default, English support
+- Fully functional offline — the AI is an enhancement, not a dependency
 
 **For the Builder (Solo Development):**
-- Minimal scope (two modules + AI layer)
-- Realistic 3–4 week solo development timeline
-- Clear priority hierarchy
-- Offline-first architecture reduces complexity
+- Locked scope and architecture make a 4–6 week solo build realistic
+- A single, internally coherent product — no committee compromises
+- Architectural restraint (one feature owner per module, strict imports, single `_providers.dart` per feature) makes the codebase maintainable by one person for years
+
+**The Compounding Moat:**
+The evening session builds cumulative understanding. By month three, OdO is irreplaceable. By month twelve, it knows the user better than most humans in their life. This is not lock-in by trap — it is lock-in by genuine value compounded, all of it local.
 
 ---
 
-## MVP Scope
+## V1 MVP Scope
 
-### Included in MVP
+### The Three Time Horizons
 
-**1. Agenda Module**
-- Calendar view (day/week)
-- Event creation, editing, deletion
-- Time-based event display
-- Persistent "today strip" showing next 2–3 upcoming events
-- SQLite persistence
+OdO operates across three coordinated timescales. Understanding these is understanding the product.
 
-**2. Practice Module**
-- Skill cards (add/edit/delete skills)
-- Session logging (duration, date, notes)
-- Streak tracking
-- Idle skill detection (last session timestamp)
-- Unanchored session flagging (sessions without calendar events)
+1. **Moments** — Throughout the day, OdO delivers timely notifications. Five minutes before a meeting. A practice reminder. A proactive suggestion when the AI has detected something worth surfacing. Voice-first on the watch (V2), configurable on the phone. Always brief.
+2. **The Evening Session** — At 8pm each day, OdO invites the user to a five-minute reflective conversation. Structured, predictable, never longer than five minutes, often shorter on quiet days. This is where OdO learns what the user values.
+3. **Cumulative Understanding** — Over weeks and months, OdO accumulates a model of what matters. What the user highlights in evening sessions, what they dismiss, what patterns emerge. Stays local. Grows in value with every passing day.
 
-**3. AI Layer (Claude Integration)**
-- Context builder (aggregates Agenda + Practice data)
-- Proactive notifications (8pm daily check-in)
-- Free-slot detection (gaps in calendar)
-- Idle-skill matching (suggest practice for available time)
-- Chat interface for questions
-- Offline graceful degradation
+### Included in V1
 
-**4. Core UX**
-- Persistent Agenda strip (always visible)
-- Two-slide carousel (Practice + Expenses placeholder)
-- Dark mode first, light mode support
-- Responsive design for mobile
+**1. Glance Screen**
+- Ambient lock screen with privileged glance information, sits before the home screen
+- Lock icon (violet locked / green unlocked) with state label
+- Centered AI orb — idle breathing animation, active waveform when listening
+- Minimal info cards — next event, OdO's latest suggestion, never sensitive data
+- Bottom bar: quick-add (left), text input (center), microphone toggle (right)
+- Authentication: vocal password ("Hey OdO, unlock — [phrase]"), typed password, optional biometric
+- Slide-up unlock gesture
+- Doubles as the watch face design language (V2)
 
-### Deferred to v1.1
+**2. Home Screen with Persistent Agenda Strip**
+- Agenda strip always visible at top — next two events, truncated at 20 characters, three states (events today / no more today / nothing scheduled), tappable to expand into monthly calendar
+- One-slide carousel (Practice) for V1 — Expenses placeholder deferred to V1.5
+- Persistent AI bottom bar — text input + microphone toggle, always thumb-reachable
 
-- Expenses module (manual logging, complex for MVP)
-- Voice commands (accent/language variability, permission complexity)
-- Cloud sync (local-first MVP)
-- Habit anchoring to recurring events
-- Receipt scanning
+**3. Agenda Module**
+- Event CRUD with three categories — Personal (violet), Work (blue), Practice (green) — each with a colored left-bar in the timeline
+- Day timeline view with 30-minute grid
+- Monthly calendar accessible within the Agenda slide
+- Persistent Agenda strip (see above)
+- Recurring events deferred to V1.5
+
+**4. Practice Module**
+- User-defined skills (free text, no preset categories, no goal templates, no XP)
+- Skill card: name, current streak badge, 7-day activity bar, last session duration + relative date
+- Session logging with duration + optional note
+- Automatic streak computation
+- First-launch bottom sheet: "What's one skill you're working on?" — single question, free text
+- Unanchored session silent flagging
+- Pattern detection: after 3 sessions at similar times across ≥2 calendar weeks, OdO asks once during the evening session about anchoring
+
+**5. AI Layer — OdO Itself**
+- Persistent bottom bar on home screen + the Glance Screen orb
+- Selective context payload, hard-capped at 4,000 characters: today's agenda + next 48 hours, all skills with streak data, last 7 days of unanchored sessions, last 3 suggestions with outcomes, current datetime, active screen
+- Swappable AI provider via `AiProvider` interface — Claude, Gemini, Groq, OpenAI, or offline stub selected by changing one constant
+- API keys via `--dart-define` build-time environment variables, never in source control
+- Offline graceful degradation: chat shows "Couldn't reach AI — tap to retry" without losing the user's message. Orb breathes. Agenda updates. Product remains fully functional.
+
+**6. Evening Session**
+- 8pm notification invites the user to the session
+- Five-minute structured ritual on the phone
+- Opens with a brief headline ("Productive day. Two practice sessions, three events, on budget.")
+- 3–4 highlight items, ranked by relevance from current data state
+- Tag-or-speak interaction per item: significant / dismiss / expand — one tap each
+- One cross-domain insight if available ("Third Japanese session at 7pm this week — want to anchor that time?")
+- One-line learning summary at close
+- "Wrap up" button always visible at top — jumps to close phase
+- Session persists until midnight if interrupted; after midnight, today's session is gone
+
+**7. Proactive Suggestion Engine**
+- On-device, fully offline
+- Suggestions emerge from current data state: Agenda gaps, idle skills, unanchored patterns, schedule density
+- Ranking algorithm: longest-idle skill first → shortest fitting slot → earliest available window
+- One suggestion per evening, non-negotiable
+- Throughout-day notifications when data shifts meaningfully (meeting canceled, streak at risk, pattern threshold crossed)
+- Suppression: soft dismiss = 3 days, explicit thumbs-down = 7 days, after acceptance = 1 day
+
+**8. Voice Interaction (Phone V1)**
+- Tap-to-speak as MVP wake mechanism (microphone button on Glance Screen and persistent bar)
+- Voice commands commit in one shot when possible ("Hey OdO, rendez-vous at 7pm tonight")
+- Voice output toggleable in settings, silent banners default on phone
+- Wake-word detection ("Hey OdO" ambient) deferred to V2 alongside watch release
+
+**9. Themes & Customization**
+- Seven presets: Violet Dark (default), Cyan Dark, Green Dark, Light Mode, Cosmic, Ember, Aurora
+- Custom color picker for personalized accent
+- Theme selection in settings, post-unlock
+- Dark mode hardcoded default at first launch; Light mode built for high-brightness outdoor Abidjan conditions
+- Orb + active dot pill + cards inherit active theme accent — one system, themed coherently
+
+**10. Background Tasks & Notifications**
+- 8pm session invitation via `workmanager` with fallback trigger on app open
+- 5-minute pre-event reminders via `flutter_local_notifications`
+- Best-effort delivery; product never implies guaranteed timing
+
+**11. Locale-Aware Throughout**
+- XOF currency with no decimal places
+- DD/MM/YYYY date format
+- UTC+0 timezone
+- French primary UI, English support
+- AI responses in English in V1 (French AI responses deferred to V1.5)
 
 ---
 
-## Architecture Decisions
+## Deferred (V1.5)
 
-### Technology Stack
-- **Framework:** Flutter (cross-platform, solo-friendly)
-- **Database:** SQLite (local-first, no backend required)
-- **AI:** Claude API (context-aware, handles ambiguity)
-- **Notifications:** flutter_local_notifications (proactive AI delivery)
-- **Internationalization:** intl package (XOF currency, DD/MM/YYYY dates)
+- Expenses module (manual logging, receipt scanning, custom budget categories)
+- Recurring events
+- French AI responses
+- Sunday weekly reflection notifications
 
-### Key Architectural Principles
+## Deferred (V2)
 
-1. **Offline-First:** All modules function completely without AI. AI is an enhancement layer, not a dependency.
-2. **Perceived Responsiveness:** Sub-500ms perceived latency via optimistic UI, skeleton loaders, local-first rendering.
-3. **Graceful Degradation:** If AI is unavailable, the app remains fully functional.
-4. **Proactive > Reactive:** AI's primary value is proactive notifications (8pm check-in), not reactive chat.
-5. **Locale Awareness:** XOF currency, DD/MM/YYYY dates, French language support (future).
+- Apple Watch and Wear OS companion apps
+- Wake-word detection ("Hey OdO" ambient phrase)
+- Cross-device handoff for proactive notifications
+
+## Deferred (V3)
+
+- Family plan, shared awareness, per-event privacy controls
+- Backend infrastructure, user accounts, sync, conflict resolution
+
+## Deferred (V4)
+
+- Enterprise / Organization plan
+- Multi-tenant architecture, RBAC, admin dashboards, service integrations
+
+---
+
+## Architecture Decisions (Locked)
+
+| Layer | Choice |
+|---|---|
+| Framework | Flutter (Dart) — one codebase for iOS and Android |
+| State management | Riverpod with code-gen syntax |
+| Local database | SQLite via Drift ORM |
+| Navigation | go_router with bottom sheets as routes |
+| Background tasks | workmanager with fallback trigger on app open |
+| Notifications | flutter_local_notifications |
+| Connectivity | connectivity_plus for offline state detection |
+| Theme | ThemeMode.dark hardcoded default, SharedPreferences toggle |
+| AI abstraction | AiProvider interface, swappable implementations |
+| API keys | --dart-define at build time, never in source control |
+
+Full architectural detail lives in `architecture.md`.
+
+---
+
+## Key Architectural Principles
+
+1. **Local-first, always.** All user data lives on-device. The only outbound traffic is the AI context payload to the active provider, over HTTPS, only when the user is online and explicitly interacts with the AI layer. No analytics, no telemetry, no third-party SDKs, no advertising identifiers, no behavioral tracking.
+2. **Offline-tolerant by default.** Every feature works without connectivity. The AI is an enhancement layer, not a dependency. Offline state is never an error state.
+3. **One AI voice per day.** The proactive notification is the AI's primary channel. The chat is the user's channel. The AI never initiates inside the chat. The 8pm session is the only moment the AI speaks first by default.
+4. **The phone is the brain. The watch (V2) is a surface.** The phone owns all data, runs all logic, computes all suggestions, talks to the AI provider, manages the local database. The watch displays, captures, reports back. Never decides on its own.
+5. **Voice as equal-priority input.** Tap-to-speak in V1, ambient wake-word in V2. Voice output configurable per surface — never speaks first on a device the user isn't wearing or holding.
+6. **Restraint over feature density.** The product takes a position. The right user finds this freeing. The wrong user finds it odd. Designing for the right user is the only sustainable path.
 
 ---
 
 ## User Flows
 
-### Primary Flow: Free-Slot Suggestion
+### Primary Flow: The Evening Session
 
 ```
-1. User opens app (evening, 8pm)
-2. Background task runs: analyzes Agenda gaps + idle skills
-3. Notification: "You have 45 free minutes Thursday. Japanese is idle. Block it?"
-4. User taps → Practice module opens with suggestion pre-filled
-5. User confirms → Event added to Agenda
+1. 8pm notification: "Your evening with OdO is ready."
+2. User taps → session opens with a headline summary
+3. OdO presents 3–4 highlight items, one at a time
+4. User tags each — significant / dismiss / expand — one tap
+5. OdO surfaces one cross-domain insight if one exists
+6. Session closes with a one-line summary of what was learned
+7. Session is gone at midnight; tomorrow is tomorrow's
 ```
 
-### Secondary Flow: Unanchored Session Detection
+### Secondary Flow: Throughout-Day Proactive Suggestion
 
 ```
-1. User logs practice session (no calendar event)
-2. After 2nd unanchored session at similar time, AI surfaces suggestion
-3. "You've practised Japanese twice around 7pm without scheduling. Add recurring block?"
-4. User confirms → Recurring event created in Agenda
+1. User's 3pm meeting is canceled (event deleted/moved)
+2. SuggestionEngine detects free slot, idle skill
+3. Notification: "45 minutes just opened up. Japanese is 5 days idle. Block it?"
+4. User taps → confirmation sheet pre-filled
+5. User confirms → event added to Agenda, session pre-queued in Practice
 ```
 
-### Tertiary Flow: Manual Queries
+### Tertiary Flow: Unanchored Pattern Detection
 
 ```
-1. User opens chat interface
-2. Asks: "When should I practice this week?"
-3. AI analyzes Agenda + Practice, returns prioritized time slots
-4. User can tap to add events
+1. User logs a Japanese session at 7:12pm — no calendar event
+2. Session flagged silently as unanchored
+3. After 3 sessions at similar times (within 90 min) across ≥2 calendar weeks
+4. During next evening session, OdO asks once: "Third Japanese session at 7pm this week — want to anchor that time?"
+5. User says yes/no via tag — OdO never asks again for that skill
+```
+
+### Quaternary Flow: Glance Screen Quick Capture
+
+```
+1. Phone wakes — Glance Screen renders, orb breathing
+2. User taps microphone → orb shifts to waveform
+3. "Hey OdO, rendez-vous at 7pm tonight"
+4. Event committed immediately to Agenda
+5. Banner confirmation, optional enrichment offered ("add a note?") — never blocking
 ```
 
 ---
 
-## Success Metrics
+## Success Criteria
 
-### MVP Success Criteria
-- App launches and functions offline
-- Agenda + Practice modules work without AI
-- AI context builder correctly aggregates data
-- Proactive notification triggers at 8pm
-- Free-slot detection accuracy > 90%
-- Idle-skill matching works for 2+ skills
-- No crashes on typical usage patterns
-- Perceived latency < 500ms
+V1 is successful when, after three months of personal daily use:
 
-### User Engagement (Post-Launch)
-- Daily active users (DAU)
-- Notification engagement rate (% who tap proactive suggestions)
-- Practice session consistency (week-over-week)
-- Feature adoption (% using AI vs. manual-only)
+1. The evening session is held at least **20 days out of every 30**.
+2. The user can articulate, in one sentence, what OdO understands about them that no other app does.
+3. A first-time user opens the app and reaches first useful state — at least one skill, at least one event, one evening session completed — within **5 minutes** of first launch with no instruction.
+4. The app runs **without a crash for two consecutive weeks** of normal use.
+5. A beta tester, given the app with no explanation, uses it for **seven consecutive days** without abandoning it.
+6. The **proactive suggestion acceptance rate trends upward** week over week — indicating the learning loop is working.
+
+When any of these fail, the failure points to a specific, fixable design or engineering problem — not a fundamental product flaw.
 
 ---
 
 ## Constraints & Assumptions
 
 ### Load-Bearing Constraints
-- **Solo development:** One person, full responsibility
-- **Flutter:** Cross-platform requirement
-- **Perceived responsiveness:** Must feel instant, even if AI is slow
-- **Local-first data:** All user data stays on device
-- **Locale correctness:** XOF currency, DD/MM/YYYY dates, Abidjan context
+- **Solo development:** one person, full responsibility, scope ruthlessly prioritized
+- **Flutter cross-platform:** one codebase, iOS + Android from day one
+- **Local-first data:** no backend, no sync, no user accounts in V1
+- **Locale correctness:** XOF, DD/MM/YYYY, UTC+0, French-primary
+- **Intermittent connectivity:** Abidjan reality — graceful degradation essential
 
 ### Assumptions About User Behavior
-- Users will consistently log practice sessions (or use voice in v1.1)
-- Users check their phone daily (notification delivery assumption)
-- Users have predictable schedule patterns (AI learning assumption)
-- Users value time optimization over feature breadth
+- Users consistently engage with the 8pm session (the entire moat depends on this)
+- Users tag highlights honestly — this is how OdO learns
+- Users prefer voice for on-the-go capture and tap for reflective tagging
+- Users have predictable but evolving daily patterns
 
 ### Technical Assumptions
-- Claude API remains available and performant
-- SQLite is sufficient for 2+ years of data
-- Context payload stays under token limits (selective context strategy for degradation)
+- Claude (or whichever AI provider is active) remains performant on a 4,000-character payload
+- SQLite via Drift handles 2+ years of personal data without performance degradation
+- `workmanager` 8pm trigger fires on Android ~80% of the time, on iOS ~70% — fallback on app open covers the rest
 - Mobile connectivity is intermittent but not permanent
 
 ---
 
 ## Implementation Roadmap
 
-### Phase 1: Foundation (Days 1–3)
-- Flutter project setup
-- Theme system (dark/light)
-- Persistent Agenda strip + carousel shell
-- SQLite schema design
+The full epic breakdown lives in `epics.md`. Six epics in execution order:
 
-### Phase 2: Agenda Module (Days 4–7)
-- Calendar view (day/week)
-- Event CRUD operations
-- Time-based display
-- Persistence
+| Phase | Epic | Days | Description |
+|---|---|---|---|
+| 1 | Foundation | 1–4 | Project scaffold, design tokens, theme system, DB schema, AiProvider abstraction |
+| 2 | Agenda Module | 5–9 | Persistent strip, calendar view, event CRUD, day timeline, categories |
+| 3 | Practice Module | 10–13 | Skill cards, session logging, streak computation, unanchored flagging, pattern detection |
+| 4 | AI Layer | 14–17 | Context builder, chat sheet, voice tap-to-speak, offline degradation |
+| 5 | Glance + Evening + Proactive | 18–23 | Glance Screen, evening session ritual, SuggestionEngine, background tasks, confirmation sheet |
+| 6 | Polish & Resilience | 24–28 | All seven themes, light mode QA, animations, empty/error states, accessibility, locale QA |
 
-### Phase 3: Practice Module (Days 8–11)
-- Skill cards
-- Session logging
-- Streak tracking
-- Unanchored flagging
-
-### Phase 4: AI Layer (Days 12–16)
-- Claude API integration
-- Context builder
-- Chat interface
-- Graceful offline handling
-
-### Phase 5: Proactive AI (Days 17–20)
-- Background task scheduling
-- Free-slot detection
-- Idle-skill matching
-- 8pm notification logic
-
-### Phase 6: Polish & Testing (Days 21–27)
-- Edge case handling
-- Error states
-- Offline testing
-- Dark/light mode QA
-- Performance optimization
+Target: **4–6 weeks** end-to-end for a solo build.
 
 ---
 
-## Risk Mitigation
+## Risk Register
 
 | Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|-----------|
-| Context payload exceeds token limits | Medium | High | Implement selective context strategy; defer to v1.1 if needed |
-| Offline connectivity breaks AI | High | Medium | Design app to function fully without AI; graceful degradation |
-| Voice commands (v1.1) fail on accents | High | Low | Defer to v1.1; test with Ivorian French speakers |
-| Manual expense logging abandoned | High | Medium | Defer Expenses to v1.1; focus on Agenda + Practice |
-| Notification fatigue | Medium | Medium | Limit to one suggestion per day; user can disable |
-| Solo development timeline slips | Medium | High | Prioritize ruthlessly; defer features to v1.1 |
+|---|---|---|---|
+| Context payload exceeds 4k characters | Medium | High | Hard cap enforced in `AiService`; selective context strategy with priority order; truncation rules documented |
+| `workmanager` 8pm task killed by OS | High | Medium | Fallback trigger on app open: if no session delivered in last 18h, surface inline. UI never implies guaranteed timing |
+| Voice commands fail on Ivorian French accent | Medium | Medium | Phone V1 uses platform STT (Apple/Google) — already accent-tolerant. AI parsing handles intent ambiguity |
+| Notification fatigue erodes trust | Medium | High | "One AI voice per day" is non-negotiable. Suppression algorithm enforces it |
+| User abandons evening session after week 1 | Medium | High | Session ceiling of 5 minutes, "wrap up" always visible, no penalty for skipping. Quiet-day collapse keeps it short |
+| Solo timeline slips | High | Medium | Ruthless deferrals to V1.5/V2 already documented. Foundation epic locks architecture so no mid-build re-debate |
+| API key leaks via source control | Low | Critical | `--dart-define` at build time enforced; `.env.example` in repo, real `.env` in `.gitignore`; key audit before each commit |
 
 ---
 
-## Success Definition
+## Three Things Worth Stating Explicitly
 
-**MVP is successful when:**
-1. App launches, functions offline, and doesn't crash
-2. Agenda + Practice modules work without AI
-3. AI proactive notification triggers and surfaces relevant suggestions
-4. One user (you) uses it daily for 2+ weeks without abandoning it
-5. The product is honest about its constraints (offline-first, no voice, no expenses)
+**OdO is not for everyone, and that's correct.** The product is designed for someone who wants a daily companion, not a tool. Users wanting only calendaring will find OdO too involved. Users wanting gamified streaks will find it too quiet. The product takes a position — reflection over engagement metrics, restraint over feature density, depth over breadth.
 
-**This is not about perfection. It's about shipping a focused product that solves one problem well: helping you find time to practice.**
+**The evening session is the moat.** Switching costs grow with every evening session. By month three, OdO is irreplaceable — not by trap, but by genuine value compounded. All of it local. None of it copyable.
+
+**Solo build is a feature, not a constraint.** Every decision is internally coherent. No committee compromises, no design-by-democracy. The product's restraint is the developer's restraint. The product's soul is the developer's soul. This is the rarest thing in software — a personal product that wasn't designed by a team trying to imagine a person.
 
 ---
 
 ## Next Steps
 
-1. **Review & Validate:** Confirm this brief aligns with your vision
-2. **Refine Scope:** Adjust MVP scope if needed before implementation
-3. **Design System:** Create wireframes for Agenda strip + carousel
-4. **Begin Implementation:** Start Phase 1 (Foundation)
+1. **Review & validate** this brief against the V1 MVP specification
+2. **Lock architecture** — confirm `architecture.md` against this brief
+3. **Sequence epics** — confirm `epics.md` ordering against this brief
+4. **Begin Epic 1: Foundation** — Day 1 work starts with `pubspec.yaml`, `app_colors.dart`, `app/theme.dart`, and the Drift schema
 
 ---
 
-**Document Status:** Ready for Implementation  
-**Last Updated:** March 29, 2026  
-**Owner:** Lokki (Solo Developer)
+**Document Status:** Ready for Implementation
+**Last Updated:** May 13, 2026
+**Owner:** Lokki (Solo Developer, Abidjan)

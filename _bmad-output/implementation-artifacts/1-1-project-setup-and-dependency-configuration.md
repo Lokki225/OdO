@@ -1,129 +1,103 @@
----
-storyId: 1.1
-storyKey: 1-1-project-setup-and-dependency-configuration
-epicId: 1
-projectName: TooXTips
-date: 2026-03-29
-status: ready-for-dev
----
-
 # Story 1.1: Project Setup and Dependency Configuration
 
-## Story Statement
+Status: ready-for-dev
+
+## Story
 
 As a developer,
 I want to initialize the Flutter project with all required dependencies configured,
-So that the project compiles and is ready for feature development.
+so that the project compiles and is ready for feature development.
 
 ## Acceptance Criteria
 
-**Given** a fresh Flutter project created with `flutter create --org com.tooxips tooxips`
-**When** I add all dependencies from the architecture specification (Riverpod, Drift, go_router, etc.)
-**Then** the project compiles without errors
-**And** `flutter pub get` succeeds
-**And** all platform-specific configurations (Android permissions, iOS setup) are in place
+1. A fresh Flutter project exists created with `flutter create --org com.odo odo`
+2. All dependencies from `architecture.md` are in `pubspec.yaml`: flutter_riverpod ^2.5.1, riverpod_annotation ^2.3.5, go_router ^14.0.0, drift ^2.18.0, sqlite3_flutter_libs ^0.5.22, path_provider ^2.1.3, path ^1.9.0, shared_preferences ^2.2.3, flutter_local_notifications ^17.1.2, workmanager ^0.5.2, timezone ^0.9.4, http ^1.2.1, connectivity_plus ^6.0.3, speech_to_text ^6.6.0, flutter_tts ^4.0.2, local_auth ^2.2.0, table_calendar ^3.1.2, intl ^0.19.0, flutter_animate ^4.5.0
+3. Dev dependencies include: drift_dev ^2.18.0, riverpod_generator ^2.4.0, build_runner ^2.4.9, flutter_lints ^4.0.0
+4. `flutter pub get` succeeds with no resolution errors
+5. The project compiles without errors on iOS and Android (`flutter build apk --debug` and `flutter build ios --debug --no-codesign`)
+6. Android `AndroidManifest.xml` includes permissions: RECORD_AUDIO, USE_BIOMETRIC, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, WAKE_LOCK, VIBRATE, INTERNET
+7. iOS `Info.plist` includes: `NSMicrophoneUsageDescription`, `NSSpeechRecognitionUsageDescription`, `NSFaceIDUsageDescription`, `UIBackgroundModes` (fetch, background-processing)
+8. `CONVENTIONS.md` exists at the repo root documenting locked architectural decisions (Clean Architecture layers, import rules, Riverpod patterns)
+9. `.env.example` documents required env vars (`AI_API_KEY`); real `.env` is in `.gitignore`
+10. Project folder structure matches the spec in `architecture.md`: `lib/{app,features,core}/`
 
-## Technical Requirements
+## Tasks / Subtasks
 
-### Dependencies to Add
+- [ ] Task 1: Initialize Flutter project (AC: 1)
+  - [ ] Run `flutter create --org com.odo odo` in the workspace root
+  - [ ] Verify default project compiles
+- [ ] Task 2: Configure pubspec.yaml with all dependencies (AC: 2, 3, 4)
+  - [ ] Add all runtime dependencies with pinned minor versions
+  - [ ] Add all dev dependencies
+  - [ ] Run `flutter pub get` and confirm success
+- [ ] Task 3: Configure Android permissions (AC: 6)
+  - [ ] Edit `android/app/src/main/AndroidManifest.xml` to add all required permissions
+  - [ ] Add `workmanager` initialization in `AndroidManifest.xml`
+- [ ] Task 4: Configure iOS Info.plist (AC: 7)
+  - [ ] Edit `ios/Runner/Info.plist` with all usage descriptions
+  - [ ] Add `UIBackgroundModes` array with required modes
+- [ ] Task 5: Create CONVENTIONS.md (AC: 8)
+  - [ ] Document Clean Architecture import rules
+  - [ ] Document Riverpod patterns (AsyncNotifier, StreamProvider, providers in feature folder)
+  - [ ] Document naming conventions (files: snake_case, classes: PascalCase)
+  - [ ] Document zero-lint policy
+- [ ] Task 6: Configure environment files (AC: 9)
+  - [ ] Create `.env.example` with `AI_API_KEY=your_key_here`
+  - [ ] Verify `.env` is in `.gitignore`
+- [ ] Task 7: Scaffold project folder structure (AC: 10)
+  - [ ] Create `lib/app/`, `lib/features/`, `lib/core/` directories
+  - [ ] Create feature subdirs: `glance/`, `home/`, `agenda/`, `practice/`, `ai/`, `evening_session/`, `settings/`
+  - [ ] Each feature gets `data/`, `domain/`, `presentation/` subdirs
 
-**State Management & Dependency Injection:**
-- `riverpod: ^2.4.0` - State management with code-gen support
-- `riverpod_generator: ^2.3.0` - Code generation for @riverpod
-- `flutter_riverpod: ^2.4.0` - Flutter integration for Riverpod
+## Dev Notes
 
-**Database & Persistence:**
-- `drift: ^2.14.0` - Type-safe SQLite ORM
-- `drift_flutter: ^2.1.0` - Flutter integration for Drift
-- `sqlite3_flutter_libs: ^0.5.0` - SQLite native libraries
-- `shared_preferences: ^2.2.0` - Local key-value storage
+- **Flutter SDK:** Use the version installed; minimum Flutter 3.22+ required for Dart 3 sealed classes
+- **Drift init:** `drift_dev` and `build_runner` are dev deps only; never import `drift_dev` in `lib/`
+- **workmanager Android init:** The `<application>` tag in `AndroidManifest.xml` must declare the workmanager `BroadcastReceiver` and the `CallbackDispatcher`; follow the workmanager README exactly
+- **google_fonts NOT in scope for this story** — fonts are added in Story 1.2/1.3 when theme is created
+- **`flutter_animate`** is preferred over raw `AnimationController` for all animations in the project
+- **Build verification:** Run `flutter analyze` after setup — must show "No issues found!" before marking done
+- **`.env` pattern:** API keys pass to the app via `--dart-define=AI_API_KEY=xxx` at build time, not via dotenv packages at runtime
 
-**Navigation:**
-- `go_router: ^13.0.0` - Modern routing with bottom sheets support
-
-**Notifications & Background Tasks:**
-- `flutter_local_notifications: ^16.0.0` - Local notification delivery
-- `workmanager: ^0.5.0` - Background task scheduling
-- `timezone: ^0.9.0` - Timezone support for scheduling
-
-**Connectivity:**
-- `connectivity_plus: ^5.0.0` - Network connectivity detection
-
-**UI & Calendar:**
-- `table_calendar: ^3.0.0` - Calendar widget
-- `intl: ^0.19.0` - Internationalization and date formatting
-
-**Build & Code Generation:**
-- `build_runner: ^2.4.0` - Code generation runner (dev dependency)
-- `drift_dev: ^2.14.0` - Drift code generation (dev dependency)
-
-### Platform-Specific Configuration
-
-**Android (android/app/build.gradle):**
-- Set `minSdkVersion` to 21 (for Drift and background tasks)
-- Add permissions in `AndroidManifest.xml`:
-  - `android.permission.SCHEDULE_EXACT_ALARM` (for workmanager)
-  - `android.permission.POST_NOTIFICATIONS` (for notifications)
-  - `android.permission.INTERNET` (for AI API calls)
-
-**iOS (ios/Podfile):**
-- Set minimum deployment target to 12.0
-- Ensure background modes enabled for notifications
-
-### Project Structure
+### Project Structure Notes
 
 ```
-tooxips/
-├── lib/
-│   ├── main.dart
-│   ├── app/
-│   │   └── theme.dart
-│   ├── core/
-│   │   ├── constants/
-│   │   │   ├── app_colors.dart
-│   │   │   └── ai_constants.dart
-│   │   ├── database/
-│   │   │   └── app_database.dart
-│   │   └── services/
-│   │       ├── ai_provider.dart
-│   │       ├── background_task_service.dart
-│   │       └── notification_service.dart
-│   └── features/
-│       ├── agenda/
-│       ├── practice/
-│       └── ai/
-├── test/
-├── pubspec.yaml
-├── analysis_options.yaml
-└── CONVENTIONS.md
+lib/
+├── main.dart                   # minimal, delegates to app/app.dart
+├── app/
+│   ├── app.dart               # MaterialApp + ProviderScope
+│   ├── theme.dart             # placeholder — Story 1.3
+│   └── router.dart            # placeholder — Story 1.8
+├── core/
+│   ├── constants/             # app_colors.dart, app_spacing.dart, ai_constants.dart
+│   ├── database/              # app_database.dart, database_providers.dart
+│   ├── services/              # ai_provider.dart, background_task_service.dart, etc.
+│   ├── types/                 # result.dart
+│   └── widgets/               # shared widgets
+└── features/
+    ├── glance/{data,domain,presentation}/
+    ├── home/presentation/
+    ├── agenda/{data,domain,presentation}/
+    ├── practice/{data,domain,presentation}/
+    ├── ai/{data,domain,presentation}/
+    ├── evening_session/{data,domain,presentation}/
+    └── settings/{data,domain,presentation}/
 ```
 
-### Verification Steps
+### References
 
-1. Run `flutter create --org com.tooxips tooxips` to initialize project
-2. Add all dependencies to `pubspec.yaml`
-3. Run `flutter pub get` and verify no errors
-4. Run `flutter pub upgrade` to resolve any version conflicts
-5. Run `flutter analyze` to check for analysis issues
-6. Run `flutter doctor` to verify platform setup
-7. Verify Android and iOS configurations are in place
-8. Run `dart run build_runner build` to generate initial code (should succeed even with empty files)
+- [Source: _bmad-output/planning-artifacts/architecture.md#Starter-Template] — pubspec.yaml versions locked here
+- [Source: _bmad-output/planning-artifacts/architecture.md#Project-Structure] — folder layout
+- [Source: _bmad-output/planning-artifacts/epics.md#Story-1.1] — acceptance criteria source
 
-## Success Criteria
+## Dev Agent Record
 
-- ✓ Flutter project initializes without errors
-- ✓ All dependencies resolve successfully
-- ✓ `flutter pub get` completes without conflicts
-- ✓ `flutter analyze` shows no errors or warnings
-- ✓ Android minSdkVersion set to 21
-- ✓ iOS minimum deployment target set to 12.0
-- ✓ Platform permissions configured
-- ✓ Project structure created as specified
-- ✓ `dart run build_runner build` succeeds (generates empty code)
+### Agent Model Used
 
-## Notes
+claude-sonnet-4-6
 
-- This story is foundational - all other stories depend on successful completion
-- Do not skip platform configuration steps; they are required for later stories
-- The project should compile even before adding feature code
-- Keep pubspec.yaml organized with clear dependency grouping
+### Debug Log References
+
+### Completion Notes List
+
+### File List

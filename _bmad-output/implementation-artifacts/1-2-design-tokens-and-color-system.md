@@ -1,166 +1,83 @@
----
-storyId: 1.2
-storyKey: 1-2-design-tokens-and-color-system
-epicId: 1
-projectName: TooXTips
-date: 2026-03-29
-status: ready-for-dev
----
+# Story 1.2: Design Tokens and Color System (Two-Layer, Seven Themes)
 
-# Story 1.2: Design Tokens and Color System
+Status: ready-for-dev
 
-## Story Statement
+## Story
 
 As a developer,
-I want to define the two-layer color token system (raw palette → semantic tokens),
-So that all UI components use consistent colors and theme switching is centralized.
+I want to define the two-layer color token system with seven theme presets,
+so that all UI components use semantic tokens and theme switching is centralized.
 
 ## Acceptance Criteria
 
-**Given** the design system specification in the UX document
-**When** I create `core/constants/app_colors.dart` with raw palette and semantic tokens
-**Then** raw colors (violetPrimary, darkBg, etc.) are defined but never used directly in widgets
-**And** semantic tokens (colorAccentAgenda, colorSurface, etc.) are defined for all UI usage
-**And** light mode remapping is prepared (tokens only, no hardcoded colors in widgets)
-**And** the file compiles and exports all tokens
+1. `lib/core/constants/app_colors.dart` exists and defines the raw palette: `violetPrimary`, `cyanPrimary`, `greenPrimary`, `emberOrange`, `cosmicMagenta`, `auroraTeal`, `darkBg` (`#0D0D0F`), `lightBg` (`#FDF8F2`)
+2. Raw palette constants are never used directly in widgets — only in `AppTheme` builder
+3. Semantic tokens defined as named constants (not hardcoded values in widgets): `colorAccent`, `colorAccentAgenda`, `colorAccentWork`, `colorAccentPractice`, `colorSurface`, `colorBackground`, `colorTextPrimary`, `colorTextMuted`, `colorBorder`, `colorOrbIdle`, `colorOrbActive`
+4. Seven theme maps defined as `OdoTheme` data class instances: Violet Dark, Cyan Dark, Green Dark, Light Mode, Cosmic, Ember, Aurora
+5. Custom accent override is supported: stored as hex string in `SharedPreferences` key `custom_accent_hex`; overrides only `colorAccent`, `colorOrbIdle`, `colorOrbActive` in the active theme
+6. Category colors defined as fixed semantic tokens: `colorCategoryPersonal` (violet), `colorCategoryWork` (blue), `colorCategoryPractice` (green)
+7. `app_colors.dart` compiles, passes `flutter analyze`, and exports all tokens via top-level constants
+8. No widget file anywhere in `lib/` imports raw palette values directly — all go through semantic tokens
 
-## Technical Requirements
+## Tasks / Subtasks
 
-### Two-Layer Color System Architecture
+- [ ] Task 1: Define raw palette (AC: 1, 2)
+  - [ ] Create `lib/core/constants/app_colors.dart`
+  - [ ] Add raw `Color` constants for all palette entries
+  - [ ] Mark palette class/namespace as `@visibleForTesting` or document "only for AppTheme use"
+- [ ] Task 2: Define `OdoTheme` data class (AC: 4)
+  - [ ] Create `lib/core/constants/odo_theme.dart` with `OdoTheme` immutable class
+  - [ ] Fields: `name`, `colorAccent`, `colorBackground`, `colorSurface`, `colorTextPrimary`, `colorTextMuted`, `colorBorder`, `colorOrbIdle`, `colorOrbActive`, `isDark`
+- [ ] Task 3: Define seven theme instances (AC: 4)
+  - [ ] Violet Dark: accent `#7C4DFF`, bg `#0D0D0F`, surface `#1A1A1F`
+  - [ ] Cyan Dark: accent `#00BCD4`, bg `#0D0D0F`, surface `#1A1A1F`
+  - [ ] Green Dark: accent `#1D9E75`, bg `#0D0D0F`, surface `#1A1A1F`
+  - [ ] Light Mode: accent `#8B6C4F`, bg `#FDF8F2`, surface `#F5EDE0`
+  - [ ] Cosmic: accent `#E040FB`, bg `#0A0014`, surface `#120025`
+  - [ ] Ember: accent `#FF6E40`, bg `#0F0A00`, surface `#1A1200`
+  - [ ] Aurora: accent `#00BFA5`, bg `#001A14`, surface `#00261C`
+- [ ] Task 4: Define semantic token accessors (AC: 3, 6)
+  - [ ] Semantic tokens derived from active `OdoTheme` — exposed via extension or static helpers
+  - [ ] Category colors: Personal=`violetPrimary`, Work=`#2196F3`, Practice=`greenPrimary` (fixed, not theme-dependent)
+- [ ] Task 5: Custom accent support (AC: 5)
+  - [ ] Add `customAccentHex` field to `OdoTheme` (nullable)
+  - [ ] When non-null, override accent, orbIdle, orbActive tokens
+- [ ] Task 6: Lint & compile check (AC: 7, 8)
+  - [ ] Run `flutter analyze lib/core/constants/`
+  - [ ] Grep for raw hex color literals in `lib/features/` — zero allowed
 
-**Layer 1: Raw Palette (Internal Use Only)**
-- Define raw colors from design system
-- Never import or use directly in widgets
-- Serves as source of truth for all semantic tokens
+## Dev Notes
 
-**Layer 2: Semantic Tokens (Public API)**
-- Map raw colors to semantic meaning
-- Used exclusively in all widget code
-- Enables theme switching without code changes
+- **Two-layer rule:** Layer 1 = raw palette (`AppColors._violetPrimary`). Layer 2 = semantic tokens (from `OdoTheme` fields). Widgets only ever reference Layer 2.
+- **`OdoTheme` is pure Dart** — no Flutter imports needed for data class; `Color` from `dart:ui`
+- **Immutability:** Use `@immutable` + `const` constructors on `OdoTheme`
+- **google_fonts:** NOT imported in this file — fonts are part of theme.dart in Story 1.3
+- **Dark bg `#0D0D0F`** is OLED-optimized black — this is a non-negotiable from the product brief
+- **Semantic token naming:** prefix `color` on all tokens to distinguish from spacing/radius tokens
 
-### Required Raw Colors
+### Project Structure Notes
 
-```dart
-// Dark mode palette (primary)
-const violetPrimary = Color(0xFF7C3AED);
-const darkBg = Color(0xFF0F172A);
-const darkSurface = Color(0xFF1E293B);
-const darkSurfaceAlt = Color(0xFF334155);
-const darkText = Color(0xFFF1F5F9);
-const darkTextSecondary = Color(0xFFCBD5E1);
-const darkBorder = Color(0xFF475569);
-
-// Light mode palette
-const lightBg = Color(0xFFFAFAFA);
-const lightSurface = Color(0xFFFFFFFF);
-const lightSurfaceAlt = Color(0xFFF3F4F6);
-const lightText = Color(0xFF1F2937);
-const lightTextSecondary = Color(0xFF6B7280);
-const lightBorder = Color(0xFFE5E7EB);
-
-// Accent colors (shared)
-const accentAgenda = Color(0xFF06B6D4);
-const accentPractice = Color(0xFF10B981);
-const accentExpenses = Color(0xFFF59E0B);
-const accentError = Color(0xFFEF4444);
-const accentSuccess = Color(0xFF22C55E);
+```
+lib/core/constants/
+├── app_colors.dart     # raw palette + OdoTheme data class + 7 instances
+├── app_spacing.dart    # Story 1.3
+└── app_typography.dart # Story 1.3
 ```
 
-### Required Semantic Tokens (Dark Mode)
+### References
 
-```dart
-// Surface colors
-const colorSurface = darkSurface;
-const colorSurfaceAlt = darkSurfaceAlt;
-const colorBackground = darkBg;
+- [Source: _bmad-output/planning-artifacts/epics.md#Story-1.2] — acceptance criteria
+- [Source: _bmad-output/planning-artifacts/architecture.md#Theme-System] — two-layer color token system
+- [Source: _bmad-output/planning-artifacts/ux-design-specification.md] — visual palette values
 
-// Text colors
-const colorText = darkText;
-const colorTextSecondary = darkTextSecondary;
-const colorTextTertiary = darkTextSecondary; // Lighter variant
+## Dev Agent Record
 
-// Border colors
-const colorBorder = darkBorder;
-const colorBorderLight = darkSurfaceAlt;
+### Agent Model Used
 
-// Accent colors
-const colorAccentAgenda = accentAgenda;
-const colorAccentPractice = accentPractice;
-const colorAccentExpenses = accentExpenses;
-const colorAccentError = accentError;
-const colorAccentSuccess = accentSuccess;
+claude-sonnet-4-6
 
-// Interactive states
-const colorInteractive = violetPrimary;
-const colorInteractiveHover = Color(0xFF6D28D9);
-const colorInteractivePressed = Color(0xFF5B21B6);
-const colorDisabled = darkSurfaceAlt;
-```
+### Debug Log References
 
-### Light Mode Remapping
+### Completion Notes List
 
-```dart
-// Light mode token overrides (prepared for Story 1.3)
-const Map<String, Color> lightModeTokens = {
-  'colorSurface': lightSurface,
-  'colorSurfaceAlt': lightSurfaceAlt,
-  'colorBackground': lightBg,
-  'colorText': lightText,
-  'colorTextSecondary': lightTextSecondary,
-  'colorBorder': lightBorder,
-  'colorBorderLight': lightSurfaceAlt,
-  // Accent colors remain the same
-};
-```
-
-## Implementation Details
-
-### File Structure
-
-Create `lib/core/constants/app_colors.dart` with:
-
-1. Raw palette section (commented as "Internal Use Only")
-2. Dark mode semantic tokens section
-3. Light mode token mapping (as Map for easy switching)
-4. Export all tokens for use in theme system
-
-### Key Constraints
-
-- Raw colors MUST NOT be imported in any widget code
-- All widget colors MUST use semantic tokens
-- Semantic tokens MUST be defined as constants (not functions)
-- Light mode remapping MUST be prepared but not active (Story 1.3 activates it)
-- File MUST compile without errors
-
-### Verification Steps
-
-1. Create `lib/core/constants/app_colors.dart`
-2. Define all raw palette colors
-3. Define all semantic tokens for dark mode
-4. Prepare light mode token mapping
-5. Verify file compiles: `flutter analyze`
-6. Verify all tokens are exported and accessible
-7. Run `dart run build_runner build` (should succeed)
-
-## Success Criteria
-
-- ✓ Raw palette defined with all required colors
-- ✓ Semantic tokens defined for dark mode
-- ✓ Light mode token mapping prepared
-- ✓ File compiles without errors
-- ✓ All tokens are properly exported
-- ✓ No hardcoded colors in the file (only Color() constructors)
-- ✓ Comments clearly mark raw vs semantic layers
-- ✓ Ready for theme system integration (Story 1.3)
-
-## Dependencies
-
-- Depends on: Story 1.1 (Project Setup)
-- Blocks: Story 1.3 (Theme System)
-
-## Notes
-
-- This story establishes the foundation for consistent theming across the entire app
-- The two-layer system prevents color inconsistencies and makes theme switching trivial
-- Light mode tokens are prepared but not active until Story 1.3
-- All future UI code must reference semantic tokens, never raw colors
+### File List

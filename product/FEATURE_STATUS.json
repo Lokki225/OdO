@@ -1,88 +1,83 @@
 {
+  "project": "TooXTips",
+  "lastUpdated": "2026-04-28",
+  "version": "1.0.0-mvp",
   "features": [
     {
-      "name": "user-authentication",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "All Users",
-      "businessGoal": "Enable secure user access",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "foundation",
+      "epicId": 1,
+      "name": "Foundation",
+      "description": "Project setup, design system, theme, database schema, core services (AI provider, notifications, background tasks), Riverpod setup, error handling",
+      "state": "NOT_STARTED",
+      "storiesTotal": 7,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/foundation/",
+      "codePath": "lib/core/",
+      "completedDate": null
     },
     {
-      "name": "tutoring-interface",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "Sarah, Marcus, Elena",
-      "businessGoal": "Provide interactive learning experience",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "agenda",
+      "epicId": 2,
+      "name": "Agenda Module",
+      "description": "Event data model, persistent agenda strip, calendar view, event CRUD, day timeline, categories (Personal/Work/Practice), state management, tests",
+      "state": "NOT_STARTED",
+      "storiesTotal": 8,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/agenda/",
+      "codePath": "lib/features/agenda/",
+      "completedDate": null
     },
     {
-      "name": "study-session-framework",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "Sarah, Marcus, Elena",
-      "businessGoal": "Enable structured learning sessions",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "practice",
+      "epicId": 3,
+      "name": "Practice / Wills Module",
+      "description": "Skill (Will) data model, first-launch prompt, skill cards, session logging, streak calculation, unanchored session flagging, pattern detection, tests",
+      "state": "NOT_STARTED",
+      "storiesTotal": 8,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/practice/",
+      "codePath": "lib/features/practice/",
+      "completedDate": null
     },
     {
-      "name": "progress-tracking",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "Sarah, Marcus, James",
-      "businessGoal": "Track and visualize learning progress",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "ai",
+      "epicId": 4,
+      "name": "AI Layer",
+      "description": "Claude API integration, context builder (agenda + wills + sessions payload), persistent chat UI, quick command dropdown, offline degradation, tests",
+      "state": "NOT_STARTED",
+      "storiesTotal": 5,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/ai/",
+      "codePath": "lib/features/ai/",
+      "completedDate": null
     },
     {
-      "name": "ai-tutoring-engine",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "Sarah, Marcus, Elena",
-      "businessGoal": "Provide personalized AI-powered tutoring",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "proactive",
+      "epicId": 5,
+      "name": "Proactive System",
+      "description": "Suggestion storage, SuggestionEngine, background workmanager task, 8pm daily notification, in-app confirmation UI, tests",
+      "state": "NOT_STARTED",
+      "storiesTotal": 5,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/proactive/",
+      "codePath": "lib/features/proactive/",
+      "completedDate": null
     },
     {
-      "name": "content-recommendations",
-      "state": "PROPOSED",
-      "owner": "Franklin",
-      "persona": "Sarah, Marcus, Elena",
-      "businessGoal": "Personalize learning content",
-      "created": "2026-03-29",
-      "lastUpdated": "2026-03-29",
-      "metrics": {
-        "usage": null,
-        "errorRate": null,
-        "performance": null
-      }
+      "id": "polish",
+      "epicId": 6,
+      "name": "Polish & Resilience",
+      "description": "Light mode, micro-animations, empty states, accessibility (semantic labels, contrast), locale formatting (XOF currency, DD/MM/YYYY), performance profiling, integration tests, Sunday reflection, settings screen",
+      "state": "NOT_STARTED",
+      "storiesTotal": 9,
+      "storiesComplete": 0,
+      "productLayerPath": "lib/product/features/polish/",
+      "codePath": "lib/features/polish/",
+      "completedDate": null
     }
-  ]
+  ],
+  "lifecycle": {
+    "states": ["NOT_STARTED", "IN_PROGRESS", "IMPLEMENTED", "VERIFIED"],
+    "releaseThreshold": "All MVP epics must reach VERIFIED before shipping"
+  }
 }

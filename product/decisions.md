@@ -1,271 +1,103 @@
-# Architecture Decision Records (ADR)
+# TooXTips — Architecture Decision Records
+
+> Last updated: 2026-04-28
 
 ---
 
-## ADR-001: Technology Stack Selection
+## ADR-001: Flutter for cross-platform mobile
 
-**Date**: 2026-01-15  
-**Status**: Active
-
-### Context
-Need to select technology stack for TooXTips platform that supports rapid development, scalability, and AI integration.
-
-### Decision
-- **Frontend**: Next.js 14 with React 18 and TypeScript
-- **Backend**: Node.js with Express
-- **Database**: PostgreSQL with Supabase
-- **AI/ML**: TensorFlow.js, OpenAI API
-- **Deployment**: Vercel (frontend), AWS (backend)
-- **Testing**: Jest, React Testing Library, Playwright
-
-### Rationale
-- Next.js provides full-stack capabilities with excellent performance
-- TypeScript ensures type safety across codebase
-- PostgreSQL offers robust relational data management
-- TensorFlow.js enables client-side ML capabilities
-- Supabase provides managed backend infrastructure
-- Selected tools have strong community support and documentation
-
-### Consequences
-- Team needs to learn Next.js and TypeScript
-- Supabase has some limitations compared to custom backend
-- TensorFlow.js has performance constraints on client side
-- Vendor lock-in with Vercel and AWS
+**Status:** Accepted  
+**Context:** App needs to run on Android and iOS from a single codebase. Franklin uses Android primarily.  
+**Decision:** Flutter + Dart.  
+**Consequences:** Single codebase, fast UI, strong ecosystem. Dart code generation (Drift, Riverpod) requires `build_runner` step.
 
 ---
 
-## ADR-002: BMAD Architecture Pattern
+## ADR-002: Riverpod for state management
 
-**Date**: 2026-01-20  
-**Status**: Active
-
-### Context
-Need clear separation of concerns and scalable architecture for growing codebase.
-
-### Decision
-Implement BMAD (Backend, Model, API, Database) architecture pattern with strict layer separation.
-
-### Rationale
-- Clear separation of concerns improves maintainability
-- Enables independent testing of each layer
-- Facilitates team collaboration with defined boundaries
-- Supports scaling individual components
-
-### Consequences
-- Requires discipline in maintaining layer boundaries
-- May add slight overhead for simple features
-- Team training needed on architecture principles
+**Status:** Accepted  
+**Context:** Needed a state solution that supports code generation, is testable, and avoids boilerplate.  
+**Decision:** `flutter_riverpod` + `riverpod_annotation` + `riverpod_generator`. All providers for a feature live in `{feature}_providers.dart`.  
+**Alternatives considered:** BLoC (too verbose), Provider (superseded by Riverpod), GetX (poor testability).  
+**Consequences:** `build_runner` required for provider generation. `AsyncNotifier` replaces BLoC event/state classes. `StreamProvider` enables reactive Drift queries.
 
 ---
 
-## ADR-003: Authentication Strategy
+## ADR-003: Drift (SQLite) for local persistence
 
-**Date**: 2026-02-01  
-**Status**: Active
-
-### Context
-Need secure, scalable authentication supporting multiple user types (students, educators, admins).
-
-### Decision
-Use Supabase Auth with JWT tokens and role-based access control (RBAC).
-
-### Rationale
-- Supabase Auth integrates seamlessly with database
-- JWT tokens enable stateless authentication
-- RBAC supports multiple user types
-- Built-in security features reduce custom implementation
-
-### Consequences
-- Dependent on Supabase availability
-- Need to implement token refresh strategy
-- RBAC configuration requires careful planning
+**Status:** Accepted  
+**Context:** App is offline-first. Data must persist locally without a server.  
+**Decision:** `drift` + `drift_flutter` + `sqlite3_flutter_libs`. All tables defined in `AppDatabase` (`core/database/app_database.dart`). Column names are snake_case; Drift generates camelCase Dart accessors.  
+**Alternatives considered:** Hive (no relational queries), Isar (less mature), ObjectBox (licence concerns).  
+**Consequences:** Code generation required for DAO and table classes. Migrations needed for schema changes.
 
 ---
 
-## ADR-004: Data Privacy and Security
+## ADR-004: Claude API for AI features
 
-**Date**: 2026-02-10  
-**Status**: Active
-
-### Context
-Handle sensitive user data including learning progress, personal information, and payment details.
-
-### Decision
-- Implement end-to-end encryption for sensitive data
-- Use HTTPS for all communications
-- Comply with GDPR and CCPA regulations
-- Regular security audits and penetration testing
-
-### Rationale
-- Protects user privacy and builds trust
-- Ensures regulatory compliance
-- Reduces liability and legal risks
-
-### Consequences
-- Adds complexity to data handling
-- Performance impact from encryption/decryption
-- Requires ongoing security maintenance
+**Status:** Accepted  
+**Context:** AI suggestions, chat interface, and proactive notifications require an LLM.  
+**Decision:** Claude API (`claude-sonnet-4-6`) called via `http` package. No Anthropic SDK — raw HTTP keeps the dependency minimal.  
+**AI context payload (capped at 4000 chars):**
+- Today's agenda events
+- Agenda events for the next 48 hours
+- All active Wills with last session date
+- Last 7 days of unanchored sessions
+- Last 3 AI suggestions
+- Current datetime and active screen  
+**Offline behaviour:** AI features degrade gracefully. Core app (agenda, wills, expenses) works fully offline.  
+**API key:** injected at build time via `--dart-define=CLAUDE_API_KEY=...`. Never hardcoded.
 
 ---
 
-## ADR-005: AI Integration Approach
+## ADR-005: Offline-first architecture
 
-**Date**: 2026-02-15  
-**Status**: Active
-
-### Context
-Integrate AI capabilities for personalized tutoring and content recommendations.
-
-### Decision
-- Use OpenAI API for natural language processing
-- Implement TensorFlow.js for client-side ML
-- Build custom ML models for learning analytics
-- Cache AI responses to reduce API costs
-
-### Rationale
-- OpenAI provides state-of-the-art NLP capabilities
-- TensorFlow.js enables offline functionality
-- Custom models provide competitive advantage
-- Caching reduces operational costs
-
-### Consequences
-- Dependent on OpenAI API availability
-- Need expertise in ML model development
-- API costs scale with usage
+**Status:** Accepted  
+**Context:** Franklin uses the app throughout the day, including in low-connectivity situations.  
+**Decision:** All reads and writes go to local SQLite first. The Claude API is the only networked dependency. If offline, AI features show a degraded state; all other features work normally.  
+**Consequences:** No server, no sync (until v1.1 optional cloud sync). Data lives only on the device.
 
 ---
 
-## ADR-006: Feature Rollout Strategy
+## ADR-006: Clean Architecture (data / domain / presentation)
 
-**Date**: 2026-02-20  
-**Status**: Active
-
-### Context
-Need controlled rollout of new features to minimize risk and gather user feedback.
-
-### Decision
-Implement feature flags with gradual rollout:
-- Beta: 10% of users
-- Staged: 25%, 50%, 100%
-- Rollback capability at each stage
-
-### Rationale
-- Reduces risk of breaking changes
-- Enables A/B testing
-- Allows quick rollback if issues arise
-- Gathers real-world usage data
-
-### Consequences
-- Adds complexity to feature management
-- Requires monitoring infrastructure
-- May delay feature availability for some users
+**Status:** Accepted  
+**Context:** Need clear separation to keep the codebase testable and prevent feature coupling.  
+**Decision:** Three-layer architecture per feature. Dependency direction: `presentation -> domain <- data`. Domain has zero external imports.  
+**Enforcement:** CLAUDE.md workflow blocks implementation if layers are violated. `CONVENTIONS.md` documents the rules.
 
 ---
 
-## ADR-007: Performance Optimization
+## ADR-007: Dark mode default
 
-**Date**: 2026-03-01  
-**Status**: Active
-
-### Context
-Ensure platform meets <300ms interactive response time requirement.
-
-### Decision
-- Implement aggressive caching (Redis)
-- Use CDN for static assets
-- Optimize database queries
-- Implement lazy loading and code splitting
-- Monitor performance with real user monitoring (RUM)
-
-### Rationale
-- Caching reduces database load
-- CDN improves global performance
-- Code splitting reduces initial load time
-- RUM provides real-world performance data
-
-### Consequences
-- Cache invalidation complexity
-- Additional infrastructure costs
-- Requires ongoing optimization efforts
+**Status:** Accepted  
+**Context:** Franklin prefers OLED-friendly dark UI. Dark mode is the designed experience.  
+**Decision:** Default theme is dark (`#0D0D0F` background, `#7C4DFF` violet accent for agenda, `#1D9E75` green accent for wills). Light mode toggle available via SharedPreferences.  
+**Consequences:** All widgets and design tokens must be designed dark-first and tested in dark mode.
 
 ---
 
-## ADR-008: Content Management Strategy
+## ADR-008: workmanager + flutter_local_notifications for proactive AI
 
-**Date**: 2026-03-05  
-**Status**: Active
-
-### Context
-Need scalable approach for managing and delivering learning content.
-
-### Decision
-- Use headless CMS (Contentful) for content management
-- Store content in PostgreSQL with versioning
-- Implement content delivery API
-- Support multiple content formats (text, video, interactive)
-
-### Rationale
-- Headless CMS separates content from presentation
-- Enables content reuse across platforms
-- Versioning supports content updates
-- Multiple formats support diverse learning styles
-
-### Consequences
-- Additional CMS infrastructure cost
-- Content team training needed
-- API design complexity
+**Status:** Accepted  
+**Context:** The AI needs to send a proactive suggestion at 8pm daily, even when the app is not open.  
+**Decision:** `workmanager` schedules a background task that builds the AI context, calls the Claude API, and uses `flutter_local_notifications` to deliver the result as a notification.  
+**Consequences:** Android `SCHEDULE_EXACT_ALARM` and `POST_NOTIFICATIONS` permissions required. iOS background modes must be enabled.
 
 ---
 
-## ADR-009: Monitoring and Observability
+## ADR-009: go_router for navigation
 
-**Date**: 2026-03-10  
-**Status**: Active
-
-### Context
-Need comprehensive monitoring to ensure reliability and quick issue resolution.
-
-### Decision
-- Implement structured logging (ELK stack)
-- Use APM (Application Performance Monitoring)
-- Set up real-time alerting
-- Maintain detailed audit logs
-
-### Rationale
-- Enables quick issue identification and resolution
-- Provides insights into system behavior
-- Supports compliance requirements
-- Improves user experience through proactive fixes
-
-### Consequences
-- Infrastructure and operational overhead
-- Log storage costs
-- Requires DevOps expertise
+**Status:** Accepted  
+**Context:** App uses a carousel shell (persistent agenda strip + swipeable slides) with modal bottom sheets.  
+**Decision:** `go_router` handles named routes and bottom sheet navigation. The main shell is a `PageController`-based carousel, not tab bars.  
+**Consequences:** Deep linking is supported via go_router. Bottom sheets use `showModalBottomSheet` triggered from providers.
 
 ---
 
-## ADR-010: Testing Strategy
+## ADR-010: Expenses deferred to v1.1
 
-**Date**: 2026-03-15  
-**Status**: Active
-
-### Context
-Need comprehensive testing to ensure code quality and reliability.
-
-### Decision
-- Unit tests: 80%+ coverage
-- Integration tests: All API endpoints
-- E2E tests: Critical user flows
-- Performance tests: Load and stress testing
-- Security tests: OWASP top 10
-
-### Rationale
-- High coverage ensures code quality
-- Multiple test types catch different issues
-- Performance testing prevents degradation
-- Security testing protects user data
-
-### Consequences
-- Significant time investment in test development
-- Maintenance overhead as code evolves
-- CI/CD pipeline complexity
+**Status:** Accepted  
+**Context:** MVP scope must be kept manageable. Agenda + Wills + AI is the core value loop.  
+**Decision:** Expenses module is not in MVP. v1.1 target is Q3 2026.  
+**Consequences:** Database schema should not include expense tables in MVP. Expense-related UI placeholders are out of scope.

@@ -10,8 +10,8 @@ documentsIncluded:
 
 # Implementation Readiness Assessment Report
 
-**Date:** 2026-03-29
-**Project:** TooXTips
+**Date:** 2026-03-29 (updated 2026-05-13 for 41-story structure)
+**Project:** OdO
 
 ## Step 1: Document Discovery
 
@@ -110,7 +110,7 @@ documentsIncluded:
 
 **MVP Scope Boundaries:**
 - Expenses module explicitly deferred to v1.1
-- Voice commands deferred to v1.1
+- Voice commands implemented in V1 (Story 4.4: Voice Tap-to-Speak Pipeline)
 - Cloud sync and multi-device support deferred
 - Recurring events deferred
 - Receipt scanning deferred
@@ -152,7 +152,7 @@ From the epics document, the following FRs are claimed to be covered:
 **FR1-3 (Agenda Module):** Covered in Epic 2 (Agenda Module)
 **FR4-7 (Practice Module):** Covered in Epic 3 (Practice Module)
 **FR8-9 (AI Chat):** Covered in Epic 4 (AI Layer)
-**FR10-14 (Proactive System):** Covered in Epic 5 (Proactive System)
+**FR10-14 (Proactive System):** Covered in Epic 5 (Glance + Evening + Proactive)
 **FR15-20 (Offline, Dark/Light, Claude API, Background Tasks):** Covered in Epics 1, 4, and 6
 **FR21-23 (First-launch, Reflection, Provider Swappability):** Covered in Epics 3, 5, and 1
 
@@ -162,32 +162,32 @@ From the epics document, the following FRs are claimed to be covered:
 
 | FR Number | PRD Requirement | Epic Coverage | Status |
 |-----------|-----------------|----------------|--------|
-| FR1 | Persistent Agenda strip showing next 2-3 events | Epic 2, Story 2.1 | ✓ Covered |
-| FR2 | Calendar view (day/week modes) with event CRUD | Epic 2, Stories 2.2-2.3 | ✓ Covered |
-| FR3 | Persistent Agenda strip always visible | Epic 2, Story 2.1 | ✓ Covered |
-| FR4 | Practice module with skill cards | Epic 3, Story 3.1 | ✓ Covered |
-| FR5 | Session logging with duration tracking | Epic 3, Story 3.3 | ✓ Covered |
-| FR6 | Streak tracking for each skill | Epic 3, Story 3.4 | ✓ Covered |
-| FR7 | Unanchored session flagging | Epic 3, Story 3.5 | ✓ Covered |
+| FR1 | Persistent Agenda strip showing next 2-3 events | Epic 2, Story 2.2 | ✓ Covered |
+| FR2 | Calendar view (day/week modes) with event CRUD | Epic 2, Stories 2.3–2.4 | ✓ Covered |
+| FR3 | Persistent Agenda strip always visible | Epic 2, Story 2.2 | ✓ Covered |
+| FR4 | Practice module with skill cards | Epic 3, Story 3.3 | ✓ Covered |
+| FR5 | Session logging with duration tracking | Epic 3, Story 3.4 | ✓ Covered |
+| FR6 | Streak tracking for each skill | Epic 3, Story 3.5 | ✓ Covered |
+| FR7 | Unanchored session flagging | Epic 3, Story 3.6 | ✓ Covered |
 | FR8 | AI chat interface | Epic 4, Story 4.3 | ✓ Covered |
-| FR9 | Quick-command dropdown | Epic 4, Story 4.4 | ✓ Covered |
-| FR10 | Proactive 8pm notification | Epic 5, Story 5.5 | ✓ Covered |
-| FR11 | Free-slot detection algorithm | Epic 5, Story 5.1 | ✓ Covered |
-| FR12 | Idle-skill detection algorithm | Epic 5, Story 5.1 | ✓ Covered |
+| FR9 | Voice tap-to-speak pipeline | Epic 4, Story 4.4 | ✓ Covered |
+| FR10 | Proactive 8pm notification | Epic 5, Story 5.8 | ✓ Covered |
+| FR11 | Free-slot detection algorithm | Epic 5, Story 5.6 | ✓ Covered |
+| FR12 | Idle-skill detection algorithm | Epic 5, Story 5.6 | ✓ Covered |
 | FR13 | Pattern recognition for spontaneous sessions | Epic 3, Story 3.6 | ✓ Covered |
-| FR14 | Automatic event creation from AI suggestions | Epic 5, Story 5.4 | ✓ Covered |
+| FR14 | Automatic event creation from AI suggestions | Epic 5, Story 5.7 | ✓ Covered |
 | FR15 | Offline-first architecture | Epic 1, Story 1.4 | ✓ Covered |
 | FR16 | SQLite local persistence | Epic 1, Story 1.4 | ✓ Covered |
 | FR17 | Complete offline functionality | Epic 4, Story 4.5 | ✓ Covered |
 | FR18 | Graceful AI degradation when offline | Epic 4, Story 4.5 | ✓ Covered |
 | FR19 | Silent sync when connectivity returns | Epic 4, Story 4.5 | ✓ Covered |
-| FR20 | Claude API integration | Epic 4, Story 4.2 | ✓ Covered |
-| FR21 | Background task scheduling (8pm check-in) | Epic 5, Story 5.3 | ✓ Covered |
-| FR22 | Notification delivery system | Epic 5, Story 5.5 | ✓ Covered |
-| FR23 | Event creation with time, category, description | Epic 2, Story 2.3 | ✓ Covered |
+| FR20 | Claude API integration | Epic 4, Story 4.1 | ✓ Covered |
+| FR21 | Background task scheduling (8pm check-in) | Epic 5, Story 5.8 | ✓ Covered |
+| FR22 | Notification delivery system | Epic 5, Story 5.8 | ✓ Covered |
+| FR23 | Event creation with time, category, description | Epic 2, Story 2.4 | ✓ Covered |
 | FR24 | Skill management (add, edit, delete) | Epic 3, Story 3.1 | ✓ Covered |
-| FR25 | Session duration logging and streak calculation | Epic 3, Stories 3.3-3.4 | ✓ Covered |
-| FR26 | Settings screen with data clearing option | **NOT FOUND** | ❌ MISSING |
+| FR25 | Session duration logging and streak calculation | Epic 3, Stories 3.4–3.5 | ✓ Covered |
+| FR26 | Settings screen with data clearing option | Epic 6, Story 6.7 (first-launch + settings flow) | ⚠️ Partial — data clearing not a standalone story |
 
 ### Missing FR Coverage
 
@@ -200,9 +200,9 @@ From the epics document, the following FRs are claimed to be covered:
 ### Coverage Statistics
 
 - **Total PRD FRs:** 26
-- **FRs covered in epics:** 25
-- **Coverage percentage:** 96.2%
-- **Missing FRs:** 1 (FR26 - Settings screen)
+- **FRs covered in epics:** 25.5 (FR26 partially covered by Story 6.7)
+- **Coverage percentage:** ~98%
+- **Partial coverage:** 1 (FR26 — data clearing not a standalone story; settings hook exists in first-launch flow)
 
 ### Additional Observations
 
@@ -219,9 +219,9 @@ From the epics document, the following FRs are claimed to be covered:
 - Data clearing functionality should be explicitly implemented
 
 **Recommendations:**
-1. Add Story 6.9 to Epic 6 for Settings screen implementation
-2. Include data clearing, theme toggle, and API key management in settings
-3. Update FR coverage map to include FR26 mapping
+1. FR26 partially covered by Story 6.7 (First-Launch Flow); consider adding data clearing to settings page task in that story
+2. Theme toggle is covered by Epic 6 (Stories 6.1, 6.2)
+3. API key management handled at build time via `--dart-define` (no runtime settings needed)
 
 ---
 
@@ -334,10 +334,10 @@ From the epics document, the following FRs are claimed to be covered:
 - **User Value:** ✓ Users can chat with AI and receive suggestions
 - **Assessment:** ✓ Passes user value check
 
-**Epic 5: Proactive System**
-- **Title:** "Proactive System" — User-centric, clear user value
-- **Goal:** "Build the proactive AI system with SuggestionEngine, background tasks, confirmation sheet, suppression algorithm, and Sunday reflection"
-- **User Value:** ✓ Users receive proactive suggestions and weekly reflections
+**Epic 5: Glance + Evening + Proactive**
+- **Title:** "Glance + Evening + Proactive" — User-centric, clear user value
+- **Goal:** "Build the app-lock Glance Screen, Orb widget, evening session orchestration, on-device SuggestionEngine, background tasks, confirmation sheet, and suppression algorithm"
+- **User Value:** ✓ Users access OdO via locked screen, receive evening summaries and proactive suggestions
 - **Assessment:** ✓ Passes user value check
 
 **Epic 6: Polish & Resilience**
@@ -414,43 +414,31 @@ From the epics document, the following FRs are claimed to be covered:
 - Story 1.5 (AiProvider) depends on 1.1
 - **Assessment:** ✓ Logical progression, no circular dependencies
 
-**Epic 2 Story Sequence:**
-- Story 2.1 (Agenda Strip) requires 2.4 (Data Access Layer) ⚠️ **VIOLATION**
-- Story 2.2 (Calendar View) requires 2.4 (Data Access Layer) ⚠️ **VIOLATION**
-- **Issue:** Stories 2.1 and 2.2 reference Story 2.4 but are listed before it
-- **Assessment:** ⚠️ Forward dependency detected
+**Epic 2 Story Sequence (41-story structure):**
+- Story 2.1 (Agenda Repository and DAO) → 2.2 (Persistent Strip) → 2.3 (Day Timeline) → 2.4 (Event CRUD) → 2.5 (Monthly Calendar)
+- **Assessment:** ✓ Data access layer (2.1) correctly sequenced before feature stories
 
-**Epic 3 Story Sequence:**
-- Story 3.1 (Skill Cards) requires 3.7 (Data Access Layer) ⚠️ **VIOLATION**
-- Story 3.3 (Session Logging) requires 3.7 (Data Access Layer) ⚠️ **VIOLATION**
-- **Issue:** Stories reference data layer that comes later
-- **Assessment:** ⚠️ Forward dependencies detected
+**Epic 3 Story Sequence (41-story structure):**
+- Story 3.1 (Practice Repository and DAO) → 3.2 (First-Launch Prompt) → 3.3 (Skill Card) → 3.4 (Session Logging) → 3.5 (Streak) → 3.6 (Pattern Detection)
+- **Assessment:** ✓ Data access layer (3.1) correctly sequenced before feature stories
 
-**Epic 5 Story Sequence:**
-- Story 5.1 (SuggestionEngine) requires 5.2 (Suggestion Storage) ⚠️ **VIOLATION**
-- Story 5.3 (Background Task) requires 5.1 (SuggestionEngine)
-- **Issue:** Story 5.1 references storage mechanism from Story 5.2
-- **Assessment:** ⚠️ Forward dependency detected
+**Epic 5 Story Sequence (41-story structure):**
+- Story 5.1 (Glance Screen Layout) → 5.2 (Authentication) → 5.3 (Orb) → 5.4 (Evening Session) → 5.5 (Persistence) → 5.6 (Suggestion Engine) → 5.7 (Confirmation Sheet) → 5.8 (Background Tasks) → 5.9 (Suppression Algorithm)
+- **Assessment:** ✓ No forward dependencies; suggestion storage is in DB schema (Story 1.4), suggestion engine builds on it
 
 ### Best Practices Compliance Summary
 
-#### 🔴 Critical Violations
+#### ✅ Critical Violations (All Resolved in 41-Story Restructure — 2026-05-13)
 
-1. **Epic 1 is a technical milestone epic** with no user value. Foundation epics should be minimized or restructured to deliver user-facing value alongside infrastructure.
+1. **Epic 1 as technical milestone** — Documented rationale: Epic 1 (8 stories) is a technical prerequisite enabling all user-facing epics (2–6). This is acceptable for a solo project.
 
-2. **Forward dependencies in Epic 2:** Stories 2.1 and 2.2 reference Story 2.4 (Data Access Layer) but are sequenced before it. This violates independence principle.
+2. **Forward dependencies in Epics 2, 3, 5** — ✅ Resolved. Data access layer stories are now the first story in each epic (2.1, 3.1) and the DB schema (Story 1.4) covers suggestions/evening data for Epic 5.
 
-3. **Forward dependencies in Epic 3:** Stories 3.1 and 3.3 reference Story 3.7 (Data Access Layer) but are sequenced before it.
+#### 🟡 Remaining Minor Concerns
 
-4. **Forward dependencies in Epic 5:** Story 5.1 references Story 5.2 (Suggestion Storage) for implementation details.
+1. **FR26 partial coverage:** Data clearing as a standalone Settings screen was Story 6.9 in the old structure but is not a dedicated story in the 41-story plan. Settings functionality is partially addressed in Story 6.7 (First-Launch Flow). Consider adding a settings page task to an existing story if needed post-MVP.
 
-#### 🟠 Major Issues
-
-1. **Epic 6 mixes user-facing and technical work:** Stories like 6.8 (Performance Optimization and Testing) have no user value and should be separated.
-
-2. **Data Access Layer stories are misplaced:** Stories 2.4, 3.7 should be moved earlier in their respective epics or restructured as foundational stories that other stories build upon.
-
-3. **Technical stories lack user value:** Stories like 1.1-1.7, 5.1 are necessary but deliver no direct user value.
+2. **Technical stories without direct user value:** Stories 1.1–1.8 and 6.8 are infrastructure/QA. This is acceptable for a solo project with a tight scope.
 
 #### 🟡 Minor Concerns
 
@@ -460,12 +448,12 @@ From the epics document, the following FRs are claimed to be covered:
 
 ### Quality Assessment Findings
 
-**Total Stories Reviewed:** 48 stories across 6 epics
-**Stories with User Value:** 38 (79%)
-**Stories with Forward Dependencies:** 5 (10%)
-**Stories with Clear Acceptance Criteria:** 46 (96%)
+**Total Stories Reviewed:** 41 stories across 6 epics
+**Stories with User Value:** 33 (80%)
+**Stories with Forward Dependencies:** 0 (0% — resolved in 41-story restructure; data access layers are now Story X.1 in each epic)
+**Stories with Clear Acceptance Criteria:** 41 (100%)
 
-**Overall Assessment:** The epic structure is sound with strong user-centric focus, but forward dependencies in data access layers and the presence of technical-only epics violate best practices.
+**Overall Assessment:** The 41-story structure (restructured 2026-05-13) is sound with strong user-centric focus and all forward dependencies resolved. Data access layer stories are now Story X.1 in each epic, sequenced before the feature stories that depend on them.
 
 ### Remediation Recommendations
 
@@ -492,41 +480,37 @@ From the epics document, the following FRs are claimed to be covered:
 ### Issues Resolved
 
 **1. ✅ Forward Dependencies Fixed**
-- **Resolution:** Reordered Epic 2 stories: moved Story 2.1 (Event Data Access Layer) before Stories 2.2-2.4
-- **Resolution:** Reordered Epic 3 stories: moved Story 3.1 (Practice Data Access Layer) before Stories 3.2-3.8
-- **Resolution:** Reordered Epic 5 stories: moved Story 5.1 (Suggestion Storage) before Story 5.2 (SuggestionEngine)
-- **Impact:** All stories now have proper dependencies; no forward references
+- **Resolution:** In the 41-story restructure (2026-05-13), data access layer stories are now the first story in each epic (2.1 Agenda Repository, 3.1 Practice Repository)
+- **Resolution:** Epic 5 suggestion/evening data is in DB schema (Story 1.4); no separate suggestion storage story needed
+- **Impact:** All stories have proper dependencies; no forward references
 
-**2. ✅ Missing Settings Screen Implemented**
-- **Resolution:** Story 6.9 added to Epic 6 for Settings screen with data clearing functionality
-- **Resolution:** FR26 now fully covered with acceptance criteria for theme toggle and data clearing
-- **Impact:** 100% FR coverage achieved (26 of 26 FRs)
-
-**3. ✅ Epic 1 Documentation Added**
-- **Resolution:** Added "Technical Foundation Rationale" section explaining why Epic 1 is essential infrastructure
-- **Resolution:** Documented that Epic 1 enables all subsequent user-facing epics (2-6)
+**2. ✅ Epic 1 Documentation Added**
+- **Resolution:** Added "Technical Foundation Rationale" — Epic 1 (8 stories) is essential infrastructure enabling Epics 2–6
 - **Impact:** Technical foundation necessity is now explicit and justified
 
-**4. ✅ All Dependencies Verified**
-- **Resolution:** Updated all story references to reflect new numbering and dependencies
+**3. ✅ All Dependencies Verified**
+- **Resolution:** Updated all story references to reflect 41-story numbering
 - **Resolution:** Verified no circular dependencies exist
-- **Impact:** All 48 stories can now be completed independently within their epic sequence
+- **Impact:** All 41 stories can now be completed independently within their epic sequence
+
+**4. ⚠️ FR26 Partial Coverage**
+- **Status:** Data clearing not a standalone story in 41-story plan. Settings functionality partially addressed in Story 6.7 (First-Launch Flow)
+- **Recommendation:** Add settings/data clearing task to Story 6.7 or a post-MVP story if needed
 
 ### Next Steps
 
 **Phase 1: Implementation Ready**
 
-All structural issues have been resolved. The project is now ready to proceed directly to implementation with the corrected epic structure:
+All structural issues have been resolved. The project is ready to proceed directly to implementation:
 
-1. ✅ Epic 2: Data access layer (Story 2.1) completed before feature stories
-2. ✅ Epic 3: Data access layer (Story 3.1) completed before feature stories  
-3. ✅ Epic 5: Suggestion storage (Story 5.1) completed before SuggestionEngine (Story 5.2)
-4. ✅ Epic 6: Settings screen (Story 6.9) fully specified with FR26 coverage
-5. ✅ Epic 1: Technical foundation rationale documented
+1. ✅ Epic 2: Story 2.1 (Agenda Repository and DAO) sequences before 2.2–2.5
+2. ✅ Epic 3: Story 3.1 (Practice Repository and DAO) sequences before 3.2–3.6
+3. ✅ Epic 5: Suggestion + evening data in Story 1.4 schema; Stories 5.4–5.9 build on it
+4. ✅ Epic 1: Technical foundation rationale documented; 8-story scope clearly defined
 
 **Phase 2: Begin Implementation**
 
-Start with Epic 1 (Foundation) to establish the technical substrate, then proceed sequentially through Epics 2-6 using the corrected story order. All 48 stories can now be completed independently within their epic sequence without forward dependencies.
+Start with Epic 1 (Foundation) to establish the technical substrate, then proceed sequentially through Epics 2–6. All 41 stories can now be completed independently within their epic sequence without forward dependencies.
 
 ### Detailed Findings Summary
 
@@ -538,24 +522,24 @@ Start with Epic 1 (Foundation) to establish the technical substrate, then procee
 | **UX-Architecture Alignment** | All UX requirements supported by architecture | ✓ Aligned | No conflicts |
 | **Epic User Value** | 5 of 6 epics user-centric; Epic 1 documented | ✓ Complete | Technical foundation rationale added |
 | **Story Dependencies** | Zero forward dependencies across all epics | ✓ Complete | All stories independent within sequence |
-| **Acceptance Criteria** | 48 of 48 stories have clear ACs (100%) | ✓ Complete | All stories implementation-ready |
+| **Acceptance Criteria** | 41 of 41 stories have clear ACs (100%) | ✓ Complete | All stories implementation-ready |
 | **NFR Coverage** | All 20 NFRs documented and supported | ✓ Complete | Architecture supports all |
 
 ### Quality Metrics
 
-- **Total FRs:** 26 (26 covered = 100%)
+- **Total FRs:** 26 (~98% covered; FR26 partial — data clearing not a standalone story)
 - **Total NFRs:** 20 (all covered = 100%)
 - **Total UX Design Requirements:** 28 (all covered = 100%)
-- **Total Stories:** 48 (48 with clear ACs = 100%)
+- **Total Stories:** 41 (41 with clear ACs = 100%)
 - **Epic Independence:** 6 of 6 epics (no backward or forward dependencies)
-- **Coverage Percentage:** 100% (FR coverage), 100% (NFR coverage), 100% (UX-Architecture alignment)
+- **Coverage Percentage:** ~98% (FR), 100% (NFR), 100% (UX-Architecture alignment)
 
 ### Strengths
 
 ✓ **Comprehensive PRD** with clear user journeys, success criteria, and technical constraints
 ✓ **Detailed UX Design Specification** with emotional design principles and interaction patterns
 ✓ **Well-structured Architecture** with clear technology stack and design system
-✓ **Strong Epic Breakdown** with 6 logically organized epics and 48 detailed stories
+✓ **Strong Epic Breakdown** with 6 logically organized epics and 41 detailed stories
 ✓ **Excellent Documentation Quality** with clear acceptance criteria and traceability
 ✓ **100% PRD-UX-Architecture Alignment** with no conflicts or gaps
 ✓ **Offline-First Design** fully supported by architecture and UX specifications
@@ -563,29 +547,29 @@ Start with Epic 1 (Foundation) to establish the technical substrate, then procee
 ### Weaknesses Resolved
 
 ✅ **Forward Dependencies** — All resolved through story reordering in Epics 2, 3, and 5
-✅ **Missing FR26 Implementation** — Settings screen (Story 6.9) now fully specified
+⚠️ **FR26 Partial Coverage** — Data clearing not a standalone story; Settings hook in Story 6.7
 ✅ **Epic 1 Documentation** — Technical foundation rationale now documented
-✅ **Story Quality** — All 48 stories have clear acceptance criteria (100%)
+✅ **Story Quality** — All 41 stories have clear acceptance criteria (100%)
 
 ### Final Note
 
-This assessment identified **4 critical/major issues** that have all been **successfully resolved**:
+This assessment identified issues that have been **successfully resolved** in the 41-story restructure (2026-05-13):
 
-1. ✅ Forward dependencies in data access layers eliminated through reordering
-2. ✅ Missing FR26 (Settings screen) implemented as Story 6.9
-3. ✅ Epic 1 technical foundation rationale documented
-4. ✅ All story dependencies verified and corrected
+1. ✅ Forward dependencies eliminated — data access layers are now Story X.1 in each epic
+2. ✅ Epic 1 technical foundation rationale documented
+3. ✅ All story dependencies verified and corrected
+4. ⚠️ FR26 (Settings screen) — partially covered by Story 6.7; full data-clearing settings page not a standalone story
 
-**Project Status: ✅ 100% READY FOR IMPLEMENTATION**
+**Project Status: ✅ READY FOR IMPLEMENTATION**
 
 The project now achieves:
-- **100% FR Coverage** (26 of 26 FRs)
+- **~98% FR Coverage** (FR26 partial)
 - **100% NFR Coverage** (20 of 20 NFRs)
 - **100% UX-Architecture Alignment**
 - **Zero Forward Dependencies** across all epics
-- **100% Story Acceptance Criteria** (48 of 48 stories)
+- **100% Story Acceptance Criteria** (41 of 41 stories)
 
-**Recommendation:** Proceed directly to implementation. Begin with Epic 1 (Foundation) to establish the technical substrate, then proceed sequentially through Epics 2-6 using the corrected story order. All stories can be completed independently within their epic sequence.
+**Recommendation:** Proceed directly to implementation. Begin with Epic 1 (Foundation) to establish the technical substrate, then proceed sequentially through Epics 2–6. All stories can be completed independently within their epic sequence.
 
 ---
 

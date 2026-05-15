@@ -1,154 +1,34 @@
----
-stepsCompleted: ["step-01-validate-prerequisites"]
-inputDocuments: 
-  - prd.md
-  - architecture.md
-  - ux-design-specification.md
-projectName: TooXTips
-userName: Lokki
-date: 2026-03-29
+# OdO — Epics & Stories
+
+**Project:** OdO — Personal AI Daily Companion
+**Author:** Lokki
+**Date:** May 13, 2026
+**Status:** Locked for V1 MVP Implementation
+
 ---
 
-# TooXTips - Epic Breakdown
+## Epic Overview
 
-## Overview
+Six epics in execution order. Each epic depends on the previous one. Epic 1 unblocks everything else.
 
-This document provides the complete epic and story breakdown for TooXTips, decomposing the requirements from the PRD, UX Design, and Architecture requirements into implementable stories.
-
-## Requirements Inventory
-
-### Functional Requirements
-
-FR1: Agenda module with calendar view (day/week modes)
-FR2: Event CRUD operations (create, read, update, delete events)
-FR3: Persistent Agenda strip showing next 2-3 events
-FR4: Practice module with skill cards
-FR5: Session logging with duration tracking
-FR6: Streak tracking for each skill
-FR7: Unanchored session flagging (sessions without calendar events)
-FR8: AI chat interface with message history
-FR9: Quick-command dropdown for AI interactions
-FR10: Proactive 8pm notification with cross-module suggestions
-FR11: Free-slot detection algorithm
-FR12: Idle-skill detection algorithm
-FR13: Pattern recognition for spontaneous practice sessions
-FR14: Automatic Agenda event creation from AI suggestions
-FR15: Offline-first architecture with complete local data storage
-FR16: SQLite persistence for all data
-FR17: Dark mode (primary) and light mode support
-FR18: Claude API integration with context builder
-FR19: Background task scheduling (8pm check-in)
-FR20: Graceful AI degradation when offline
-FR21: Single first-launch bottom sheet asking "What's one skill you're working on?" — free text, no categories, creates first skill card
-FR22: Weekly Sunday reflection notification — locally-computed sentence from streak data and session counts, no API call
-FR23: AI provider swappability — AiProvider abstract interface with Claude, Gemini, Groq, OpenAI, and OfflineProvider implementations
-FR26: Settings screen with option to clear all local data
-
-### NonFunctional Requirements
-
-NFR1: Perceived responsiveness < 500ms for all core interactions
-NFR2: Notification delivery reliability (8pm check-in within ±5 minutes)
-NFR3: Claude API calls complete within 3 seconds
-NFR4: SQLite handles 2+ years of typical user data (10,000+ events, 1,000+ sessions)
-NFR5: 99%+ crash-free sessions
-NFR6: Zero data loss on app restart or device reboot
-NFR7: WCAG AA text contrast compliance
-NFR8: Minimum 44dp touch targets for interactive elements
-NFR9: XOF currency formatting (no decimal places)
-NFR10: DD/MM/YYYY date format
-NFR11: UTC+0 timezone handling
-NFR12: High-brightness outdoor readability (light mode optimization)
-NFR13: Sub-500ms perceived latency via optimistic UI and skeleton loaders
-NFR14: Offline functionality 100% for core features
-NFR15: No analytics, no telemetry, no third-party SDKs
-NFR16: API keys passed via --dart-define at build time, never present in source code or version control
-
-### Additional Requirements
-
-- Riverpod state management with code-gen syntax (@riverpod)
-- Drift ORM for type-safe SQLite access
-- go_router for navigation with bottom sheets as routes
-- flutter_local_notifications for notification delivery
-- workmanager for background task scheduling
-- connectivity_plus for offline state detection
-- Two-layer colour token system (raw palette → semantic tokens)
-- Selective AI context payload (48hr agenda, 7-day unanchored sessions, all skills)
-- Context payload hard cap at 4000 characters
-- Adaptive suppression algorithm (dismissed: 3d, thumbs-down: 7d, accepted: 1d)
-- Offline fallback trigger when background task fails (18-hour window)
-- Inline message + single pulse animation for offline fallback
-- Pattern detection threshold: 3 sessions, 90-minute window, 2+ different weeks
-- Claude model pinned to claude-sonnet-4-6
-- AI provider abstraction with swappable implementations (Claude, Gemini, Groq, OpenAI, Offline)
-- API key security via String.fromEnvironment (no hardcoding)
-- Feature-based folder structure (agenda, practice, ai)
-- Strict data → domain → presentation separation
-- Single _providers.dart file per feature
-- Database naming convention: snake_case columns
-- Riverpod provider naming with suffix convention (Repository, Notifier, Service)
-- Error handling: AsyncValue at UI boundaries, Result<T> in services
-- Separate test/ tree mirroring lib/ structure
-
-### UX Design Requirements
-
-UX-DR1: Confirmation sheet with exactly four elements (suggestion, context, primary action "Block it", secondary action "Not now")
-UX-DR2: Agenda strip information hierarchy with three states (events today, no events today, nothing scheduled)
-UX-DR3: Agenda strip shows max 2 events simultaneously, truncated at 20 characters
-UX-DR4: Offline state message for AI chat ("Couldn't reach AI · Tap to retry")
-UX-DR5: One-line state summary at chat opening ("3 events today · Japanese idle 5 days · 2 free slots this week")
-UX-DR6: Quick-command suggestions in chat to lower activation energy
-UX-DR7: Proactive notification opens confirmation sheet directly (not app home screen)
-UX-DR8: Session logging feels like completion, not a prompt for more
-UX-DR9: Unanchored sessions flagged silently until pattern detected — 3 sessions within 90-minute time-of-day window across at least 2 different calendar weeks. AI asks once. If dismissed, never asks again for that skill.
-UX-DR10: Thumbs-down or dismissal button on confirmation sheet (silent feedback, no explanation required)
-UX-DR11: Stale slot guard - recheck Agenda before rendering confirmation sheet
-UX-DR12: Completion animation 400ms (durationSlow) with scale-down effect
-UX-DR13: Dark mode as hardcoded default with SharedPreferences toggle for light mode
-UX-DR14: Streak indicator should feel emotionally significant and worth protecting
-UX-DR15: Minimal UI with persistent Agenda strip, one-slide carousel, persistent AI component
-UX-DR16: AI never initiates inside chat - only 8pm notification speaks first
-UX-DR17: No close icon on confirmation sheet, no "remind me later" option
-UX-DR18: Suggestion construction algorithm: longest idle skill first, then shortest available slot, then earliest free slot
-UX-DR19: One AI voice per day - maximum one proactive notification per 24 hours
-UX-DR20: Offline proactive logic - free-slot + idle-skill detection runs on-device
-UX-DR21: Completion sheet dismisses with Navigator.pop() after 400ms animation
-UX-DR22: Two-layer colour token system with semantic tokens (colorAccentAgenda, colorAccentPractice, colorAccentExpenses)
-UX-DR23: System fonts (SF Pro / Roboto) with tabular figures for clock display
-UX-DR24: Spacing scale (sp2, sp4, sp8, sp12, sp16, sp20, sp24)
-UX-DR25: Three animation durations (durationFast: 150ms, durationDefault: 250ms, durationSlow: 400ms)
-UX-DR26: Thumbs-down micro-action on confirmation sheet triggers suppressionThumbsDown (7 days). Dismissed via "Not now" triggers suppressionDismissed (3 days). Accepted triggers suppressionAccepted (1 day). Three distinct suppression windows.
-UX-DR27: AI component pulse dot animates once on app open when fallback suggestion is queued (background task missed 18-hour window). Single slow pulse only — never continuous, never a badge count.
-UX-DR28: Sunday 8pm notification is qualitatively different from weekday notifications — reflection line only, no "Block it" action, no confirmation sheet. Computed locally from session data.
-
-### FR Coverage Map
-
-| Requirement | Epic 1 | Epic 2 | Epic 3 | Epic 4 | Epic 5 | Epic 6 |
-|-------------|--------|--------|--------|--------|--------|--------|
-| FR1-3 (Agenda) | | ✓ | | | | |
-| FR4-7 (Practice) | | | ✓ | | | |
-| FR8-9 (AI Chat) | | | | ✓ | | |
-| FR10-14 (Proactive) | | | | | ✓ | |
-| FR15-20 (Offline, Dark/Light) | ✓ | | | ✓ | | ✓ |
-| FR21-23 (First-launch, Reflection, Provider) | ✓ | | ✓ | ✓ | ✓ | |
-| NFR1-16 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| UX-DR1-28 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-
-## Epic List
-
-1. **Epic 1: Foundation** — Theme system, design tokens, database schema, project scaffold, AiProvider abstraction
-2. **Epic 2: Agenda Module** — Persistent strip, calendar view, event CRUD, day timeline
+1. **Epic 1: Foundation** — Project scaffold, design tokens, theme system (7 presets), DB schema (6 tables), AiProvider abstraction, core services
+2. **Epic 2: Agenda Module** — Persistent strip (3 states), day timeline, event CRUD, three categories, monthly calendar
 3. **Epic 3: Practice Module** — Skill cards, session logging, streak computation, unanchored flagging, pattern detection
-4. **Epic 4: AI Layer** — Context builder, chat interface, quick-command dropdown, offline degradation
-5. **Epic 5: Proactive System** — SuggestionEngine, background tasks, confirmation sheet, suppression algorithm, Sunday reflection
-6. **Epic 6: Polish & Resilience** — Light mode, animations, empty states, error states, fallback pulse, accessibility
+4. **Epic 4: AI Layer** — Context builder (4k cap), chat sheet, persistent bottom bar, voice tap-to-speak, offline degradation
+5. **Epic 5: Glance + Evening + Proactive** — Glance Screen (lock, orb, info cards), Evening Session ritual, SuggestionEngine, background tasks, confirmation sheet
+6. **Epic 6: Polish & Resilience** — All seven themes, light mode QA, animations, empty/error states, accessibility, locale QA, first-launch flow
+
+**Target timeline:** 4–6 weeks solo.
 
 ---
 
 ## Epic 1: Foundation
 
-**Goal:** Establish the architectural foundation with theme system, design tokens, database schema, project scaffold, and AI provider abstraction. This epic unblocks all other epics.
+**Goal:** Establish the architectural foundation — project scaffold, design tokens, theme system, database schema, core services, AI provider abstraction. This epic unblocks Epics 2–6.
 
-**Technical Foundation Rationale:** While this epic has no direct user-facing value, it is essential infrastructure that enables all subsequent user-facing epics (2-6). The database schema, theme system, and AI provider abstraction are foundational decisions that cannot be changed mid-implementation without breaking dependent features. This epic must be completed first to provide the technical substrate for all other work. Without this foundation, Epics 2-6 cannot be implemented.
+**Technical Foundation Rationale:** This epic has no direct user-facing value but is essential infrastructure. The database schema, theme system, and AI provider abstraction are foundational decisions that cannot be changed mid-implementation without breaking dependent features. This epic must complete first.
+
+**Duration:** Days 1–4
 
 ### Story 1.1: Project Setup and Dependency Configuration
 
@@ -158,758 +38,750 @@ So that the project compiles and is ready for feature development.
 
 **Acceptance Criteria:**
 
-**Given** a fresh Flutter project created with `flutter create --org com.tooxips tooxips`
-**When** I add all dependencies from the architecture specification (Riverpod, Drift, go_router, etc.)
-**Then** the project compiles without errors
-**And** `flutter pub get` succeeds
-**And** all platform-specific configurations (Android permissions, iOS setup) are in place
+- **Given** a fresh Flutter project created with `flutter create --org com.odo odo`
+- **When** I add all dependencies from `architecture.md` (Riverpod, Drift, go_router, workmanager, flutter_local_notifications, speech_to_text, flutter_tts, local_auth, connectivity_plus, etc.)
+- **Then** the project compiles without errors on iOS and Android
+- **And** `flutter pub get` succeeds
+- **And** Android permissions (RECORD_AUDIO, USE_BIOMETRIC, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, WAKE_LOCK, VIBRATE, INTERNET) are in `AndroidManifest.xml`
+- **And** iOS `Info.plist` includes `NSMicrophoneUsageDescription`, `NSSpeechRecognitionUsageDescription`, `NSFaceIDUsageDescription`, `UIBackgroundModes`
+- **And** `CONVENTIONS.md` is in the repo root documenting locked architectural decisions
+- **And** `.env.example` documents required API keys; real `.env` is git-ignored
 
-### Story 1.2: Design Tokens and Color System
+### Story 1.2: Design Tokens and Color System (Two-Layer, Seven Themes)
 
 As a developer,
-I want to define the two-layer color token system (raw palette → semantic tokens),
-So that all UI components use consistent colors and theme switching is centralized.
+I want to define the two-layer color token system with seven theme presets,
+So that all UI components use semantic tokens and theme switching is centralized.
 
 **Acceptance Criteria:**
 
-**Given** the design system specification in the UX document
-**When** I create `core/constants/app_colors.dart` with raw palette and semantic tokens
-**Then** raw colors (violetPrimary, darkBg, etc.) are defined but never used directly in widgets
-**And** semantic tokens (colorAccentAgenda, colorSurface, etc.) are defined for all UI usage
-**And** light mode remapping is prepared (tokens only, no hardcoded colors in widgets)
-**And** the file compiles and exports all tokens
+- **Given** the design system specification in `ux-design-specification.md`
+- **When** I create `core/constants/app_colors.dart`
+- **Then** the raw palette (violetPrimary, cyanPrimary, greenPrimary, emberOrange, cosmicMagenta, auroraTeal, darkBg, lightBg, etc.) is defined but never used directly in widgets
+- **And** semantic tokens (`colorAccent`, `colorAccentAgenda`, `colorAccentWork`, `colorAccentPractice`, `colorSurface`, `colorBackground`, `colorTextPrimary`, `colorTextMuted`, `colorBorder`, `colorOrbIdle`, `colorOrbActive`) are defined for all UI usage
+- **And** seven theme maps (Violet Dark, Cyan Dark, Green Dark, Light Mode, Cosmic, Ember, Aurora) are defined as `OdoTheme` data classes
+- **And** custom accent override is supported as a hex string in `SharedPreferences`
+- **And** category colors (Personal/Work/Practice) are defined as fixed semantic tokens
+- **And** the file compiles and exports all tokens
 
-### Story 1.3: Theme System with Dark Mode Default
+### Story 1.3: Theme System with Runtime Swap
 
 As a developer,
-I want to create a ThemeData configuration with dark mode as default and light mode toggle via SharedPreferences,
-So that the app renders correctly in both themes and users can switch at runtime.
+I want a `ThemeData` configuration for all seven presets with runtime swap and `SharedPreferences` persistence,
+So that the user can pick a theme in settings and the app updates without restart.
 
 **Acceptance Criteria:**
 
-**Given** the color tokens from Story 1.2
-**When** I create `app/theme.dart` with ThemeData for dark and light modes
-**Then** dark mode is hardcoded as default in main.dart
-**And** light mode toggle is persisted via SharedPreferences
-**And** typography includes tabular figures for clock display (FontFeature.tabularFigures())
-**And** spacing scale (sp2-sp24) is defined as constants
-**And** animation durations (durationFast, durationDefault, durationSlow) are defined
-**And** theme switching works at runtime without app restart
+- **Given** the color tokens from Story 1.2
+- **When** I create `app/theme.dart` and a Riverpod `activeThemeProvider`
+- **Then** Violet Dark is hardcoded as default at first launch
+- **And** the active theme name + optional custom accent hex are persisted via `SharedPreferences`
+- **And** typography includes tabular figures for clock display (`FontFeature.tabularFigures()`)
+- **And** `app_spacing.dart` defines the spacing scale (sp2–sp32)
+- **And** `app_typography.dart` defines the type scale (textDisplay, textTitle, textBody, textBodyMuted, textCaption, textMicro)
+- **And** animation durations (durationFast, durationDefault, durationSlow) are defined as constants
+- **And** theme switching at runtime triggers a `ProviderScope` rebuild without app restart
+- **And** semantic tokens correctly remap on dark↔light swap
 
-### Story 1.4: SQLite Database Schema with Drift
+### Story 1.4: SQLite Database Schema with Drift (Six Tables)
 
 As a developer,
-I want to define the SQLite schema using Drift with critical tables (skills, sessions, events, suggestions),
+I want to define the complete V1 SQLite schema using Drift,
 So that all data is persisted locally with type-safe access.
 
 **Acceptance Criteria:**
 
-**Given** the architecture specification with schema decisions
-**When** I create `core/database/app_database.dart` with Drift tables
-**Then** `skills` table exists with id, name, createdAt, lastSessionAt
-**And** `sessions` table exists with id, skillId, startedAt, durationMinutes, isAnchored, suggestedTime, notes
-**And** `events` table exists with id, title, startTime, endTime, category
-**And** `suggestions` table exists with id, skillId, slotStart, slotDuration, suggestedAt, acceptedAt, dismissedAt, thumbsDownAt, suppressedUntil
-**And** `dart run build_runner build` generates all Drift code without errors
-**And** the database compiles and is ready for data access
+- **Given** the schema in `architecture.md`
+- **When** I create `core/database/app_database.dart` with Drift tables
+- **Then** `skills` exists with `id`, `name`, `created_at`, `last_session_at`
+- **And** `sessions` exists with `id`, `skill_id` (FK CASCADE), `started_at`, `duration_minutes`, `notes`, `is_anchored`, `suggested_time`
+- **And** `events` exists with `id`, `title`, `start_time`, `end_time`, `category` (`personal`|`work`|`practice`), `notes`
+- **And** `suggestions` exists with `id`, `skill_id` (FK SET NULL), `slot_start`, `slot_duration`, `suggested_at`, `accepted_at`, `dismissed_at`, `thumbs_down_at`, `suppressed_until`
+- **And** `evening_sessions` exists with `id`, `session_date`, `started_at`, `completed_at`, `abandoned_at`, `headline`, `close_summary`
+- **And** `evening_highlights` exists with `id`, `evening_session_id` (FK CASCADE), `display_order`, `content`, `source_type`, `source_ref_id`, `user_tag`, `tagged_at`
+- **And** `dart run build_runner build` generates Drift code without errors
+- **And** the database opens, migrates from scratch, and is ready for DAO access
 
-### Story 1.5: AiProvider Abstraction with Multiple Implementations
+### Story 1.5: AiProvider Abstraction with Five Implementations
 
 As a developer,
-I want to create an AiProvider abstract interface with concrete implementations (Claude, Gemini, Groq, OpenAI, Offline),
-So that the AI provider can be swapped via a single constant without touching feature code.
+I want an `AiProvider` abstract interface with concrete implementations,
+So that the AI provider can be swapped via a single constant.
 
 **Acceptance Criteria:**
 
-**Given** the AI provider architecture specification
-**When** I create `core/services/ai_provider.dart` with abstract AiProvider interface
-**Then** the interface defines `complete()` method with systemPrompt, userMessage, maxTokens parameters
-**And** `ClaudeProvider` implements the interface for claude-sonnet-4-6
-**And** `GeminiProvider` implements the interface for Gemini 1.5 Flash
-**And** `GroqProvider` implements the interface for Llama 3.1 8B
-**And** `OpenAiProvider` implements the interface for GPT-4o mini
-**And** `OfflineProvider` returns empty string (graceful offline fallback)
-**And** `core/constants/ai_constants.dart` defines AiConfig with provider selection
-**And** Riverpod provider wiring allows swapping with one-line change
+- **Given** the abstraction design in `architecture.md`
+- **When** I create `features/ai/domain/ai_provider.dart`
+- **Then** `AiProvider` abstract class defines `String get name`, `Future<Result<AiResponse>> sendContext(AiContextPayload payload)`, `Future<Result<Stream<String>>> streamResponse(AiContextPayload payload)`
+- **And** `ClaudeAiProvider` is implemented and functional via `--dart-define=AI_API_KEY`
+- **And** `GeminiAiProvider`, `GroqAiProvider`, `OpenAiAiProvider` stubs exist with correct interfaces (can be empty bodies returning `Failure(AppError.aiUnavailable)` in V1)
+- **And** `OfflineStubAiProvider` returns a deterministic response for testing
+- **And** a single constant `kActiveAiProvider` in `core/constants/ai_config.dart` selects the active implementation
+- **And** the Riverpod `aiProviderServiceProvider` injects the active implementation
+- **And** API keys never appear in source control (`.env.example` documents; `.env` git-ignored)
 
-### Story 1.6: CONVENTIONS.md Documentation
+### Story 1.6: Core Services
 
 As a developer,
-I want to document all architectural conventions and patterns in CONVENTIONS.md,
-So that future code follows consistent patterns and decisions are transparent.
+I want stateless supporting services for connectivity, notifications, background tasks, voice, and locale,
+So that features can depend on them via Riverpod injection.
 
 **Acceptance Criteria:**
 
-**Given** all architectural decisions from the architecture document
-**When** I create `CONVENTIONS.md` in project root
-**Then** it documents database naming (snake_case), Riverpod provider naming, error handling patterns
-**And** it specifies feature folder structure (data/domain/presentation)
-**And** it lists import rules (domain imports nothing, data imports domain, presentation imports domain only)
-**And** it documents AI payload limits (4000 char cap, 48hr agenda window)
-**And** it specifies API key security (--dart-define only)
-**And** it lists all confirmed architectural decisions (Riverpod, Drift, go_router, etc.)
+- **Given** the supporting services in `architecture.md`
+- **When** I create `core/services/`
+- **Then** `ConnectivityService` exposes a `Stream<bool> isOnline$` via `connectivity_plus`
+- **And** `NotificationService.initialize()` configures `flutter_local_notifications` with timezone init
+- **And** `BackgroundTaskService.initialize()` registers `workmanager` with the 8pm task dispatcher
+- **And** `VoiceService` wraps `speech_to_text` (STT) and `flutter_tts` (TTS) with a clean state machine (idle/listening/parsing/committing/committed)
+- **And** `LocaleService` provides XOF formatting (no decimals, thin-space thousands), DD/MM/YYYY date formatting, and string lookup for French/English
+- **And** all services are injected via Riverpod providers
+- **And** unit tests for `LocaleService.formatXof()` and `LocaleService.formatDate()` pass
 
-### Story 1.7: Main.dart Initialization with Service Setup
+### Story 1.7: Result Type and Error Handling
 
 As a developer,
-I want to initialize main.dart with proper sequencing for WidgetsFlutterBinding, BackgroundTaskService, and NotificationService,
-So that all services are ready before the app runs.
+I want a sealed `Result<T, AppError>` type and an `AppError` enum,
+So that services and repositories communicate failures explicitly.
 
 **Acceptance Criteria:**
 
-**Given** all services from previous stories
-**When** I create `main.dart` with initialization sequence
-**Then** WidgetsFlutterBinding.ensureInitialized() is called first
-**And** BackgroundTaskService.initialize() is called before runApp
-**And** NotificationService.initialize() is called before runApp
-**And** ProviderScope wraps the entire app
-**And** ThemeMode.dark is hardcoded as default
-**And** the app launches without errors
+- **Given** the error handling pattern in `architecture.md`
+- **When** I create `core/domain/result.dart` and `core/domain/app_error.dart`
+- **Then** `Result<T>` is sealed with `Success<T>` and `Failure<T>` subclasses
+- **And** `AppError` enum includes `aiUnavailable`, `databaseWriteFailed`, `suggestionSuppressed`, `contextPayloadTooLarge`, `voiceCaptureFailed`, `voiceParseAmbiguous`, `slotNoLongerAvailable`, `authFailed`
+- **And** all services and repositories use `Result<T>` for fallible operations
+- **And** widgets use `AsyncValue.when` at the provider boundary
+- **And** `try/catch` is reserved for third-party library calls only
+
+### Story 1.8: Router and Project Structure
+
+As a developer,
+I want `go_router` configured with all V1 routes and bottom sheets as routes,
+So that navigation is centralized and deep linking works.
+
+**Acceptance Criteria:**
+
+- **Given** the route map in `architecture.md`
+- **When** I create `app/router.dart`
+- **Then** top-level routes are defined: `/glance`, `/home`, `/home/agenda`, `/home/agenda/event/:id`, `/home/agenda/calendar`, `/home/practice`, `/home/practice/skill/:id`, `/evening`, `/settings`, `/settings/themes`
+- **And** bottom sheet routes are defined: `/home/agenda/add-event`, `/home/practice/add-skill`, `/home/practice/log-session/:id`, `/confirm-suggestion/:id`
+- **And** the project structure matches the spec: `features/{glance,home,agenda,practice,ai,evening_session,settings}/`, each with `data/`, `domain/`, `presentation/`
+- **And** import rules are documented in `CONVENTIONS.md`: domain imports nothing from data/presentation; data imports only domain; presentation imports only domain entities and providers
+- **And** a placeholder screen renders at each top-level route to confirm routing works
 
 ---
 
 ## Epic 2: Agenda Module
 
-**Goal:** Build the Agenda module with persistent strip, calendar view, event CRUD, and day timeline. This epic provides the temporal anchor for all other features.
+**Goal:** Build the temporal anchor of the entire product. The Agenda owns the data the AI reasons over. Without it, OdO has nothing to be proactive about.
 
-### Story 2.1: Event Data Access Layer
+**Duration:** Days 5–9
+
+### Story 2.1: Agenda Repository and DAO
 
 As a developer,
-I want to create AgendaRepository and AgendaDAO for type-safe event access,
-So that all event queries are centralized and testable.
+I want a repository and Drift DAO for the `events` table,
+So that event CRUD is type-safe and centralized.
 
 **Acceptance Criteria:**
 
-**Given** the Drift database from Epic 1
-**When** I create `features/agenda/data/agenda_dao.dart` with Drift queries
-**Then** queries exist for: getAllEvents(), getEventsForDate(), getEventsForWeek(), getNextEvents(count)
-**And** I create `features/agenda/data/agenda_repository.dart` implementing domain interface
-**And** repository methods: createEvent(), updateEvent(), deleteEvent(), getUpcomingEvents()
-**And** all queries return Future<List<AgendaEvent>> or Future<AgendaEvent>
-**And** repository is injected via Riverpod provider
+- **Given** the `events` table from Epic 1
+- **When** I create `features/agenda/data/agenda_dao.dart` and `features/agenda/data/agenda_repository.dart`
+- **Then** the DAO exposes `insertEvent`, `updateEvent`, `deleteEvent`, `getEventById`, `getEventsBetween(startMs, endMs)`, `watchEventsForDay(date)`
+- **And** the repository implements the abstract `AgendaRepository` from `domain/`
+- **And** all methods return `Result<T, AppError>`
+- **And** unit tests cover insert, update, delete, range query
 
-### Story 2.2: Persistent Agenda Strip Widget
+### Story 2.2: Persistent Agenda Strip (Three States)
 
 As a user,
-I want to see the next 2-3 upcoming events in a persistent strip at the top of every screen,
-So that I always know what's coming next without scrolling.
+I want a strip at the top of the home screen that shows what's next at all times,
+So that I always know my temporal context without opening anything.
 
 **Acceptance Criteria:**
 
-**Given** the Agenda strip specification (UX-DR2, UX-DR3) and AgendaRepository from Story 2.1
-**When** I create `features/agenda/presentation/widgets/agenda_strip.dart`
-**Then** the strip shows next 2 events with time and title (truncated at 20 chars)
-**And** if no events today, it shows first event tomorrow with "tomorrow" label
-**And** if nothing scheduled, it shows "Nothing scheduled — free day"
-**And** the strip is always visible above the main content
-**And** tapping the strip opens the calendar modal
-**And** the strip updates in real-time when events are added/deleted
+- **Given** events stored locally
+- **When** the strip renders
+- **Then** State 1 (events today): shows next 2 events with time + title, titles truncated at 20 chars, format `9:00 Standup · 11:00 Design Review`
+- **And** State 2 (no more today): shows first event tomorrow with muted "Tomorrow" label, format `Tomorrow · 9:00 Standup`
+- **And** State 3 (nothing scheduled): single muted line *"Nothing scheduled — free day"*
+- **And** the strip never shows more than 2 events simultaneously
+- **And** tap expands into the Agenda slide
+- **And** long-press opens the monthly calendar
 
-### Story 2.3: Calendar View (Day and Week Modes)
+### Story 2.3: Day Timeline View
 
 As a user,
-I want to view my calendar in day and week modes,
-So that I can see my schedule at different time scales.
+I want a vertical timeline of my day with 30-min grid lines and category colors,
+So that I can see my day at a glance.
 
 **Acceptance Criteria:**
 
-**Given** the Agenda module requirements (FR1)
-**When** I create `features/agenda/presentation/agenda_slide.dart` with calendar view
-**Then** day mode shows hourly timeline with events positioned by time
-**And** week mode shows 7-day grid with events
-**And** user can swipe between day and week modes
-**And** current day is highlighted
-**And** tapping an event shows event details
-**And** calendar uses table_calendar package for rendering
+- **Given** events for a selected date
+- **When** I open the Agenda slide
+- **Then** events render as colored blocks with a category left-bar (violet/blue/green)
+- **And** the timeline shows 30-min grid lines from 6am to 11pm by default
+- **And** free slots ≥30 min are visually distinct (dashed border, muted green tint)
+- **And** tapping an event opens the event detail route
+- **And** tapping a free slot opens the add-event bottom sheet with the slot pre-filled
 
-### Story 2.4: Event CRUD Operations
+### Story 2.4: Event CRUD with Three Categories
 
 As a user,
-I want to create, read, update, and delete calendar events,
+I want to create, read, update, and delete events with a category,
 So that I can manage my schedule.
 
 **Acceptance Criteria:**
 
-**Given** the calendar view from Story 2.3 and AgendaRepository from Story 2.1
-**When** I create `features/agenda/presentation/widgets/add_event_sheet.dart` and event editing
-**Then** tapping "+" or empty time slot opens add event bottom sheet
-**And** the sheet has fields for title, start time, end time, category
-**And** saving creates the event in Agenda and persists to SQLite
-**And** tapping an event opens edit sheet with same fields
-**And** saving updates the event in SQLite
-**And** swiping left on event shows delete confirmation
-**And** deleting removes event from SQLite and UI updates immediately
+- **Given** the add-event bottom sheet
+- **When** I open it
+- **Then** fields are: title, start time, end time, category (Personal/Work/Practice radio), optional notes
+- **And** category defaults to Personal
+- **And** save commits to the `events` table and updates the strip immediately (optimistic UI)
+- **And** edit and delete are available from the event detail screen
+- **And** delete shows a confirmation toast with undo (5s)
+- **And** voice command "rendez-vous at 7pm tonight" parses correctly via AI Layer (Epic 4)
+- **And** 5-min pre-event reminder is scheduled via `NotificationService` on event create
 
-### Story 2.5: Agenda State Management with Riverpod
-
-As a developer,
-I want to manage Agenda state with Riverpod providers,
-So that UI widgets reactively update when events change.
-
-**Acceptance Criteria:**
-
-**Given** AgendaRepository from Story 2.4
-**When** I create `features/agenda/presentation/agenda_providers.dart`
-**Then** `agendaRepositoryProvider` returns AgendaRepository instance
-**And** `todayAgendaProvider` returns today's events (async)
-**And** `weekAgendaProvider` returns week's events (async)
-**And** `nextEventsProvider` returns next 2-3 events for strip (async)
-**And** `agendaNotifierProvider` provides StateNotifier for add/update/delete actions
-**And** all providers use @riverpod annotation for code generation
-
-### Story 2.6: Agenda Strip Integration with Main App
+### Story 2.5: Monthly Calendar
 
 As a user,
-I want the Agenda strip to appear on every screen and update when events change,
-So that temporal context is always available.
+I want a monthly calendar inside the Agenda slide,
+So that I can navigate to other dates and see density at a glance.
 
 **Acceptance Criteria:**
 
-**Given** AgendaStrip widget from Story 2.2 and Riverpod providers from Story 2.5
-**When** I integrate the strip into the main app shell
-**Then** the strip appears above the carousel on every screen
-**And** it watches `nextEventsProvider` and updates reactively
-**And** it handles loading state with skeleton loader
-**And** it handles error state gracefully
-**And** tapping the strip opens calendar modal without losing carousel position
+- **Given** events stored locally
+- **When** I long-press the strip or tap the calendar icon
+- **Then** a monthly view (`table_calendar`) renders with dots indicating event presence per day
+- **And** dot color reflects the highest-priority category that day (Work > Practice > Personal, or design-driven mix)
+- **And** tapping a day jumps the timeline to that date
+- **And** today is highlighted with the active theme accent
 
 ---
 
 ## Epic 3: Practice Module
 
-**Goal:** Build the Practice module with skill cards, session logging, streak computation, unanchored flagging, and pattern detection. This epic provides the skill development anchor.
+**Goal:** Build the habit-tracking surface. Skill cards, session logging, streak math, and the silent pattern detection that fuels the evening session's cross-domain insight.
 
-### Story 3.1: Practice Data Access Layer
+**Duration:** Days 10–13
+
+### Story 3.1: Practice Repository and DAO
 
 As a developer,
-I want to create PracticeRepository and PracticeDAO for type-safe skill and session access,
-So that all practice queries are centralized.
+I want a repository and DAO for `skills` and `sessions`,
+So that practice data is type-safe and centralized.
 
 **Acceptance Criteria:**
 
-**Given** the Drift database from Epic 1
-**When** I create `features/practice/data/practice_dao.dart`
-**Then** queries exist for: getAllSkills(), getSkillById(), getSessionsForSkill(), getUnanchoredSessions()
-**And** I create `features/practice/data/practice_repository.dart`
-**And** repository methods: createSkill(), logSession(), getSkillWithSessions(), getUnanchoredSessionsLastDays(days)
-**And** all queries return properly typed Futures
+- **Given** the `skills` and `sessions` tables from Epic 1
+- **When** I create `features/practice/data/practice_dao.dart` and `features/practice/data/practice_repository.dart`
+- **Then** the DAO exposes `insertSkill`, `deleteSkill`, `watchAllSkills`, `insertSession`, `getSessionsForSkill(skillId, sinceMs)`, `getLastSession(skillId)`, `getUnanchoredSessions(skillId, sinceMs)`
+- **And** the repository returns `Result<T>` for all writes
+- **And** unit tests cover skill CRUD, session insertion, and unanchored query
 
-### Story 3.2: Practice Module UI Shell and Skill Cards
+### Story 3.2: First-Launch Skill Prompt
+
+As a first-time user,
+I want OdO to ask me one question on first launch,
+So that I feel useful from minute one.
+
+**Acceptance Criteria:**
+
+- **Given** the user has just unlocked the Glance Screen for the first time
+- **When** the home screen renders and `skills` is empty
+- **Then** a single bottom sheet appears: *"What's one skill you're working on?"*
+- **And** there is one text field and one button labeled "Add it"
+- **And** submitting creates a skill and dismisses the sheet
+- **And** the home screen now shows the skill card
+- **And** the sheet never appears again after the first skill is created
+
+### Story 3.3: Skill Card
 
 As a user,
-I want to see my skills as cards in the Practice module,
-So that I can track and interact with each skill.
+I want each skill to render as a card with my current streak and recent activity,
+So that I can see progress without opening anything.
 
 **Acceptance Criteria:**
 
-**Given** the Practice module specification (FR4) and PracticeRepository from Story 3.1
-**When** I create `features/practice/presentation/practice_slide.dart` and `features/practice/presentation/widgets/skill_card.dart`
-**Then** each skill card shows: skill name, streak (7-day bar), last session date, session count
-**And** the streak bar is visually significant and feels worth protecting (UX-DR14)
-**And** tapping a card opens session logging sheet
-**And** cards are displayed in a scrollable list
-**And** the module handles empty state (no skills) with first-launch prompt
+- **Given** a skill with sessions
+- **When** the skill card renders
+- **Then** the top row shows skill name + current streak badge (e.g. "🔥 7")
+- **And** the middle shows a 7-day activity bar — 7 vertical bars, filled if a session that day, muted if not
+- **And** the bottom shows last session: duration + relative date (*"35 min · 2 days ago"*)
+- **And** there are no XP indicators, no levels, no goal progress bars
+- **And** tap opens the skill detail screen
+- **And** long-press opens the quick-log session sheet
 
-### Story 3.3: First-Launch Skill Prompt
-
-As a new user,
-I want to be asked "What's one skill you're working on?" on first launch,
-So that I can create my first skill without friction.
-
-**Acceptance Criteria:**
-
-**Given** the app is launched for the first time
-**When** the Practice module loads and no skills exist
-**Then** a bottom sheet appears with the question "What's one skill you're working on?"
-**And** the sheet has a free-text input field (no categories)
-**Then** tapping "Create" creates the skill and dismisses the sheet
-**And** the skill card appears immediately in the Practice module
-**And** this prompt never appears again (flag in SharedPreferences)
-
-### Story 3.4: Session Logging with Duration and Notes
+### Story 3.4: Session Logging
 
 As a user,
-I want to log a practice session with duration and optional notes,
-So that I can track my practice history.
+I want to log a session with a duration and optional note,
+So that the system records my practice.
 
 **Acceptance Criteria:**
 
-**Given** a skill card from Story 3.2 and PracticeRepository from Story 3.1
-**When** I tap the card and open the session logging sheet
-**Then** the sheet shows: duration input (minutes), optional notes field, "Log Session" button
-**And** the sheet has quick-select buttons for common durations (15, 30, 45, 60 min)
-**And** tapping "Log Session" creates the session in SQLite with isAnchored = false
-**And** the sheet dismisses with completion animation (400ms, scale-down effect) (UX-DR12)
-**And** the skill card updates immediately with new streak and last session date
-**And** the session is logged without prompting for calendar event
+- **Given** the log-session bottom sheet
+- **When** I open it
+- **Then** fields are: duration (preset chips: 15/25/45/60 min + custom), optional note (text)
+- **And** the `started_at` defaults to "now" (editable)
+- **And** save commits to the `sessions` table with `is_anchored = 0` if no overlapping practice event exists, else `is_anchored = 1`
+- **And** the completion animation runs (durationSlow, opacity + scale)
+- **And** the streak updates immediately
+- **And** the skill card's last-session line updates
 
-### Story 3.5: Streak Computation and Display
-
-As a user,
-I want to see my streak for each skill (consecutive days practiced),
-So that I'm motivated to maintain the streak.
-
-**Acceptance Criteria:**
-
-**Given** session data in SQLite
-**When** I create `features/practice/domain/streak_calculator.dart`
-**Then** it calculates consecutive days from most recent session backwards
-**And** it handles timezone correctly (UTC+0)
-**And** it returns current streak count and last session date
-**And** the streak bar on skill cards updates reactively
-**And** the bar fills proportionally (7-day max for MVP)
-
-### Story 3.6: Unanchored Session Flagging
+### Story 3.5: Streak Computation
 
 As a developer,
-I want to flag sessions that don't have corresponding calendar events,
-So that the system can detect patterns later.
+I want a `StreakCalculator` that computes the current streak for a skill,
+So that the card always shows correct numbers.
 
 **Acceptance Criteria:**
 
-**Given** session logging from Story 3.4
-**When** a session is logged without a calendar event
-**Then** `isAnchored` is set to false in the sessions table
-**And** no UI prompt appears (silent flagging) (UX-DR9)
-**And** the flag is stored for pattern detection
-**And** the user never sees the flag until pattern is detected
+- **Given** a list of sessions for a skill
+- **When** `StreakCalculator.compute(sessions, todayLocal)` is called
+- **Then** the current streak equals the number of consecutive days ending today (or yesterday — grace period until end-of-day) with at least one session
+- **And** the algorithm handles timezone correctly (UTC+0 storage, local-day boundary for display)
+- **And** unit tests cover: no sessions, single session today, multi-day streak, broken streak, grace-period edge case at end-of-day
 
-### Story 3.7: Pattern Detection for Unanchored Sessions
+### Story 3.6: Pattern Detection (Unanchored Sessions)
 
 As a developer,
-I want to detect when a user practices at similar times without calendar events,
-So that the AI can suggest making it a recurring event.
+I want a `PatternDetector` that identifies recurring unanchored session times,
+So that the evening session can ask once about anchoring.
 
 **Acceptance Criteria:**
 
-**Given** unanchored sessions from Story 3.6
-**When** I create `features/practice/domain/pattern_detector.dart`
-**Then** it detects pattern: 3+ unanchored sessions within 90-minute time window across 2+ different calendar weeks
-**And** it returns skill_id and suggested_time if pattern detected
-**And** it handles timezone correctly (UTC+0)
-**And** the detector is called by SuggestionEngine (Epic 5)
-
-### Story 3.8: Practice State Management with Riverpod
-
-As a developer,
-I want to manage Practice state with Riverpod providers,
-So that UI widgets reactively update when skills and sessions change.
-
-**Acceptance Criteria:**
-
-**Given** PracticeRepository from Story 3.1
-**When** I create `features/practice/presentation/practice_providers.dart`
-**Then** `practiceRepositoryProvider` returns PracticeRepository
-**And** `allSkillsProvider` returns all skills (async)
-**And** `skillWithSessionsProvider(skillId)` returns skill with session history (async)
-**And** `unanchoredSessionsProvider` returns unanchored sessions from last 7 days (async)
-**And** `practiceNotifierProvider` provides StateNotifier for create/log actions
-**And** all providers use @riverpod annotation
+- **Given** unanchored sessions for a skill
+- **When** `PatternDetector.detect(skillId)` runs
+- **Then** it queries the last 3 unanchored sessions for the skill
+- **And** if all 3 start times fall within a ±45-minute window-of-day AND span ≥2 distinct calendar weeks, it returns a `PatternMatch`
+- **And** otherwise returns `null`
+- **And** unit tests cover: no sessions, 3 sessions same window same week (no match), 3 sessions same window 2+ weeks (match), 3 sessions different windows (no match)
+- **And** once OdO has asked about a skill's pattern (yes or no), it never asks again for that skill (suppression flag persisted)
 
 ---
 
 ## Epic 4: AI Layer
 
-**Goal:** Build the AI integration layer with context builder, chat interface, quick-command dropdown, and offline degradation. This epic provides the intelligence layer.
+**Goal:** Build OdO itself. The persistent bottom bar, the chat sheet, the context builder, voice tap-to-speak, and graceful offline degradation.
 
-### Story 4.1: AI Context Builder
+**Duration:** Days 14–17
 
-As a developer,
-I want to construct the AI context payload from Agenda and Practice data,
-So that the AI has the information needed to make suggestions.
-
-**Acceptance Criteria:**
-
-**Given** Agenda and Practice data from Epics 2 and 3
-**When** I create `features/ai/domain/context_builder.dart`
-**Then** it builds payload with: today + next 48 hours events, all skills with streak/last_session, last 7 days unanchored sessions, last 3 suggestions with status, current_datetime, timezone (UTC+0)
-**And** it enforces 4000 character hard cap (contextMaxChars)
-**And** if payload exceeds cap, it truncates session history first, then extends agenda window
-**And** it logs warning locally if truncation occurs
-**And** it returns structured context as JSON-serializable object
-
-### Story 4.2: Claude API Client with Error Handling
+### Story 4.1: Context Builder (4k Cap, Priority-Ordered)
 
 As a developer,
-I want to create a Claude API client that handles requests and responses,
-So that the app can communicate with Claude API.
+I want a `ContextBuilder` that produces an AI context payload ≤4,000 characters,
+So that the AI provider receives a focused, defensible payload.
 
 **Acceptance Criteria:**
 
-**Given** the AiProvider abstraction from Epic 1
-**When** I create `features/ai/data/claude_provider.dart` implementing AiProvider
-**Then** it sends POST requests to Claude API with systemPrompt and userMessage
-**And** it includes context payload from Story 4.1
-**And** it handles API timeout (3 second max) gracefully
-**And** it returns parsed response text
-**And** it handles API errors without crashing (returns empty string or error message)
-**And** API key is passed via String.fromEnvironment (NFR16)
+- **Given** local data (events, skills, sessions, suggestions)
+- **When** `ContextBuilder.build()` is called
+- **Then** the payload includes, in priority order: (1) current datetime + active screen, (2) today's agenda + next 48h, (3) all skills with current streak, (4) last 7 days unanchored sessions, (5) last 3 suggestions with outcomes
+- **And** the total character count is ≤4,000
+- **And** truncation drops lowest-priority sections first
+- **And** the payload is built only in `AiService`, never in widgets
+- **And** unit tests cover: empty data, full data within cap, oversize data with truncation
 
-### Story 4.3: AI Chat Interface
+### Story 4.2: Persistent AI Bottom Bar
 
 As a user,
-I want to chat with the AI to ask questions and get suggestions,
-So that I can interact with the system conversationally.
+I want a bottom bar on the home screen with quick-add, text input, and mic toggle,
+So that OdO is always one tap away.
 
 **Acceptance Criteria:**
 
-**Given** the Claude API client from Story 4.2
-**When** I create `features/ai/presentation/ai_chat_sheet.dart`
-**Then** the chat opens with one-line state summary at top: "3 events today · Japanese idle 5 days · 2 free slots this week" (UX-DR5)
-**And** below the summary are quick-command suggestions (UX-DR6)
-**And** the message input is always at bottom, thumb-reachable
-**And** user can type a message and tap send
-**And** the message appears in chat thread immediately
-**And** the AI response appears below with loading state
-**And** chat history persists in SQLite
-**And** offline message handling: "Couldn't reach AI · Tap to retry" (UX-DR4)
+- **Given** the home screen
+- **When** the bottom bar renders
+- **Then** three elements are visible: quick-add (+) on left, text input center, microphone toggle on right
+- **And** tapping the text input expands into the chat sheet (modal route)
+- **And** tapping the mic enters voice capture mode (Story 4.4)
+- **And** tapping quick-add opens a sheet with three options: Add event, Log session, Add skill
+- **And** the bottom bar is also the layout shared with the Glance Screen
 
-### Story 4.4: Quick-Command Dropdown
+### Story 4.3: Chat Sheet
 
 As a user,
-I want to see quick-command suggestions when I open the chat,
-So that I can interact with the AI without typing.
+I want a modal chat surface where I can ask OdO questions,
+So that I have a reactive channel to the AI.
 
 **Acceptance Criteria:**
 
-**Given** the chat interface from Story 4.3
-**When** the chat opens
-**Then** quick-command suggestions appear below the state summary
-**And** suggestions are context-aware (e.g., "When should I practice?", "Show my week")
-**And** tapping a suggestion sends it as a message
-**And** the AI responds to the command
-**And** suggestions are generated locally (no API call)
+- **Given** I tap the text input in the bottom bar
+- **When** the chat sheet opens
+- **Then** previous messages from this session are visible (chat is scoped to the current app launch in V1)
+- **And** I can type and send messages
+- **And** OdO responds via the active `AiProvider`
+- **And** OdO never initiates inside the chat — only the user sends first
+- **And** quick commands ("What should I practice today?", "What's my next event?", "What's my Japanese streak?") are visible on first open as starter chips
+- **And** when offline, my message stays in the thread with *"Couldn't reach AI · Tap to retry"* underneath
+- **And** retry sends without retyping
 
-### Story 4.5: Offline Degradation for AI
+### Story 4.4: Voice Tap-to-Speak Pipeline
 
 As a user,
-I want the app to work when offline and gracefully degrade AI functionality,
-So that I can still use Agenda and Practice without connectivity.
+I want to tap the mic and speak to OdO,
+So that voice is a first-class input.
 
 **Acceptance Criteria:**
 
-**Given** the ConnectivityService from architecture
-**When** the app detects offline state
-**Then** the AI provider switches to OfflineProvider
-**And** chat messages show: "Couldn't reach AI · Tap to retry"
-**And** when connectivity returns, the message can be retried
-**And** the user's message is preserved (not lost)
-**And** the app never shows error states or spinners for AI unavailability
+- **Given** I tap the mic toggle
+- **When** the voice pipeline runs
+- **Then** the orb morphs to the listening (waveform) state
+- **And** `VoiceService` starts STT
+- **And** 1.5 seconds of silence triggers `parsing` state — orb pulses
+- **And** the transcript is sent to `AiService.parseCommand(transcript)` which returns an intent
+- **And** clear intents commit immediately (create event, log session, add skill)
+- **And** ambiguous intents show a single-line follow-up question above the bar
+- **And** STT failure returns the orb to idle silently — no error toast
+- **And** tapping the mic during listening cancels without committing
 
-### Story 4.6: AI State Management with Riverpod
+### Story 4.5: Offline Graceful Degradation
 
 As a developer,
-I want to manage AI state with Riverpod providers,
-So that chat and suggestions update reactively.
+I want all AI-dependent surfaces to degrade silently when offline,
+So that the user never sees an error state.
 
 **Acceptance Criteria:**
 
-**Given** Claude API client from Story 4.2
-**When** I create `features/ai/presentation/ai_providers.dart`
-**Then** `aiProviderServiceProvider` returns AiProvider (swappable)
-**And** `chatMessagesProvider` returns chat history (async)
-**And** `aiResponseProvider(message)` sends message and returns response (async)
-**And** `contextBuilderProvider` returns AI context payload (async)
-**And** `aiNotifierProvider` provides StateNotifier for chat actions
-**And** all providers use @riverpod annotation
+- **Given** the device is offline
+- **When** the user interacts with any AI surface
+- **Then** the chat preserves the message with *"Couldn't reach AI · Tap to retry"*
+- **And** the orb continues breathing (no error overlay)
+- **And** voice capture proceeds to STT; commands that don't require AI parsing (e.g. literal "log 30 min Japanese") still commit
+- **And** the Agenda strip continues updating from local data
+- **And** the SuggestionEngine (on-device) continues working
+- **And** the evening session, if 8pm, opens with cached headline logic running locally on the last-cached `AiResponse` template (or a fallback template)
 
 ---
 
-## Epic 5: Proactive System
+## Epic 5: Glance + Evening + Proactive
 
-**Goal:** Build the proactive AI system with SuggestionEngine, background tasks, confirmation sheet, suppression algorithm, and Sunday reflection. This epic delivers the core value proposition.
+**Goal:** Build the three defining surfaces — the Glance Screen, the Evening Session, and the proactive suggestion engine. This is where OdO becomes OdO.
 
-### Story 5.1: Suggestion Storage and Suppression Algorithm
+**Duration:** Days 18–23
 
-As a developer,
-I want to store suggestions and track user feedback to suppress irrelevant suggestions,
-So that the AI learns from user behavior.
-
-**Acceptance Criteria:**
-
-**Given** the suggestions table from Epic 1
-**When** a suggestion is generated by SuggestionEngine
-**Then** it's stored with suggestedAt timestamp
-**And** when user taps "Block it", acceptedAt is set and suppressedUntil = now + 1 day (UX-DR26)
-**And** when user taps "Not now", dismissedAt is set and suppressedUntil = now + 3 days (UX-DR26)
-**And** when user taps thumbs-down, thumbsDownAt is set and suppressedUntil = now + 7 days (UX-DR26)
-**And** SuggestionEngine filters out any skill where suppressedUntil > now()
-**And** the suppression logic is the entire learning algorithm
-
-### Story 5.2: SuggestionEngine with Slot Detection
-
-As a developer,
-I want to create the SuggestionEngine that detects free slots and idle skills,
-So that the system can generate proactive suggestions.
-
-**Acceptance Criteria:**
-
-**Given** Agenda and Practice data from Epics 2 and 3, and Suggestion Storage from Story 5.1
-**When** I create `features/ai/domain/suggestion_engine.dart`
-**Then** it finds free slots in the next 48 hours (gaps between events)
-**And** it identifies idle skills (longest days since last session)
-**And** it applies suppression filters (dismissed: 3d, thumbs-down: 7d, accepted: 1d) (UX-DR26)
-**And** it prioritizes: longest idle skill first, then shortest available slot, then earliest free slot (UX-DR18)
-**And** it returns one suggestion per call (first match wins)
-**And** it handles edge cases (no free slots, all skills suppressed, etc.)
-
-### Story 5.3: Background Task Scheduling (8pm Check-in)
-
-As a developer,
-I want to schedule a background task that runs daily at 8pm,
-So that the proactive notification is delivered reliably.
-
-**Acceptance Criteria:**
-
-**Given** the workmanager package from dependencies
-**When** I create `core/services/background_task_service.dart`
-**Then** it registers a periodic task via workmanager to run at 8pm daily
-**And** the task is platform-specific (Android: AlarmManager, iOS: background fetch)
-**And** the task runs even if app is closed
-**And** it handles platform-specific constraints (battery optimization, OS throttling)
-**And** it logs task execution for debugging
-
-### Story 5.4: Confirmation Sheet with Stale Slot Guard
+### Story 5.1: Glance Screen — Layout and States
 
 As a user,
-I want to see a confirmation sheet when I tap the proactive notification,
-So that I can quickly accept or dismiss the suggestion.
+I want a Glance Screen that shows lock state, the orb, my next event, and the latest suggestion,
+So that one look tells me what I need to know.
 
 **Acceptance Criteria:**
 
-**Given** the notification from Story 5.3
-**When** I tap the notification
-**Then** a confirmation sheet opens (not the app home screen) (UX-DR7)
-**And** the sheet shows: suggestion text, context (slot duration + skill idle days), "Block it" button, "Not now" button (UX-DR1)
-**And** before rendering, it rechecks the Agenda to verify the slot still exists (UX-DR11)
-**And** if slot is gone, it shows: "This slot is no longer available" with "Close" button
-**And** if slot exists, tapping "Block it" creates the event in both Agenda and Practice
-**And** tapping "Not now" dismisses the sheet
-**And** the sheet has a thumbs-down micro-action for silent feedback (UX-DR10, UX-DR26)
-**And** after action, the sheet dismisses with 400ms completion animation (UX-DR12)
+- **Given** the app is on the Glance route
+- **When** the screen renders
+- **Then** top row shows the lock icon (violet locked, green unlocked) + state label
+- **And** the orb is centered, breathing animation idle, waveform when listening
+- **And** below the orb, up to 2 info cards render: next event (always) and OdO's latest suggestion (if one exists in the last 18h)
+- **And** sensitive data never appears on the cards (no full event descriptions, no expense amounts)
+- **And** the bottom bar matches the home screen bottom bar (quick-add, text input, mic)
+- **And** a subtle slide-up handle is visible at the bottom
 
-### Story 5.4: Proactive Notification Delivery
-
-As a developer,
-I want to send the proactive notification at 8pm with the suggestion text,
-So that the user receives the suggestion at the right moment.
-
-**Acceptance Criteria:**
-
-**Given** the background task from Story 5.3 and SuggestionEngine from Story 5.2
-**When** the 8pm task runs
-**Then** it calls SuggestionEngine to generate a suggestion
-**And** it constructs notification text: "You have 45 free minutes Thursday. Japanese is idle. Block it?"
-**And** it sends the notification via flutter_local_notifications
-**And** the notification is tagged so only one notification per day is shown (UX-DR19)
-**And** tapping the notification opens the confirmation sheet directly
-**And** the notification is best-effort (not guaranteed, but fallback exists)
-
-### Story 5.6: Offline Fallback Trigger
-
-As a developer,
-I want to detect when the background task fails and surface a suggestion on app open,
-So that the user still gets the proactive suggestion even if the background task missed.
-
-**Acceptance Criteria:**
-
-**Given** the background task from Story 5.3
-**When** the app is opened and no suggestion was delivered in the last 18 hours
-**Then** the fallback trigger runs SuggestionEngine synchronously
-**And** if a suggestion is generated, it's queued in the AI component
-**And** the AI component pulse dot animates once on app open (single slow pulse) (UX-DR27)
-**And** if user taps the AI component, the suggestion appears as first message in chat
-**And** the pulse never repeats (single pulse only, never continuous)
-
-### Story 5.7: Sunday Reflection Notification
+### Story 5.2: Glance Screen — Authentication
 
 As a user,
-I want to receive a weekly reflection on Sunday at 8pm,
-So that I can see my practice progress without extra effort.
+I want to unlock the Glance Screen with vocal password, typed password, or biometric,
+So that OdO is private without being annoying.
 
 **Acceptance Criteria:**
 
-**Given** the background task from Story 5.3
-**When** Sunday 8pm arrives
-**Then** the background task detects it's Sunday
-**And** it generates a reflection line from session data: "This week: 4 Japanese sessions, 2 Chess. Best week yet for Japanese."
-**And** it sends a notification with this text (no "Block it" action, no confirmation sheet) (UX-DR28)
-**And** tapping the notification opens the app (no special handling)
-**And** the reflection is computed locally (no API call)
+- **Given** the Glance Screen is locked
+- **When** I attempt unlock
+- **Then** I can say "Hey OdO, unlock — [my phrase]" — STT validates against the stored phrase, lock icon morphs to unlocked-green on success
+- **And** I can tap the text input and type the password, enter to submit
+- **And** if biometric is enabled in settings, swiping up triggers biometric prompt
+- **And** three consecutive vocal failures lock vocal unlock for 5 minutes (typed becomes only path)
+- **And** the unlock phrase is set during Glance Screen onboarding (first launch)
+- **And** unlock state persists for the app session; the screen re-locks on app background after a configurable timeout (default: 5 min)
 
-### Story 5.8: AI Provider Swappability in Proactive System
+### Story 5.3: The Orb Widget
 
 As a developer,
-I want the proactive system to use the swappable AI provider,
-So that I can test with different providers without changing feature code.
+I want a reusable `Orb` widget with all visual states,
+So that the same widget renders on Glance and home and (V2) watch.
 
 **Acceptance Criteria:**
 
-**Given** the AiProvider abstraction from Epic 1
-**When** the SuggestionEngine needs to call the AI (for pattern detection or reflection generation)
-**Then** it uses the injected AiProvider from Riverpod
-**And** the provider is selected via single constant in ai_constants.dart
-**And** changing the constant swaps the provider without touching feature code
-**And** offline state automatically uses OfflineProvider
+- **Given** the orb widget
+- **When** rendered in different states
+- **Then** `OrbState.idle` shows a breathing animation in `colorOrbIdle` (active accent at low opacity)
+- **And** `OrbState.listening` shows a waveform animation in `colorOrbActive` (active accent at full)
+- **And** `OrbState.parsing` shows a brief pulse (durationFast)
+- **And** `OrbState.committed` shows a single bright pulse + checkmark overlay (durationDefault)
+- **And** the orb size scales correctly across surfaces (Glance: large, home: medium, watch V2: small)
+- **And** `MediaQuery.disableAnimations` disables breathing/waveform; orb becomes static
+
+### Story 5.4: Evening Session — Orchestration
+
+As a developer,
+I want an `EveningSessionNotifier` that orchestrates the 5-minute ritual,
+So that the session has correct state at every step.
+
+**Acceptance Criteria:**
+
+- **Given** an evening session is started
+- **When** `EveningSessionNotifier.start()` runs
+- **Then** a row is created in `evening_sessions` with `session_date = today`, `started_at = now`
+- **And** the headline is generated from today's data via `HeadlineGenerator`
+- **And** `HighlightRanker` selects 3–4 highlights from sessions, events, and patterns of the last 24h
+- **And** the cross-domain insight (if any) is appended as the last item
+- **And** the session screen renders sequentially: headline → highlights → insight → close
+- **And** each tag/expand/dismiss writes immediately to `evening_highlights`
+- **And** "Wrap up" is always visible at the top — tapping jumps to the close phase
+- **And** the close phase writes `completed_at` and generates the close summary
+
+### Story 5.5: Evening Session — Persistence Until Midnight
+
+As a user,
+I want my evening session to survive interruption until midnight,
+So that I can return to it after a phone call or distraction.
+
+**Acceptance Criteria:**
+
+- **Given** a session was started but not completed
+- **When** I reopen the app between 8pm and midnight
+- **Then** the session resumes from the current step (next un-tagged highlight)
+- **And** all previously tagged highlights remain tagged
+- **And** at local midnight, an app-open check (or background job) marks the session `abandoned_at = midnight_timestamp` if still incomplete
+- **And** tomorrow's session starts fresh
+- **And** unit tests cover: start → background → resume same day, start → cross midnight → abandoned
+
+### Story 5.6: Suggestion Engine (On-Device)
+
+As a developer,
+I want a `SuggestionEngine` that produces proactive suggestions entirely on-device,
+So that suggestions work offline.
+
+**Acceptance Criteria:**
+
+- **Given** local data (skills, sessions, events, suggestions)
+- **When** `SuggestionEngine.generate()` runs
+- **Then** it queries idle skills (last_session_at older than 24h), filters out suppressed skills
+- **And** computes free slots in the next 48h (gaps ≥30 min in the agenda)
+- **And** ranks: longest-idle skill → shortest fitting slot → earliest available window
+- **And** returns the first match (one suggestion at most per call)
+- **And** persists the suggestion to `suggestions` table
+- **And** unit tests cover: no idle skills, all skills suppressed, multiple slots multiple skills (correct ranking)
+
+### Story 5.7: Confirmation Sheet (Four Elements, Stale Slot Guard)
+
+As a user,
+I want a clear, four-element confirmation sheet when OdO suggests something,
+So that I can act or dismiss in seconds.
+
+**Acceptance Criteria:**
+
+- **Given** a suggestion is delivered
+- **When** I tap the notification
+- **Then** the confirmation sheet renders four elements only: suggestion text, context line, "Block it" primary button (theme accent), "Not now" secondary text button
+- **And** there is no close icon, no "remind me later", no why-field
+- **And** long-press on "Not now" reveals a single option: "Don't suggest this again" — tapping suppresses the skill for 7 days
+- **And** the sheet runs a stale-slot check on open: if the slot is gone, all four elements collapse to a single line *"This slot is no longer available"* with one button "Close"
+- **And** "Block it" commits the session/event to both Agenda and Practice simultaneously and dismisses the sheet
+
+### Story 5.8: Background Tasks (8pm + Pre-Event + Throughout-Day)
+
+As a user,
+I want OdO to nudge me at the right moments without me opening the app,
+So that the daily rhythm runs on its own.
+
+**Acceptance Criteria:**
+
+- **Given** workmanager + flutter_local_notifications are configured
+- **When** background tasks run
+- **Then** an 8pm local-time task fires a notification "Your evening with OdO is ready"
+- **And** 5-min pre-event reminders fire for each event with `start_time - 5 min`
+- **And** throughout-day suggestion notifications fire on meaningful data shift (event canceled, streak at risk, pattern threshold crossed)
+- **And** the "one AI voice per day" rule is enforced: if a throughout-day suggestion fires, the evening session's cross-domain insight is suppressed
+- **And** if the 8pm task doesn't fire (OS killed), the app-open fallback after 8pm same day, within 18h, surfaces the session inline
+
+### Story 5.9: Suppression Algorithm
+
+As a developer,
+I want `SuggestionEngine` to respect suppression windows,
+So that the user is never re-suggested something they just dismissed.
+
+**Acceptance Criteria:**
+
+- **Given** a suggestion outcome (accepted, dismissed, thumbs-down)
+- **When** outcome is recorded
+- **Then** `suppressed_until` for that skill is set: accepted = now + 1 day, dismissed = now + 3 days, thumbs-down = now + 7 days
+- **And** `SuggestionEngine.generate()` filters out any skill where `suppressed_until > now()`
+- **And** unit tests verify each window
 
 ---
 
 ## Epic 6: Polish & Resilience
 
-**Goal:** Complete the app with light mode, animations, empty states, error states, accessibility, and locale formatting. This epic ensures quality and resilience.
+**Goal:** Make it feel like a finished product. Light mode QA, all seven themes, animations, empty/error states, accessibility, locale QA, first-launch flow.
 
-### Story 6.1: Light Mode Implementation
+**Duration:** Days 24–28
+
+### Story 6.1: All Seven Themes Render Correctly
 
 As a user,
-I want to toggle between dark and light modes,
-So that I can use the app in different lighting conditions.
+I want to switch between all seven themes,
+So that I can match OdO to my taste.
 
 **Acceptance Criteria:**
 
-**Given** the theme system from Epic 1
-**When** I create light mode ThemeData
-**Then** semantic tokens are remapped for light mode (no hardcoded colors change)
-**And** light mode is optimized for outdoor readability (high contrast, bright backgrounds)
-**And** the toggle is in settings and persists via SharedPreferences
-**And** switching modes updates the entire app without restart
-**And** both modes render correctly on all screens
+- **Given** the theme picker in settings
+- **When** I tap each theme card
+- **Then** the entire app rebuilds with the new tokens (durationDefault crossfade)
+- **And** all seven themes render the orb, strip, cards, accents coherently
+- **And** WCAG AA contrast holds on all semantic tokens in all themes
+- **And** custom accent picker is functional (24 swatches default; HSL picker behind "advanced")
 
-### Story 6.2: Completion Animations
+### Story 6.2: Light Mode — Outdoor Readability
 
-As a user,
-I want to see meaningful animations when I complete actions,
-So that the app feels responsive and satisfying.
+As a user in direct Abidjan sunlight,
+I want light mode to be genuinely readable outdoors,
+So that OdO works wherever I am.
 
 **Acceptance Criteria:**
 
-**Given** the animation durations from Epic 1 (durationFast, durationDefault, durationSlow)
-**When** I log a session
-**Then** the logged duration text animates with scale-down effect over 400ms (durationSlow) (UX-DR12)
-**And** the session card shows a checkmark-like completion feeling
-**And** when I accept a suggestion in the confirmation sheet
-**Then** the sheet animates out with 400ms duration before dismissing (UX-DR21)
-**And** when I tap "Block it"
-**Then** a brief success animation plays before the sheet closes
+- **Given** Light Mode is active
+- **When** I test the app in direct sunlight
+- **Then** all text remains legible (contrast ≥7:1 for body text)
+- **And** the orb is visible against the light background
+- **And** category colors remain distinguishable
+- **And** the agenda strip and event blocks are readable without squinting
+- **And** the user can confirm "yes, I can read this in the sun"
 
 ### Story 6.3: Empty States and Error States
 
 As a user,
-I want to see helpful empty states and error messages,
-So that I understand what to do next.
+I want every screen to handle empty and error states gracefully,
+So that I never see a broken-looking app.
 
 **Acceptance Criteria:**
 
-**Given** the modules from Epics 2, 3, 4
-**When** the Agenda module has no events
-**Then** it shows: "Nothing scheduled — free day" (not a blank screen)
-**And** when the Practice module has no skills
-**Then** the first-launch prompt appears (Story 3.2)
-**And** when the chat fails to reach the AI
-**Then** it shows: "Couldn't reach AI · Tap to retry" (not an error icon)
-**And** when a database query fails
-**Then** a graceful error message appears (not a crash)
+- **Given** any screen
+- **When** there's no data or an error occurs
+- **Then** Empty Agenda: persistent strip shows *"Nothing scheduled — free day"*, timeline shows a calm illustration + "Add your first event"
+- **And** Empty Practice: first-launch skill prompt covers this; if user deletes all skills, show *"No skills yet"* with quick-add CTA
+- **And** Empty Chat: starter quick-command chips visible
+- **And** Offline AI: chat shows retry pattern, orb continues breathing
+- **And** Database error: silent fallback to in-memory state for the screen, log to console
+- **And** No screen shows raw error stack traces or unstyled error widgets
 
-### Story 6.4: Accessibility Compliance
+### Story 6.4: Animations and Motion
+
+As a user,
+I want OdO to feel alive but never frantic,
+So that interactions feel intentional.
+
+**Acceptance Criteria:**
+
+- **Given** any animated surface
+- **When** animations play
+- **Then** orb breathing is at ~12 BPM (slow, calm)
+- **And** session completion uses durationSlow opacity + scale-down
+- **And** bottom sheet open/close uses durationDefault with custom curve
+- **And** confirmation sheet uses durationSlow
+- **And** `MediaQuery.disableAnimations` disables all non-essential motion; orb becomes static
+- **And** no animation feels like a loading state
+
+### Story 6.5: Accessibility Audit
 
 As a user with accessibility needs,
-I want the app to meet WCAG AA standards,
-So that I can use it effectively.
+I want OdO to work with screen readers and respect motion preferences,
+So that I'm not excluded.
 
 **Acceptance Criteria:**
 
-**Given** all UI components from Epics 2-5
-**When** I check text contrast
-**Then** all text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text)
-**And** all interactive elements are at least 44dp (NFR8)
-**And** semantic labels are provided for screen readers
-**And** focus indicators are visible for keyboard navigation
-**And** colour is not the only way to convey information
+- **Given** an accessibility audit
+- **When** I run through key flows with TalkBack/VoiceOver
+- **Then** all interactive elements have semantic labels
+- **And** the orb announces its state ("OdO is listening", "OdO is idle")
+- **And** all touch targets are ≥44dp
+- **And** `MediaQuery.disableAnimations` is respected throughout
+- **And** voice is fully equivalent to tap for all critical flows (add event, log session, dismiss suggestion)
+- **And** color is never the only signal for state (icon + text label always paired)
 
-### Story 6.5: Locale Formatting (XOF, DD/MM/YYYY, UTC+0)
+### Story 6.6: Locale QA — French and XOF
 
-As a user in Abidjan,
-I want the app to display dates, times, and currency in my locale,
-So that the app feels native and respectful.
-
-**Acceptance Criteria:**
-
-**Given** the intl package from dependencies
-**When** I create `core/utils/locale_service.dart`
-**Then** dates are formatted as DD/MM/YYYY (not MM/DD/YYYY)
-**And** times are formatted in 24-hour format
-**And** timezone is UTC+0 (no daylight saving)
-**And** currency is XOF with no decimal places (e.g., "1,500 XOF")
-**And** the formatting is applied consistently across the app
-
-### Story 6.6: Fallback Pulse Animation
-
-As a user,
-I want to see a subtle pulse on the AI component when a fallback suggestion is queued,
-So that I know there's something waiting for me.
+As a francophone user,
+I want OdO to feel native in French and Ivorian context,
+So that nothing feels imported.
 
 **Acceptance Criteria:**
 
-**Given** the offline fallback trigger from Story 5.6
-**When** a fallback suggestion is queued on app open
-**Then** the AI component pulse dot animates once (single slow pulse) (UX-DR27)
-**And** the pulse uses durationSlow (400ms)
-**And** the pulse never repeats (single animation only)
-**And** no badge count or persistent indicator is shown
-**And** if user taps the AI component, the suggestion appears in chat
+- **Given** French-primary UI
+- **When** I use the app
+- **Then** all UI strings are in French by default (English fallback in settings)
+- **And** XOF currency renders as `15 000 F` (no decimals, thin-space thousands)
+- **And** dates render as DD/MM/YYYY everywhere
+- **And** times render in 24-hour format
+- **And** a francophone reviewer confirms naturalness of the French strings
+- **And** AI responses are English in V1 (French deferred to V1.5)
 
-### Story 6.7: CONVENTIONS.md Enforcement and Code Review
+### Story 6.7: First-Launch Flow
+
+As a first-time user,
+I want OdO to be useful within 5 minutes of install,
+So that I don't have to learn anything.
+
+**Acceptance Criteria:**
+
+- **Given** I install and open the app for the first time
+- **When** I complete the first-launch sequence
+- **Then** I see the Glance Screen onboarding (set unlock phrase + optional biometric)
+- **And** the home screen renders with empty Agenda strip and empty Practice carousel
+- **And** the first-launch skill prompt appears: "What's one skill you're working on?"
+- **And** I can add my first skill with one text entry
+- **And** I can add my first event via voice or quick-add
+- **And** at 8pm, my first evening session opens with whatever data I've added
+- **And** the total time from install to first useful state is ≤5 minutes with no instruction
+
+### Story 6.8: Performance and Crash-Free Resilience
 
 As a developer,
-I want to ensure all code follows the documented conventions,
-So that the codebase remains maintainable.
+I want OdO to feel fast and never crash,
+So that the user trusts it daily.
 
 **Acceptance Criteria:**
 
-**Given** CONVENTIONS.md from Story 1.6
-**When** I review code
-**Then** all database columns use snake_case
-**And** all Riverpod providers use suffix convention (Repository, Notifier, Service)
-**And** all imports follow the rules (domain → nothing, data → domain, presentation → domain)
-**And** all features have data/domain/presentation structure
-**And** all features have single _providers.dart file
-**And** all API keys use --dart-define (never hardcoded)
+- **Given** normal use
+- **When** I measure
+- **Then** perceived latency for any local action is <500ms (optimistic UI where appropriate)
+- **And** 2 consecutive weeks of personal daily use produce zero crashes
+- **And** background tasks (8pm session) fire successfully ≥70% of days; fallback covers the rest
+- **And** the app cold-starts in <1.5s on a mid-range Android device
 
-### Story 6.8: Light Mode Implementation (Continued)
+---
 
-(Placeholder for additional light mode work if needed)
+## Cross-Epic Definition of Done
 
-### Story 6.9: Settings Screen with Data Clear Option
+For every story:
 
-As a user,
-I want to access a settings screen where I can clear all local data,
-So that I can reset the app if needed.
+- [ ] Code follows the import rules in `CONVENTIONS.md`
+- [ ] Public APIs return `Result<T, AppError>` or `AsyncValue<T>` per the rule
+- [ ] Drift queries are typed; no raw SQL strings
+- [ ] No hardcoded colors in widgets — only semantic tokens
+- [ ] Unit tests written for pure-logic components (calculators, builders, engines)
+- [ ] Widget tests for critical UI states
+- [ ] No analytics, telemetry, or third-party SDK additions
+- [ ] No API keys in source control
+- [ ] French strings reviewed by a francophone speaker (if user-facing)
+- [ ] Manual test on iOS and Android before marking done
 
-**Acceptance Criteria:**
+---
 
-**Given** the app is running
-**When** I access the settings screen (via menu or navigation)
-**Then** the screen shows: theme toggle (dark/light), "Clear All Data" button
-**And** tapping "Clear All Data" shows a confirmation dialog
-**And** the dialog warns: "This will delete all events, skills, and sessions. This cannot be undone."
-**And** the dialog has two buttons: "Cancel" and "Clear"
-**And** tapping "Clear" deletes all data from SQLite (skills, sessions, events, suggestions, chat history)
-**And** after clearing, the app resets to first-launch state (first-launch skill prompt appears)
-**And** the app does not crash during or after data clearing
+## Out of Scope for V1
 
-### Story 6.10: Performance Optimization and Testing
+Documented here so the build never re-debates them.
 
-As a developer,
-I want to optimize performance and test critical paths,
-So that the app meets NFR targets (< 500ms perceived latency, 99%+ crash-free).
+**V1.5:** Expenses module, recurring events, French AI responses, Sunday weekly reflection, receipt scanning, custom budget categories
+**V2:** Apple Watch + Wear OS, "Hey OdO" wake-word, cross-device handoff
+**V3:** Family plan, shared awareness, per-event privacy, backend, sync
+**V4:** Enterprise plan, multi-tenant, RBAC, admin dashboards
 
-**Acceptance Criteria:**
+---
 
-**Given** all features from Epics 2-5
-**When** I measure perceived latency
-**Then** all core interactions complete in < 500ms (NFR1)
-**And** I implement optimistic UI for event creation and session logging
-**And** I implement skeleton loaders for async data
-**And** I test offline functionality thoroughly (no silent failures)
-**And** I test crash scenarios (database errors, API timeouts, etc.)
-**And** I verify 99%+ crash-free sessions (NFR5)
-**And** I verify zero data loss on restart (NFR6)
+**Document Status:** Locked for V1 MVP Implementation
+**Last Updated:** May 13, 2026
+**Owner:** Lokki (Solo Developer, Abidjan)

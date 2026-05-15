@@ -244,6 +244,79 @@ Never hardcode API keys in source code.
 
 ---
 
+## Naming Conventions
+
+**NAMING:** files snake_case, classes PascalCase, providers suffixed by role
+
+```
+Files:        snake_case.dart          (e.g. agenda_repository.dart)
+Classes:      PascalCase               (e.g. AgendaRepository)
+Variables:    camelCase                (e.g. agendaRepository)
+Constants:    camelCase or UPPER_CASE  (e.g. kDefaultTimeout or AI_MODEL)
+Enums:        PascalCase values        (e.g. EventCategory.personal)
+```
+
+Provider naming — suffix encodes the type:
+- `*RepositoryProvider` — returns a repository instance
+- `*NotifierProvider` — returns a notifier with mutable state
+- `*ServiceProvider` — returns a stateless service
+- Computed providers use descriptive names with no suffix (`todayAgendaProvider`)
+
+Feature directories: exact lower_snake_case (`evening_session`, not `eveningSession`).
+
+---
+
+## Code Quality — Zero-Lint Policy
+
+**LINT:** `flutter analyze` must show "No issues found!" after every file change.
+
+Rules:
+- Run `flutter analyze [file]` immediately after writing or editing any file in `lib/`
+- Fix ALL warnings and hints — zero tolerance, including `prefer_const_constructors`, `avoid_print`, `unused_import`
+- Never leave a TODO comment in committed code
+- Use `debugPrint()` instead of `print()` everywhere
+- Use `const` constructors wherever possible
+- Use `super.parameter` constructor syntax (not explicit `super()` calls)
+- Remove all unused imports before moving to the next file
+
+Build-time API key pattern (never in source):
+```bash
+flutter run --dart-define=AI_API_KEY=sk-ant-...
+flutter build apk --dart-define=AI_API_KEY=sk-ant-...
+```
+
+Access in Dart:
+```dart
+const apiKey = String.fromEnvironment('AI_API_KEY');
+```
+
+---
+
+## Import Rules (Story 1.8)
+
+Strict layer dependency directions — enforced by `flutter analyze`:
+
+| Layer | May import | Must NOT import |
+|-------|-----------|-----------------|
+| `domain/` | `dart:core`, `package:flutter/foundation.dart` | `data/`, `presentation/`, external packages |
+| `data/` | `domain/` only | `presentation/`, other features' `data/` |
+| `presentation/` | `domain/` entities + own providers | `data/` (never import DAOs or models directly) |
+
+**Rule:** If a `presentation/` file imports from `data/`, it's an architecture violation.
+
+---
+
+## Navigation (Story 1.8)
+
+- Always use `context.go(path)` or `context.push(path)` — never `Navigator.push`
+- Tab navigation: `context.go('/home/agenda')` — replaces the current stack
+- Screen navigation within a feature: `context.push('/home/agenda/event/$id')` — adds to stack
+- Bottom sheets: defined as sub-routes with `CustomTransitionPage` slide-up animation
+- Dismiss sheets: `context.pop()`
+- Router accessible via Riverpod: `ref.read(routerProvider)` — needed for programmatic nav (e.g., voice commands)
+
+---
+
 ## Summary
 
 | Area | Convention |
@@ -258,8 +331,9 @@ Never hardcode API keys in source code.
 | Models | claude-sonnet-4-6, AiProvider abstraction |
 | API Keys | --dart-define at build time |
 | Theme | Dark mode default, SharedPreferences toggle |
+| Navigation | context.go / context.push only — no Navigator.push |
 
 ---
 
-**Last Updated:** March 29, 2026  
+**Last Updated:** 2026-05-15  
 **Status:** Complete — Ready for Implementation

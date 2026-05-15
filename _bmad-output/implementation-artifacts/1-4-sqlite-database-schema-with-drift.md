@@ -1,188 +1,95 @@
----
-storyId: 1.4
-storyKey: 1-4-sqlite-database-schema-with-drift
-epicId: 1
-projectName: TooXTips
-date: 2026-03-29
-status: ready-for-dev
----
+# Story 1.4: SQLite Database Schema with Drift (Six Tables)
 
-# Story 1.4: SQLite Database Schema with Drift
+Status: ready-for-dev
 
-## Story Statement
+## Story
 
 As a developer,
-I want to define the SQLite schema using Drift with critical tables (skills, sessions, events, suggestions),
-So that all data is persisted locally with type-safe access.
+I want to define the complete V1 SQLite schema using Drift,
+so that all data is persisted locally with type-safe access.
 
 ## Acceptance Criteria
 
-**Given** the architecture specification with schema decisions
-**When** I create `core/database/app_database.dart` with Drift tables
-**Then** `skills` table exists with id, name, createdAt, lastSessionAt
-**And** `sessions` table exists with id, skillId, startedAt, durationMinutes, isAnchored, suggestedTime, notes
-**And** `events` table exists with id, title, startTime, endTime, category
-**And** `suggestions` table exists with id, skillId, slotStart, slotDuration, suggestedAt, acceptedAt, dismissedAt, thumbsDownAt, suppressedUntil
-**And** `dart run build_runner build` generates all Drift code without errors
-**And** the database compiles and is ready for data access
+1. `lib/core/database/app_database.dart` defines the Drift `AppDatabase` with all six tables
+2. `skills` table: `id` (PK AUTOINCREMENT), `name` (TEXT NOT NULL), `createdAt` (INTEGER NOT NULL, epoch ms), `lastSessionAt` (INTEGER nullable, epoch ms)
+3. `sessions` table: `id` (PK), `skillId` (FK → skills, CASCADE DELETE), `startedAt` (INTEGER NOT NULL), `durationMinutes` (INTEGER NOT NULL), `notes` (TEXT nullable), `isAnchored` (INTEGER NOT NULL DEFAULT 0), `suggestedTime` (INTEGER nullable)
+4. `events` table: `id` (PK), `title` (TEXT NOT NULL), `startTime` (INTEGER NOT NULL), `endTime` (INTEGER NOT NULL), `category` (TEXT NOT NULL — `'personal'|'work'|'practice'`), `notes` (TEXT nullable)
+5. `suggestions` table: `id` (PK), `skillId` (FK → skills SET NULL), `slotStart` (INTEGER NOT NULL), `slotDuration` (INTEGER NOT NULL), `suggestedAt` (INTEGER NOT NULL), `acceptedAt` (INTEGER nullable), `dismissedAt` (INTEGER nullable), `thumbsDownAt` (INTEGER nullable), `suppressedUntil` (INTEGER nullable)
+6. `eveningSessions` table: `id` (PK), `sessionDate` (TEXT NOT NULL, 'YYYY-MM-DD'), `startedAt` (INTEGER NOT NULL), `completedAt` (INTEGER nullable), `abandonedAt` (INTEGER nullable), `headline` (TEXT NOT NULL), `closeSummary` (TEXT nullable)
+7. `eveningHighlights` table: `id` (PK), `eveningSessionId` (FK → eveningSessions CASCADE DELETE), `displayOrder` (INTEGER NOT NULL), `content` (TEXT NOT NULL), `sourceType` (TEXT NOT NULL — `'session'|'event'|'pattern'|'insight'`), `sourceRefId` (INTEGER nullable), `userTag` (TEXT nullable — `'significant'|'dismiss'|'expand'`), `taggedAt` (INTEGER nullable)
+8. `dart run build_runner build --delete-conflicting-outputs` generates Drift code without errors
+9. The database opens on a fresh install (migration from scratch works)
+10. `lib/core/database/database_providers.dart` exposes a Riverpod `appDatabaseProvider` (singleton, lazy init via `path_provider`)
+11. `flutter analyze` reports no issues on all database files
 
-## Technical Requirements
+## Tasks / Subtasks
 
-### Database Tables
+- [ ] Task 1: Create Drift table definitions (AC: 2–7)
+  - [ ] `lib/core/database/tables/skills_table.dart` — `Skills` Drift table class
+  - [ ] `lib/core/database/tables/sessions_table.dart` — `Sessions` with FK to Skills
+  - [ ] `lib/core/database/tables/events_table.dart` — `Events`
+  - [ ] `lib/core/database/tables/suggestions_table.dart` — `Suggestions` with FK to Skills
+  - [ ] `lib/core/database/tables/evening_sessions_table.dart` — `EveningSessions`
+  - [ ] `lib/core/database/tables/evening_highlights_table.dart` — `EveningHighlights` with FK to EveningSessions
+- [ ] Task 2: Create `AppDatabase` (AC: 1, 8, 9)
+  - [ ] `lib/core/database/app_database.dart`: `@DriftDatabase(tables: [...])` annotation with all 6 tables
+  - [ ] `schemaVersion = 1`
+  - [ ] `migration` returns `MigrationStrategy(onCreate: (m) => m.createAll())`
+- [ ] Task 3: Run code generation (AC: 8)
+  - [ ] `dart run build_runner build --delete-conflicting-outputs`
+  - [ ] Verify `app_database.g.dart` is generated without errors
+- [ ] Task 4: Create `database_providers.dart` (AC: 10)
+  - [ ] `appDatabaseProvider`: `Provider<AppDatabase>` — lazy singleton
+  - [ ] Uses `path_provider` to get the documents directory
+  - [ ] Opens `NativeDatabase.createInBackground(file)`
+- [ ] Task 5: Smoke test (AC: 9)
+  - [ ] Write a simple unit test that opens the DB in memory: `NativeDatabase.memory()`
+  - [ ] Insert one skill, query it back — verifies schema works
+- [ ] Task 6: Lint check (AC: 11)
+  - [ ] `flutter analyze lib/core/database/` — zero issues
 
-#### Skills Table
+## Dev Notes
 
-```dart
-@DataClassName('SkillData')
-class Skills extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text()();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get lastSessionAt => dateTime().nullable()();
-}
+- **Drift table naming:** Dart class `Skills` → Drift table name `skills` (auto-lowercased). Column `createdAt` → `created_at` in SQL (auto-snake-cased).
+- **FK in Drift:** Use `IntColumn` with `.references(Skills, #id)` for foreign key constraint. For CASCADE, add `customConstraint('REFERENCES skills(id) ON DELETE CASCADE')` on the column definition.
+- **SET NULL FK:** For `suggestions.skillId`, use `.nullable().customConstraint('REFERENCES skills(id) ON DELETE SET NULL')`.
+- **Integer booleans:** Drift maps `bool` columns to `INTEGER` (0/1) automatically with `BoolColumn`. Use `BoolColumn get isAnchored => boolean().withDefault(const Constant(false))()`.
+- **Epoch ms integers:** All timestamps are stored as `int` (epoch milliseconds). Use `IntColumn` with `.nullable()` where applicable.
+- **`sessionDate` TEXT:** Stored as `'YYYY-MM-DD'` string to avoid timezone issues in grouping. Use `TextColumn`.
+- **`sourceType` and `category` TEXT enums:** Drift doesn't enforce TEXT enum constraints natively — validation must happen in the repository layer.
+- **Background open:** `NativeDatabase.createInBackground` runs DB on an isolate — prevents main thread jank.
+- **Test with `NativeDatabase.memory()`** to avoid file system dependency in unit tests.
+
+### Project Structure Notes
+
+```
+lib/core/database/
+├── app_database.dart           # @DriftDatabase, AppDatabase class
+├── app_database.g.dart         # generated — do not edit
+├── database_providers.dart     # appDatabaseProvider (Riverpod)
+└── tables/
+    ├── skills_table.dart
+    ├── sessions_table.dart
+    ├── events_table.dart
+    ├── suggestions_table.dart
+    ├── evening_sessions_table.dart
+    └── evening_highlights_table.dart
 ```
 
-#### Sessions Table
+### References
 
-```dart
-@DataClassName('SessionData')
-class Sessions extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get skillId => integer().references(Skills, #id)();
-  DateTimeColumn get startedAt => dateTime()();
-  IntColumn get durationMinutes => integer()();
-  BoolColumn get isAnchored => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get suggestedTime => dateTime().nullable()();
-  TextColumn get notes => text().nullable()();
-}
-```
+- [Source: _bmad-output/planning-artifacts/architecture.md#SQLite-Schema] — definitive schema with column names and constraints
+- [Source: _bmad-output/planning-artifacts/epics.md#Story-1.4] — acceptance criteria
+- [Source: _bmad-output/planning-artifacts/architecture.md#Critical-Technical-Risks] — evening session interruption mitigation
 
-#### Events Table
+## Dev Agent Record
 
-```dart
-@DataClassName('EventData')
-class Events extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text()();
-  DateTimeColumn get startTime => dateTime()();
-  DateTimeColumn get endTime => dateTime()();
-  TextColumn get category => text().nullable()();
-}
-```
+### Agent Model Used
 
-#### Suggestions Table
+claude-sonnet-4-6
 
-```dart
-@DataClassName('SuggestionData')
-class Suggestions extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get skillId => integer().references(Skills, #id)();
-  DateTimeColumn get slotStart => dateTime()();
-  IntColumn get slotDuration => integer()(); // in minutes
-  DateTimeColumn get suggestedAt => dateTime()();
-  DateTimeColumn get acceptedAt => dateTime().nullable()();
-  DateTimeColumn get dismissedAt => dateTime().nullable()();
-  DateTimeColumn get thumbsDownAt => dateTime().nullable()();
-  DateTimeColumn get suppressedUntil => dateTime().nullable()();
-}
-```
+### Debug Log References
 
-### Database Class
+### Completion Notes List
 
-```dart
-@DriftDatabase(tables: [Skills, Sessions, Events, Suggestions])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-
-  @override
-  int get schemaVersion => 1;
-
-  // DAOs will be added in later stories
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'tooxips.db'));
-    return NativeDatabase(file);
-  });
-}
-```
-
-### Naming Conventions
-
-- Table names: PascalCase (Skills, Sessions, Events, Suggestions)
-- Column names: snake_case in database, camelCase in Dart
-- Primary keys: `id` (auto-increment integer)
-- Foreign keys: `{tableName}Id` format
-- Timestamps: `DateTime` type (stored as Unix timestamps)
-- Boolean flags: `is{Property}` format
-
-## Implementation Details
-
-### File Structure
-
-Create `lib/core/database/app_database.dart` with:
-
-1. Import statements for Drift and dependencies
-2. Part directive for generated code
-3. Table definitions (Skills, Sessions, Events, Suggestions)
-4. Database class definition
-5. Connection helper function
-
-### Key Constraints
-
-- All tables MUST use integer primary keys (auto-increment)
-- Foreign keys MUST reference correct tables
-- DateTime columns MUST use `dateTime()` type
-- Boolean columns MUST use `boolean()` type
-- Nullable columns MUST use `.nullable()`
-- Default values MUST be explicit where needed
-- Column names MUST follow snake_case convention
-- Database file MUST be stored in app documents directory
-
-### Code Generation
-
-After creating the file:
-
-1. Run `dart run build_runner build`
-2. Verify `app_database.g.dart` is generated
-3. Verify no compilation errors
-4. Check generated code for correctness
-
-### Verification Steps
-
-1. Create `lib/core/database/app_database.dart`
-2. Define all four tables with correct columns
-3. Create AppDatabase class with schema version
-4. Create connection helper function
-5. Run `dart run build_runner build`
-6. Verify generated files exist and compile
-7. Run `flutter analyze` to check for errors
-
-## Success Criteria
-
-- ✓ Skills table defined with all required columns
-- ✓ Sessions table defined with foreign key to Skills
-- ✓ Events table defined with all required columns
-- ✓ Suggestions table defined with foreign key to Skills
-- ✓ AppDatabase class created with correct schema version
-- ✓ Connection helper function implemented
-- ✓ `dart run build_runner build` succeeds without errors
-- ✓ Generated code files created (app_database.g.dart)
-- ✓ File compiles without errors
-- ✓ Ready for DAO implementation (Stories 2.1, 3.1)
-
-## Dependencies
-
-- Depends on: Story 1.1 (Project Setup)
-- Blocks: Story 2.1 (Agenda Data Access), Story 3.1 (Practice Data Access)
-
-## Notes
-
-- This is the foundational data layer; all data access goes through this database
-- Drift generates type-safe code; leverage it to prevent runtime errors
-- The schema is designed for offline-first architecture with complete local storage
-- All timestamps use UTC+0 timezone (enforced in business logic, not database)
-- Foreign keys ensure referential integrity
-- The database file persists across app restarts
+### File List

@@ -1,18 +1,17 @@
 ---
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7]
-inputDocuments: 
+inputDocuments:
   - project-brief.md
-  - prd.md
-  - TooXTips_MVP_Spec_v2.0_REVISED.md
-projectName: TooXTips
+  - architecture.md
+projectName: OdO
 userName: Lokki
-date: 2026-03-29
+date: 2026-05-13
 ---
 
-# UX Design Specification TooXTips
+# UX Design Specification — OdO
 
-**Author:** Lokki  
-**Date:** 2026-03-29
+**Author:** Lokki
+**Date:** May 13, 2026
 
 ---
 
@@ -20,374 +19,195 @@ date: 2026-03-29
 
 ### Project Vision
 
-TooXTips is a personal AI productivity app that unifies time management (Agenda) and skill development (Practice) into a single system. The core differentiator is proactive AI that surfaces cross-domain insights at the right moment — e.g., "You have 45 free minutes Thursday. Japanese is idle. Block it?" — rather than waiting for users to ask questions.
+OdO is a personal AI daily companion built natively for the Ivorian context. It is not a productivity app. It is a daily ritual — a five-minute evening conversation with an AI that learns what matters to the user across their time, their habits, and their life, and stays with them all day through timely, voice-first interactions.
 
-The app treats time, money, and skill development as a single interconnected system. The MVP focuses on Agenda + Practice with AI as an enhancement layer that proactively suggests how to use free time for skill development.
+The product holds two design tensions in perfect balance: **minimal in surface, deep in substance.** The UI is intentionally restrained. The AI is intentionally proactive. Together they create something that feels less like an app and more like a presence.
 
 ### Target Users
 
-**Primary:** Lokki (the builder) — knowledge worker in Abidjan, manages a full work calendar, wants to maintain Japanese language practice, tracks spending to understand financial patterns. Uses mobile as primary device, values time optimization and skill development.
+**Primary:** Lokki — knowledge worker in Abidjan, full work calendar, ongoing skill commitments (Japanese, others), intermittent connectivity, preference for restraint over feature density. Mobile-first. Uses voice when it helps and tap when it helps. Wants reflection, not engagement metrics.
 
-**Secondary:** Beta testers and collaborators who value time optimization and skill development, manage multiple life domains (work, learning, finances), and have inconsistent connectivity.
+**Secondary:** A small circle of West African francophone beta testers who value the same things — proactive but quiet AI, local privacy, native locale, depth over breadth.
 
-**User Context:** Mobile-first, intermittent connectivity, XOF currency, DD/MM/YYYY dates, Abidjan timezone (UTC+0), future French language support.
+**User Context:** Mobile-first, intermittent connectivity, XOF currency, DD/MM/YYYY dates, UTC+0 timezone, French-primary UI with English support, occasional outdoor high-brightness use, evening reflective ritual.
 
 ### Key Design Challenges
 
-1. **Persistent visibility paradox** — The Agenda strip must always be visible without consuming excessive space or creating cognitive overload. It's the anchor for all temporal reasoning.
-
-2. **Cross-module context in AI** — The AI must reason across Agenda + Practice simultaneously. The UI must make this relationship clear without overwhelming the user. The AI's value is in surfacing connections users would miss.
-
-3. **Offline-first perception** — Users must never feel the absence of AI. Graceful degradation must be invisible, not an error state. The app works fully offline; AI is a bonus.
-
-4. **Proactive notification timing and friction** — One suggestion per day at 8pm must feel relevant and actionable. Tapping it must require under three seconds to act on, with no navigation or form friction.
-
-5. **Unanchored session pattern detection** — Logging a practice session without a calendar event should feel like completion, not a prompt for more action. The AI surfaces the pattern only after observing it twice at similar times.
+1. **Ambient presence without intrusion** — OdO must feel always-there (Glance Screen, persistent strip, bottom bar) without ever demanding attention. The "one AI voice per day" principle is the spine that holds this together.
+2. **Evening session as defining ritual** — The 5-minute session must feel essential without ever feeling obligatory. It must collapse gracefully on quiet days and never penalize skipping.
+3. **Glance Screen as both lock and surface** — It is the most-used screen in the product. It must communicate state at a glance, accept voice and text input, and authenticate — all without becoming busy.
+4. **Voice as equal-priority input** — Voice and tap must be interchangeable for capture. Voice should never feel like a second-class path. But voice should never demand a response.
+5. **Seven themes without fragmentation** — Theme presets + custom picker must feel coherent across orb, strip, cards, and accents. Light mode must be genuinely usable outdoors.
+6. **Cross-module AI reasoning surfaced sparingly** — The AI's value is in connecting Agenda + Practice + history. The UI should make this connection visible only at the moment of insight (the cross-domain insight in the evening session, the throughout-day suggestion), never as ambient decoration.
+7. **Two-device coherence (V1 prep)** — The Glance Screen design language must extend to the watch (V2) without rework. One interaction model, two scales.
 
 ### Design Opportunities
 
-1. **Minimal UI, maximum AI** — The interface is intentionally simple (persistent Agenda strip, one-slide carousel between Practice and Expenses, persistent AI component). All complexity lives in the AI layer. This reduces maintenance surface and keeps cognitive load low.
-
-2. **Bidirectional module relationships** — Practice informs Agenda (spontaneous sessions suggest recurring blocks); Agenda informs Practice (free slots suggest practice opportunities). The UI can visually encode this connection through colour and layout.
-
-3. **Locale-aware design** — XOF currency, DD/MM/YYYY dates, Abidjan context, and future French support create opportunities for thoughtful localization that feels native, not generic.
-
-4. **Local-first proactive AI** — Free-slot + idle-skill detection runs on-device as a scheduled background task. The AI only gets involved if the user acts on the notification. This means proactive suggestions work fully offline.
-
-### Architectural Clarifications
-
-**Navigation Structure:** Agenda strip (always visible) + one-slide carousel between Practice and Expenses. Expenses is deferred to v1.1, but the carousel slot exists from day one so v1.1 doesn't require a navigation redesign. This is critical for the Flutter implementation.
-
-**Proactive Notification Behaviour:** Tapping the 8pm notification opens a contextual confirmation sheet — not the Practice module, not a pre-filled form. The sheet shows the suggestion in plain language with two actions: "Block it" and "Not now." If the user taps "Block it," the session is added to Agenda and Practice simultaneously, the sheet dismisses, and that's it. No navigation, no form, no friction. The user should be able to act on the AI's suggestion in under three seconds without the app fully opening.
-
-**Unanchored Session Handling:** Flag sessions silently. No immediate prompt — logging a session is a moment of completion and prompting immediately breaks that feeling. The flag is invisible to the user until the AI has seen it happen twice at similar times. Then and only then does the AI ask once.
-
-**AI Chat Opening State:** The chat opens to a one-line state summary at the top — not a dashboard, literally one sentence: *"3 events today · Japanese idle 5 days · 2 free slots this week"* — followed immediately by quick-command suggestions below it. The summary is skimmable in under two seconds and gives the AI interaction immediate context without feeling like a report.
-
-**Local Proactive Logic:** The 8pm notification is computed locally, not by the AI. Free-slot + idle-skill detection runs on-device as a scheduled background task. The AI only gets involved if the user taps the notification and opens the confirmation sheet. This ensures proactive suggestions work fully offline.
-
-**Offline AI Behaviour:** The AI never comments on its own absence. If offline, the chat opens normally, quick commands appear, and any query requiring the API returns a neutral inline message: *"Not available right now — try again when you're connected."* No error state, no spinner, no explanation. Just tell the user what to do next.
+1. **Minimal UI, maximum AI** — The interface is intentionally simple. All complexity lives in the AI layer. Cognitive load stays low.
+2. **The orb as personality** — One element carries the entire AI presence. Breathing when idle, waveform when listening, brief pulses on commit. The orb does the emotional work that text would otherwise have to do.
+3. **The Glance Screen as ritual entry point** — Every interaction starts here. The lock state, the orb, the next event, the latest suggestion — four pieces of information, perfectly framed.
+4. **The evening session as compounding moat** — Five minutes a day, compounding into a model that no other app can replicate. The longer the user stays, the deeper the value.
 
 ---
 
-## Core User Experience
+## Design Principles
 
-### Defining Experience
-
-The core user experience is **receiving and acting on a proactive AI suggestion in under three seconds**. At 8pm, the user gets a notification: "You have 45 free minutes Thursday. Japanese is idle. Block it?" They tap it, see a confirmation sheet with two buttons ("Block it" and "Not now"), tap "Block it," and the session is added to both Agenda and Practice simultaneously. The sheet dismisses. Done.
-
-This is the primary loop that defines TooXTips' value. Everything else — manual event creation, session logging, chat queries — is secondary to this moment of effortless cross-module action.
-
-### Platform Strategy
-
-**Platform:** Flutter mobile app (iOS + Android)  
-**Primary interaction:** Touch-based, mobile-first  
-**Device context:** Mobile as primary computing device, intermittent connectivity  
-**Critical constraint:** Offline-first — all core features work without connectivity  
-**Locale:** XOF currency, DD/MM/YYYY dates, Abidjan timezone (UTC+0), future French support
-
-The platform is mobile-only for MVP. The persistent Agenda strip and carousel are designed for vertical scrolling on small screens. The AI component at the bottom is thumb-reachable. Dark mode is default for OLED optimization.
-
-### Effortless Interactions
-
-1. **Proactive notification → action** — Tapping a notification opens the confirmation sheet directly, not the app home screen. The user acts without navigation.
-
-2. **Session logging** — Tapping a skill card opens a timer or quick-log sheet. Logging a session feels like completion, not a prompt for more.
-
-3. **Agenda strip visibility** — The strip is always visible. Users never scroll to see what's coming next. Time awareness is constant.
-
-4. **AI chat context** — Opening the chat shows a one-line state summary immediately: *"3 events today · Japanese idle 5 days · 2 free slots this week."* The user knows their current state without reading a report.
-
-5. **Offline transparency** — If offline, the app works normally. If a query requires the API, a neutral message appears: *"Not available right now — try again when you're connected."* No error state, no spinner.
-
-### Critical Success Moments
-
-1. **First proactive notification** — The user receives the 8pm suggestion, taps it, acts on it in under three seconds, and feels like the AI understands their life. This is the aha moment.
-
-2. **Persistent Agenda strip** — The user opens the app and immediately sees their next events without scrolling. Time is always in context.
-
-3. **Bidirectional connection** — The user logs a spontaneous practice session, and later the AI surfaces: *"You've practised Japanese twice around 7pm this week without scheduling it. Want to make it recurring?"* The system learned from behaviour.
-
-4. **Offline resilience** — The user is commuting with no connectivity, logs events and practice sessions, and later when connectivity returns, everything syncs silently. They never felt the absence of AI.
-
-5. **Minimal cognitive load** — The user opens the app and sees one primary action per screen. No decision paralysis, no submenus, no overwhelming options.
-
-### Experience Principles
-
-1. **Proactive > Reactive** — The AI's primary value is surfacing insights at the moment they're actionable, not answering questions on demand. One suggestion per day at 8pm beats an always-on AI that answers perfectly but at the wrong moment.
-
-2. **Offline-first, AI-enhanced** — The app works completely without connectivity. The AI is a read-only observer that surfaces insights when available. Its absence is never felt.
-
-3. **Friction-free action** — Every critical user action requires under three seconds and zero navigation. Tapping a notification, logging a session, confirming a suggestion — all feel instant.
-
-4. **Silent flagging, visible patterns** — Unanchored sessions are flagged silently. The user never sees the flag until the AI has observed the pattern twice at similar times. Then and only then does the AI ask once.
-
-5. **Minimal UI, infinite AI** — The interface is intentionally simple (persistent strip, one-slide carousel, persistent AI component). All complexity lives in the AI layer. This reduces maintenance and keeps cognitive load low.
-
-6. **Locale-aware, not generic** — XOF currency, DD/MM/YYYY dates, Abidjan context, and future French support are core to how the app feels native and respectful of the user's context.
-
-7. **One AI voice per day** — The proactive notification is the AI's primary channel. The chat is the user's channel. The AI never initiates inside the chat — no "good morning" messages, no unprompted check-ins, no push-style content inside the chat thread. If the user opens chat, they're asking. The AI responds. The 8pm notification is the only moment the AI speaks first. This distinction keeps the AI from feeling like a bot and preserves the notification's signal value.
+1. **One AI voice per day.** The proactive notification is the AI's primary channel. The chat is the user's channel. The AI never initiates inside the chat. The 8pm session is the only moment the AI speaks first by default.
+2. **The user tags. The system learns.** Every interaction that shapes OdO's understanding is one tap. Significant, dismiss, expand. No forms. No why-fields.
+3. **Offline is invisible.** Graceful degradation is never an error state. "Couldn't reach AI — tap to retry" preserves the user's message and never feels like failure.
+4. **Restraint is the default.** Empty space is not blank space. Three states — events, no events today, nothing scheduled — each handled with a single line. Never more.
+5. **Voice is equal, not better.** Tap and voice route to the same commit pipeline. Voice never demands a response. The user can ignore any notification.
+6. **The phone is the brain. The watch is a surface.** All logic, all data, all decisions happen on the phone. The watch (V2) displays and captures.
+7. **Local always.** Data does not leave the device except as AI context payload on explicit interaction. No analytics. No telemetry. No advertising IDs.
 
 ---
 
 ## Core UX Patterns
 
-### Pattern 1: Confirmation Sheet Anatomy
+### Pattern 1: The Glance Screen
 
-The confirmation sheet is the most critical interaction in the app. It must contain exactly four elements — no more:
+The most-used surface in the entire app. Sits before the home screen as an ambient lock screen with privileged information.
 
-1. **Suggestion** — The AI's suggestion in plain language (one sentence, natural, not system-speak)
-   - Example: *"You have 45 free minutes Thursday morning. Japanese is idle. Block it?"*
+**Layout (top to bottom):**
 
-2. **Context** — The contextual reason in muted text below the suggestion
-   - Example: *"45 min free · Japanese: 5 days idle"*
+1. **Lock state row** — lock icon (violet locked / green unlocked) + text label ("Locked" / "Unlocked")
+2. **AI orb** — centered, breathing animation idle, waveform animation when listening
+3. **Info cards** — minimal, two at most: next event, OdO's latest suggestion. Never sensitive data. Never more than two.
+4. **Bottom bar** — three elements left-to-right: quick-add (+) button, text input field, microphone toggle
+5. **Slide-up affordance** — subtle handle at very bottom signals unlock gesture
 
-3. **Primary action** — "Block it" button, full width, violet background
-   - Adds the session to both Agenda and Practice simultaneously
+**Authentication paths:**
+- Vocal: "Hey OdO, unlock — [user's chosen phrase]"
+- Typed: tap text input, type password, enter
+- Biometric: configurable in settings as a third option
 
-4. **Secondary action** — "Not now" text button, no border, muted colour
-   - Dismisses without friction and without asking why
+**Auth failure handling:** Three vocal failures → typed password becomes required for the next 5 minutes. Quiet visual cue (lock icon pulses red once), no error toast.
 
-**What's not included:** No close icon. No "remind me later." No explanation of how the AI decided this. The user either acts or doesn't. Asking why they declined adds friction and data you don't need in MVP.
+**The orb is the watch face.** Same design at smaller scale (V2). Users learn one interaction model.
 
-### Pattern 2: Agenda Strip Information Hierarchy
+### Pattern 2: The Persistent Agenda Strip
 
-The strip is always visible but its content needs a clear priority rule for when events overlap or the day is empty. Three states:
+The strip is always visible at the top of the home screen. Three states, each handled with one line:
 
-#### State 1: Events exist today
-
+**State 1 — Events exist today:**
 - Show next 2 upcoming events with time and title
 - Titles truncated at 20 characters
 - Format: `9:00 Standup · 11:00 Design Review`
 
-#### State 2: No more events today
-
-- Show first event tomorrow with a muted "tomorrow" label
+**State 2 — No more events today:**
+- Show first event tomorrow with muted "tomorrow" label
 - Format: `Tomorrow · 9:00 Standup`
 
-#### State 3: Nothing scheduled
+**State 3 — Nothing scheduled:**
+- Single muted line: *"Nothing scheduled — free day"*
+- Not a prompt. Not a blank space. A statement.
 
-- Show a single muted line: *"Nothing scheduled — free day"*
-- Not a prompt to add events, not a blank space
+**Rule:** Never more than two events simultaneously. If three are back-to-back, show two and let the user tap into the Agenda slide for the rest. The strip is a glance, not a list.
 
-**Rule:** The strip should never show more than two events simultaneously. If three are back-to-back, show the next two and let the user swipe into Agenda for the rest. The strip is a glance, not a list.
+**Interaction:** Tap to expand into the Agenda slide. Long-press to enter monthly calendar.
 
-### Pattern 3: Offline State for AI Chat
+### Pattern 3: The Confirmation Sheet
 
-When the user sends a message while offline, the message appears in the chat thread as normal. Beneath it — in the same muted style as timestamps — a single line appears:
+The confirmation sheet is the most critical interaction in the app. It must contain exactly four elements — no more:
+
+1. **Suggestion** — Plain language, one sentence, not system-speak
+   - *"You have 45 free minutes Thursday morning. Japanese is idle. Block it?"*
+2. **Context** — Muted text below
+   - *"45 min free · Japanese: 5 days idle"*
+3. **Primary action** — "Block it" button, full width, theme accent background
+   - Adds the session to both Agenda and Practice simultaneously
+4. **Secondary action** — "Not now" text button, no border, muted colour
+   - Dismisses without friction, without asking why
+
+**What is NOT included:** No close icon. No "remind me later." No explanation of how the AI decided this. No third option asking why. The user acts or doesn't.
+
+**Silent thumbs-down:** Long-press on "Not now" reveals "Don't suggest this again" — single tap, sheet closes, that skill is suppressed for 7 days. The user never sees this logic explained — they just notice suggestions get better.
+
+**Stale slot guard:** When the sheet opens, recheck the agenda. If the slot is gone, replace all four elements with a single line *"This slot is no longer available"* and one button: "Close."
+
+### Pattern 4: The Evening Session
+
+The session is OdO's defining surface. Everything else is infrastructure.
+
+**Structure (5-minute ceiling):**
+
+1. **Opening headline** — one sentence summarizing the day
+   - *"Productive day. Two practice sessions, three events, on budget."*
+2. **Highlights (3–4 items)** — ranked by relevance from current data state
+   - Each item rendered as a card: brief context + content
+   - Tag actions inline on each card: **significant** (accent dot) · **dismiss** (muted X) · **expand** (chevron)
+3. **One cross-domain insight if available**
+   - *"Third Japanese session at 7pm this week — want to anchor that time?"*
+   - Same tag interaction
+4. **Close summary** — one line of what was learned, queues tomorrow's nudge
+   - *"Noted: Japanese matters at 7pm. Tomorrow: free slot Thursday morning."*
+
+**Wrap-up shortcut:** Always-visible "wrap up" button at top — jumps to close phase. The user can complete a session in seconds when tired or rushed.
+
+**Voice handling:** All tag actions accept voice ("significant", "dismiss", "expand"). Voice is never required.
+
+**Persistence:** Every tag writes to the database immediately. The session survives interruption until midnight. After midnight, today's session is gone.
+
+**Tone:** Reflective, not corporate. Warm, not chatty. The headline summarizes; it doesn't congratulate.
+
+### Pattern 5: Offline State for AI Chat
+
+When the user sends a message while offline, the message appears in the chat thread as normal. Beneath it, in muted style:
 
 *"Couldn't reach AI · Tap to retry"*
 
-The message stays in the thread. When connectivity returns and they tap retry, it sends without them retyping. Their thought is preserved.
+The message stays in the thread. When connectivity returns and the user taps retry, it sends without retyping. Their thought is preserved.
 
-This pattern preserves the "offline absence is never felt" principle. The alternative — silently eating the message or showing a red error state — breaks the experience.
+The orb continues breathing. The Agenda strip continues updating. The product remains fully functional. Offline is never an error state.
 
----
+### Pattern 6: Skill Card
 
-## Desired Emotional Response
+The Practice module's primary surface.
 
-### Primary Emotional Goals
+**Layout:**
+- **Top row:** skill name + current streak badge (e.g. "🔥 7")
+- **Middle:** 7-day activity bar — 7 vertical bars, filled if session that day
+- **Bottom:** last session — duration + relative date (*"35 min · 2 days ago"*)
 
-The primary emotional goal is **"The AI actually understands my life."** This is the aha moment. The user receives a proactive suggestion, acts on it in under three seconds, and feels seen. The AI didn't ask them to describe their schedule or their practice habits — it observed, reasoned across domains, and surfaced a connection they would have missed.
+**Interaction:**
+- Tap → skill detail screen
+- Long-press → quick log session sheet
 
-Secondary emotional goals:
-- **Calm and focused** — The interface is minimal, decisions are clear, cognitive load is low. Using the app should feel restful, not stressful.
-- **Empowered and in control** — The user decides whether to act on suggestions. The AI is a tool they control, not a system that controls them.
-- **Trusted and reliable** — The app works offline, data stays local, the AI never surprises them with unexpected behaviour.
+**No XP. No levels. No goals.** The user types "Japanese" and the card exists. The bar fills as sessions are logged. The streak speaks for itself.
 
-### Emotional Journey Mapping
+### Pattern 7: First-Launch Skill Prompt
 
-**First discovery:**
-The user installs TooXTips and sees a minimal interface: Agenda strip at top, Practice slide, AI component at bottom. No onboarding, no tutorial, no overwhelming options. Feeling: *Curious but not intimidated.*
+On first app open, after Glance Screen unlock setup, a single bottom sheet appears:
 
-**First interaction (manual):**
-The user adds an event or logs a practice session. The interaction is frictionless — a bottom sheet, a few taps, done. Feeling: *Efficient and capable.*
+*"What's one skill you're working on?"*
 
-**First proactive notification (8pm):**
-The user gets a notification: "You have 45 free minutes Thursday. Japanese is idle. Block it?" They tap it, see the confirmation sheet, tap "Block it," and the session is added to both modules. Feeling: *Delighted and understood.* This is the aha moment.
+Single text field. Single button: "Add it." That's the entire onboarding.
 
-**Offline resilience:**
-The user is commuting with no connectivity, logs events and practice sessions, and later when connectivity returns, everything syncs silently. They never felt the absence of AI. Feeling: *Reliable and dependable.*
-
-**Returning to use:**
-The user opens the app the next day. The Agenda strip shows their schedule, the Practice slide shows their skills, the AI is ready. They feel like the app is a natural extension of their life, not a tool they have to remember to use. Feeling: *Integrated and effortless.*
-
-### Micro-Emotions
-
-1. **Trust vs. Skepticism** — The user should trust that the AI's suggestions are thoughtful, not random. The offline-first architecture and local proactive logic build this trust. The AI never comments on its absence, never shows error states, never breaks the experience.
-
-2. **Delight vs. Satisfaction** — The first proactive notification should delight. Subsequent notifications should satisfy. The "one AI voice per day" principle prevents notification fatigue and preserves the delight of the 8pm check-in.
-
-3. **Accomplishment vs. Frustration** — Logging a session should feel like completion, not a prompt for more. The silent flagging of unanchored sessions means the user never feels frustrated by unexpected prompts.
-
-4. **Confidence vs. Confusion** — The Agenda strip is always visible, providing temporal context. The user never opens the app and wonders "what should I do next?" The primary action is always clear.
-
-5. **Autonomy vs. Dependency** — The user decides whether to act on suggestions. The "Block it" / "Not now" choice is binary and frictionless. The AI never nags, never escalates, never makes decisions for the user.
-
-### Design Implications
-
-**To create "The AI understands my life":**
-- The confirmation sheet must show the suggestion in natural language, not system-speak
-- The contextual reason ("45 min free · Japanese: 5 days idle") must be visible so the user understands the AI's reasoning
-- The action must be instant — no forms, no navigation, no friction
-
-**To create "Calm and focused":**
-- The interface is minimal: persistent strip, one-slide carousel, persistent AI component
-- One primary action per screen — no decision paralysis
-- Dark mode is default for visual calm and OLED optimization
-- Typography and spacing are generous, not cramped
-
-**To create "Trusted and reliable":**
-- The app works fully offline — no surprise failures when connectivity drops
-- Offline messages are neutral, not error states: "Couldn't reach AI · Tap to retry"
-- The AI never initiates inside the chat — only the 8pm notification speaks first
-- Data stays local; no analytics, no telemetry, no third-party SDKs
-
-**To create "Integrated and effortless":**
-- The Agenda strip is always visible — time is always in context
-- Session logging feels like completion, not a prompt for more
-- Unanchored sessions are flagged silently — the user never sees friction until the AI has observed a pattern
-- The app learns from behaviour and suggests formalizing spontaneous patterns
-
-### Emotional Design Principles
-
-1. **Delight through understanding** — The AI's primary value is surfacing connections the user would miss. The confirmation sheet should make this understanding visible through natural language and contextual reasoning.
-
-2. **Calm through simplicity** — The interface is intentionally minimal. All complexity lives in the AI layer. Users should never feel overwhelmed by options or decisions.
-
-3. **Trust through transparency** — The app works offline, data stays local, the AI's reasoning is visible in the confirmation sheet. Users should never feel surprised or manipulated.
-
-4. **Autonomy through clarity** — Every critical action has a clear primary choice and a clear secondary choice. The user is always in control. The AI suggests; the user decides.
-
-5. **Integration through invisibility** — The app should feel like a natural extension of the user's life, not a tool they have to remember to use. The persistent Agenda strip and the 8pm notification are the only moments the app demands attention.
-
-### Emotional Failure States
-
-The AI will occasionally get suggestions wrong. The user already practised, the "free slot" is actually blocked by something the app doesn't know about, or the suggestion just doesn't resonate that day. One bad suggestion is fine. Three in a row and the notification gets turned off.
-
-**Design solution:** The confirmation sheet needs a third micro-action — a silent thumbs-down or "not relevant" button that takes no explanation and costs zero friction. One tap, dismissed, the system notes it. After two consecutive dismissals on the same skill, the AI deprioritises that skill in its suggestions for a week. The user never sees this logic — they just notice the suggestions get better.
-
-Implementation: a single `dismissed_at` timestamp per suggestion with a suppression window. This preserves the "in control" feeling even when the AI misses, because the user has a way to correct it without confronting the system.
-
-### Suggestion Construction Algorithm
-
-When multiple idle skills and free slots exist, the algorithm prioritises in this order:
-
-1. **Longest idle skill first** — Most days since last session
-2. **If tied** — Shortest available free slot that fits a default session (prevents suggesting a 2-hour slot when 30 minutes would do)
-3. **If still tied** — Earliest free slot in the week (sooner is more actionable)
-
-One suggestion per night, first match wins, algorithm stops. This ensures every suggestion is defensibly non-random, not arbitrary.
-
-### Stale Slot Guard
-
-The user gets the 8pm notification but doesn't tap it until 11am the next day. The "45 free minutes Thursday" slot may no longer exist — they may have added an event overnight.
-
-When the confirmation sheet opens, recheck the Agenda locally before rendering. If the slot is gone, display a single line: *"This slot is no longer available"* with a single button: "Close." No explanation, no alternative suggestion. The AI will try again tonight.
-
-This prevents a trust-breaking moment where the user taps "Block it" for a slot that doesn't exist.
-
-### Completion Animation and Navigation
-
-The completion animation plays for 400ms (durationSlow). After the animation finishes, the sheet pops using `Navigator.of(context).pop()`.
-
-If the user wasn't in the app when they tapped the notification, they return to their home screen. If they were in the app, they return to whatever slide they were on. No forced navigation, no app opening.
-
-### Success Criterion: Improvement Over Time
-
-After two weeks of use, the suggestion acceptance rate should be higher than week one. If it isn't, the deprioritisation logic isn't working or the slot-detection algorithm is too loose.
-
-Store `accepted_at` and `dismissed_at` per suggestion in the local DB with no external analytics. A simple weekly count tells you whether the product is actually learning from user behaviour, not just tracking it.
-
-### Implementation Sequence for Notification System
-
-Build in this order:
-
-1. `SuggestionEngine` — on-device algorithm (slot detection + idle skill ranking + priority rule)
-2. `SuggestionStore` — local DB table for suggestion history (`suggested_at`, `accepted_at`, `dismissed_at`, `skill_id`, `slot_start`)
-3. `BackgroundTaskService` — schedules 8pm check using `workmanager` or `flutter_background_fetch`
-4. `ConfirmationSheet` — UI surface with stale-slot guard and completion animation
-5. `NotificationService` — triggers local notification with constructed suggestion text
-
-The engine is the product — everything else is delivery infrastructure.
+This question is the difference between an app that feels empty on day one and an app that feels alive from minute one.
 
 ---
 
-## UX Pattern Analysis & Inspiration
+## Design Inspiration Strategy
 
-### Inspiring Products Analysis
+**What to adopt:**
+- Streak as quiet identity (Duolingo, but simplified — no points, no levels)
+- Completion feel (Things 3 — session logging feels like accomplishment)
+- Always-accessible voice input (Apple's ambient mic models)
+- Conversation starters (ChatGPT quick commands, but only on first chat open)
 
-#### Duolingo — Streak as Identity
+**What to adapt:**
+- Duolingo's streak mechanics → visual bar without gamification
+- Things 3's completion animation → session log + event create
+- ChatGPT's chat → add one-line state summary, no AI-initiated chat
 
-**What works:** The streak is not a gamification mechanic — it's identity. After 12 days of Japanese, the user is no longer tracking a habit. They're protecting something that feels like theirs. The emotional weight of not wanting to break the streak is more motivating than any reward system.
-
-**Lesson for TooXTips:** The 7-day bar on skill cards needs to feel like something worth protecting, not just a progress indicator. The visual design of that bar matters more than it appears in current mockups. This is where the "streak as identity" principle should live.
-
-**Anti-pattern to avoid:** Duolingo becomes a notification factory. "You haven't practised today!" at 9pm every night is meaningless noise. This is exactly what the "one AI voice per day" principle was designed to prevent. TooXTips must never send multiple notifications per day.
-
-#### Things 3 — Completion as Feeling
-
-**What works:** No dashboard, no analytics, no gamification. Just tasks that feel good to complete. The key interaction is how tasks disappear when checked — a tiny animation that feels like *done*, not *deleted*. Completion has weight and satisfaction.
-
-**Lesson for TooXTips:** Session logging should chase this completion feeling. Logging 45 minutes of Japanese should feel like that checkmark in Things 3, not like filling out a form. The bottom sheet should confirm the action instantly and dismiss with a sense of accomplishment.
-
-**Anti-pattern to avoid:** Things 3 is entirely reactive. It waits for the user. TooXTips' entire thesis is that waiting for the user is the wrong model. The proactive 8pm notification is the counter to this pattern.
-
-#### Claude / ChatGPT — Always-Accessible Input with Conversation Starters
-
-**What works:** The input is always at the bottom, always thumb-reachable, always ready. You never navigate to ask a question. The conversation persists without effort. The blank chat with a blinking cursor is intimidating, so quick-command suggestions act as conversation starters that lower activation energy to zero.
-
-**Lesson for TooXTips:** The AI component design already embeds this pattern — input always at the bottom, thumb-reachable. The one-line state summary + quick commands at chat opening is the exact pattern that lowers activation energy. This is correct.
-
-**Anti-pattern to avoid:** Both Claude and ChatGPT are entirely reactive with no concept of *when* to speak. TooXTips fixes this with the 8pm notification as the only proactive channel. This distinction is critical.
-
-### Transferable UX Patterns
-
-**From Duolingo:**
-- Streak as identity, not gamification — the 7-day bar on skill cards should feel like something worth protecting
-- Visual weight on the streak indicator to make it emotionally significant
-- Restraint in notifications — never more than one per day
-
-**From Things 3:**
-- Completion feeling over form-filling — session logging should feel like a checkmark, not a form
-- Tiny animations that signal *done* rather than *deleted*
-- Visual restraint and respect for user attention
-
-**From Claude/ChatGPT:**
-- Always-accessible input at the bottom, thumb-reachable
-- Conversation starters (quick commands) to lower activation energy
-- Persistent conversation thread without friction
-
-### Anti-Patterns to Avoid
-
-1. **Notification inflation** — All three inspiring apps have learned the wrong lesson from engagement metrics and send too many notifications that mean too little. TooXTips' "one AI voice per day" principle is the direct counter. This must remain non-negotiable.
-
-2. **Reactive-only design** — Waiting for the user to ask is the wrong model. The proactive 8pm notification is TooXTips' differentiator.
-
-3. **Form-filling friction** — Session logging and event creation should feel like completion, not data entry.
-
-4. **Blank-state intimidation** — Empty screens with no guidance lower activation energy. The first-launch skill question and the AI chat's quick commands solve this.
-
-### Design Inspiration Strategy
-
-**What to Adopt:**
-- Streak as identity — the 7-day bar should feel emotionally significant and worth protecting
-- Completion feeling — session logging and event creation should feel like accomplishment, not form-filling
-- Always-accessible input — the AI component at the bottom, thumb-reachable, always ready
-- Conversation starters — quick commands lower activation energy for chat interaction
-
-**What to Adapt:**
-- Duolingo's streak mechanics → simplify to a visual bar without points or levels
-- Things 3's completion animation → apply to session logging and event creation
-- ChatGPT's chat interface → add the one-line state summary and quick commands
-
-**What to Avoid:**
+**What to avoid:**
 - Notification inflation — one AI voice per day, non-negotiable
 - Reactive-only design — the 8pm proactive notification is the differentiator
-- Form-filling friction — all critical actions should feel like completion
-- Blank-state confusion — the first-launch skill question and quick commands prevent this
+- Form-filling friction — all critical actions feel like completion
+- Blank-state intimidation — first-launch question, persistent strip, quick commands solve this
+- Gamification — no XP, no levels, no badges
 
-This strategy keeps TooXTips unique while borrowing proven patterns from products that respect user attention and create emotional connection.
+This strategy keeps OdO unique while borrowing proven patterns from products that respect attention and create emotional connection.
 
 ---
 
@@ -395,56 +215,84 @@ This strategy keeps TooXTips unique while borrowing proven patterns from product
 
 ### Design System Choice
 
-**Choice: Flutter's Built-In Theming System + Custom Design Tokens**
+**Choice: Flutter's built-in theming + custom design tokens, two-layer color system, seven theme presets + custom picker.**
 
-Flutter's native theming system is lightweight, requires no external dependencies, and provides complete control over the visual design without the overhead of a full design system framework. This approach supports the minimal aesthetic, dark-mode-first strategy, and locale awareness required for TooXTips.
+### Rationale
 
-### Rationale for Selection
+1. **Speed** — Flutter's theming is lightweight, tokens are defined once and applied everywhere.
+2. **Control** — Complete control over the minimal aesthetic without adapting an established system's opinions.
+3. **Solo development** — No external design system framework to learn or fight.
+4. **Locale awareness** — Tokens make XOF formatting, DD/MM/YYYY, future French typography adjustments trivial.
+5. **Offline-first** — No external design system dependencies, no API calls, no sync issues.
 
-1. **Speed** — Flutter's theming system is lightweight. Design tokens are defined once and applied consistently across the app.
+### Two-Layer Color Token System
 
-2. **Control** — Complete control over visual design without adapting an established system's opinions. The minimal aesthetic (dark mode first, generous spacing, intentional colour use) is easier to implement with custom tokens.
-
-3. **Solo development** — No need to learn a complex design system framework. Flutter's theming is native and well-documented. Custom components can be built as needed without fighting a system's constraints.
-
-4. **Locale awareness** — Custom tokens make it easy to define locale-specific values (XOF currency formatting, DD/MM/YYYY dates, future French typography adjustments) without workarounds.
-
-5. **Offline-first** — No external design system dependencies means no API calls, no cloud-based design tools, no sync issues. Everything is local.
-
-### Implementation Approach
-
-**Two-Layer Colour Token System:**
-
-Layer 1 — Raw palette (never use directly in widgets):
-```
-violetPrimary   = #7C4DFF
-cyanPrimary     = #00C2D4
-greenPrimary    = #1D9E75
-darkBg          = #0D0D0F
-surface         = #1A1A1F
-mutedText       = #6B6B80
-primaryText     = #E8E8F0
-borderDefault   = #2A2A35
-```
-
-Layer 2 — Semantic tokens (use these in all widgets):
-```
-colorAccentAgenda   = violetPrimary
-colorAccentPractice = greenPrimary
-colorAccentExpenses = cyanPrimary
-colorSurface        = surface
-colorTextPrimary    = primaryText
-colorTextMuted      = mutedText
-colorBorder         = borderDefault
-```
-
-When light mode is added, only semantic tokens are remapped. Every widget using `colorSurface` automatically gets the light mode value without changes.
-
-**Typography Decisions:**
-
-System fonts (SF Pro / Roboto) are appropriate for body text. The clock display requires explicit tabular figures to prevent width shifting every second:
+**Layer 1 — Raw palette** (never use directly in widgets):
 
 ```
+violetPrimary    = #7C4DFF
+cyanPrimary      = #00C2D4
+greenPrimary     = #1D9E75
+emberOrange      = #FF6B35
+cosmicMagenta    = #C770FF
+auroraTeal       = #2DD4BF
+
+darkBg           = #0D0D0F
+darkSurface      = #1A1A1F
+lightBg          = #FDFBF7
+lightSurface     = #FFFFFF
+
+mutedTextDark    = #6B6B80
+mutedTextLight   = #6B6B6B
+primaryTextDark  = #E8E8F0
+primaryTextLight = #1A1A1A
+borderDark       = #2A2A35
+borderLight      = #E6E1D7
+
+categoryPersonal = #7C4DFF       (violet)
+categoryWork     = #5B8BD4       (blue)
+categoryPractice = #1D9E75       (green)
+```
+
+**Layer 2 — Semantic tokens** (used everywhere in widgets):
+
+```
+colorAccent              // active theme accent
+colorAccentAgenda        // Personal events
+colorAccentWork          // Work events
+colorAccentPractice      // Practice events / sessions
+colorSurface             // card background
+colorBackground          // screen background
+colorTextPrimary
+colorTextMuted
+colorBorder
+colorOrbIdle             // orb breathing color (active accent at low opacity)
+colorOrbActive           // orb waveform color (active accent at full)
+```
+
+When light mode is active, only semantic tokens remap. Every widget using `colorSurface` automatically gets the light value.
+
+### Seven Theme Presets
+
+| Theme | Mode | Accent | Notes |
+|---|---|---|---|
+| **Violet Dark** (default) | dark | `violetPrimary` | The default OdO feel — calm, reflective, identifiable |
+| **Cyan Dark** | dark | `cyanPrimary` | Cool, focused, tech-forward |
+| **Green Dark** | dark | `greenPrimary` | Grounded, practice-emphasized |
+| **Light Mode** | light | `violetPrimary` | High-contrast, outdoor-readable for Abidjan brightness |
+| **Cosmic** | dark | `cosmicMagenta` | Soft magenta, reflective |
+| **Ember** | dark | `emberOrange` | Warm, evening-toned |
+| **Aurora** | dark | `auroraTeal` | Cool teal, calm |
+
+**Custom picker:** overrides `colorAccent` only via 24 curated swatches (default) or a full HSL picker (behind "advanced" toggle). Surface/text/border tokens stay locked to the active mode.
+
+**Theme selection:** in settings, post-unlock. Active theme + custom accent (if any) persisted via `SharedPreferences`.
+
+### Typography
+
+System fonts (SF Pro on iOS, Roboto on Android) for body. Clock display requires explicit tabular figures:
+
+```dart
 clockStyle: TextStyle(
   fontSize: 22,
   fontWeight: FontWeight.w500,
@@ -453,9 +301,22 @@ clockStyle: TextStyle(
 )
 ```
 
-**Spacing Scale:**
+**Type scale (semantic):**
 
-Define once, use everywhere. Never use arbitrary padding values:
+| Token | Size | Weight | Use |
+|---|---|---|---|
+| `textDisplay` | 28 | 400 | Evening session headline |
+| `textTitle` | 22 | 500 | Section headings, clock |
+| `textBody` | 16 | 400 | Default body |
+| `textBodyMuted` | 14 | 400 | Strip context, timestamps |
+| `textCaption` | 12 | 500 | Category labels, badges |
+| `textMicro` | 11 | 600 | Streak numbers, all-caps labels |
+
+A serif accent (e.g. Fraunces) is used for the evening session headline and skill names — adds warmth, signals "ritual" not "tool". Body remains system sans-serif throughout.
+
+### Spacing Scale
+
+Define once, use everywhere. Never arbitrary padding:
 
 ```
 sp2  = 2.0
@@ -465,35 +326,224 @@ sp12 = 12.0
 sp16 = 16.0
 sp20 = 20.0
 sp24 = 24.0
+sp32 = 32.0
 ```
 
-**Animation Durations:**
+### Animation Durations
 
-Three durations cover all MVP animations:
+Three durations cover all V1 animations:
 
 ```
-durationFast    = 150ms  (dot expansion, badge appearance)
-durationDefault = 250ms  (bottom sheet open/close)
-durationSlow    = 400ms  (confirmation sheet, session completion)
+durationFast    = 150ms  // dot expansion, badge appearance, tag tap
+durationDefault = 250ms  // bottom sheet open/close, theme swap
+durationSlow    = 400ms  // confirmation sheet, session completion, orb state transition
 ```
 
-The session completion animation (Things 3 checkmark equivalent) uses `durationSlow` with `AnimatedOpacity` + slight scale-down on the logged duration text. This 400ms duration is deliberate — slow enough to register as meaningful without feeling like a loading state.
+**Session completion animation:** `AnimatedOpacity` + slight scale-down on the logged duration text at `durationSlow`. Deliberate — slow enough to register as meaningful, not so slow it feels like loading.
 
-### Customization Strategy
+### Component Build Priority
 
-**Component Build Priority:**
-
-1. `AppColors` + `AppTheme` — tokens first, nothing else works without them
-2. `AgendaStrip` — appears on every screen, most constrained surface, forces early solution of persistent-visibility problem
-3. `ConfirmationSheet` — the most important UX surface, build before any module so it's not compromised for implementation convenience
-4. `SkillCard` — Practice module's primary surface, needs completion-feeling animation solved here
-5. `AiComponent` — persistent bottom bar, build last among shared components because its expanded state (command dropdown) needs other surfaces to exist for context-aware testing
-6. Module screens — Agenda slide, Practice slide, built on top of the above
-
-**Theme Mode Default:**
-
-`ThemeMode.dark` as hardcoded default for MVP, with a toggle in settings that writes to `SharedPreferences`. This allows one theme to be perfected before launch. Light mode is deferred to post-MVP. The toggle exists in the UI from day one so it doesn't feel like a missing feature — it just always starts dark.
-
-This decision should be documented in `main.dart` as a comment explaining the choice, preventing second-guessing later.
+1. **`AppColors` + `AppTheme`** — tokens first. Nothing else works without them.
+2. **`Orb` widget** — the AI presence. Idle breathing, active waveform, brief commit pulse. Build standalone before integrating.
+3. **`AgendaStrip`** — appears on every screen. Most constrained surface. Solves persistent-visibility problem early.
+4. **`ConfirmationSheet`** — the most important UX surface. Build before any module so it is not compromised for implementation convenience.
+5. **`SkillCard`** — Practice module's primary surface. Solves completion-feeling animation.
+6. **`EveningSessionScreen`** — the defining surface. Build last in Foundation, but with skeleton during Epic 1 to test architecture early.
 
 ---
+
+## Desired Emotional Response
+
+### Primary Emotional Goal
+
+**"OdO understands my life."** This is the aha moment. The user receives a proactive suggestion or a cross-domain insight in the evening session, acts on it in seconds, and feels seen. OdO didn't ask them to describe their schedule or their practice habits — it observed, reasoned across domains, and surfaced a connection they would have missed.
+
+### Secondary Goals
+
+- **Calm and focused** — Interface minimal, decisions clear, cognitive load low. Using OdO should feel restful.
+- **Empowered and in control** — User decides. AI suggests. The user is never overridden.
+- **Trusted and reliable** — Works offline. Data stays local. AI never surprises.
+- **Held, not nagged** — Daily presence without demand. The user can ignore any notification.
+
+### Emotional Journey
+
+**First discovery:** Install. Glance Screen. Orb breathing. A single question: "What's one skill you're working on?" No tutorial. No tour. *Curious but not intimidated.*
+
+**First interaction (manual):** Add event, log a session. Bottom sheet, few taps, done. *Efficient and capable.*
+
+**First evening session (8pm):** Notification: "Your evening with OdO is ready." Tap. Headline. Three highlights. Tap "significant" on one. Cross-domain insight surfaces. Tag it. Close summary. Five minutes. *Reflective and seen.*
+
+**First proactive notification (next day, 3pm):** Meeting canceled. "45 minutes just opened up. Japanese is 4 days idle. Block it?" Tap. Done. *Delighted and understood.* This is the aha moment.
+
+**Offline resilience:** Commute, no signal. Log events. Log a session. Voice command captures. Everything works. *Reliable and dependable.*
+
+**Returning use (week 2):** Open the app. Agenda strip shows the day. Orb breathing. Latest suggestion is relevant — about a pattern OdO noticed last evening session. *Integrated and effortless.*
+
+**Compounding (month 3):** The user catches themselves saying "OdO already knows that." The evening session has become a ritual. Switching to anything else feels like leaving a relationship. *Held.*
+
+### Micro-Emotions
+
+1. **Trust vs. skepticism** — Suggestions feel thoughtful, never random. Local-first + on-device suggestion engine + visible context ("45 min free · Japanese: 5 days idle") builds trust.
+2. **Delight vs. satisfaction** — First proactive notification delights. Subsequent ones satisfy. "One AI voice per day" preserves delight.
+3. **Accomplishment vs. frustration** — Logging a session feels like completion, never a prompt for more. Silent unanchored flagging prevents frustration.
+4. **Confidence vs. confusion** — Agenda strip is always visible. The user never opens the app and wonders what's next.
+5. **Autonomy vs. dependency** — "Block it" / "Not now" is binary. The AI suggests; the user decides. Always.
+6. **Ritual vs. obligation** — The evening session is held, not required. Skipping has zero penalty. The session collapses on quiet days. It is offered, not demanded.
+
+### Design Implications
+
+**To create "OdO understands my life":**
+- Confirmation sheet shows the suggestion in natural language
+- Context is visible ("45 min free · Japanese: 5 days idle") — the AI's reasoning is transparent
+- Action is instant — no forms, no navigation, no friction
+- The evening session's cross-domain insight is the highest-value moment of the day
+
+**To create "Calm and focused":**
+- Interface minimal: Glance Screen → home (strip + one slide + bottom bar) → evening session
+- One primary action per screen
+- Dark mode default for visual calm and OLED battery
+- Generous spacing, never cramped
+
+**To create "Trusted and reliable":**
+- Works fully offline — no surprise failures
+- Offline messages neutral, not error states
+- AI never initiates inside the chat
+- Data stays local — no analytics, no telemetry, no third-party SDKs
+
+**To create "Integrated and effortless":**
+- Agenda strip always visible
+- Glance Screen as ambient surface
+- Session logging feels like completion
+- Pattern detection silent — the user never sees friction until the AI has earned the right to ask
+
+**To create "Held, not nagged":**
+- One AI voice per day
+- Voice notifications voluntary — the user can ignore
+- The evening session has a 5-minute ceiling and a wrap-up shortcut
+- No streaks-broken alerts, no shame loops
+
+---
+
+## Interaction Specifications
+
+### Glance Screen — Voice Capture
+
+```
+1. Phone wake → Glance renders, orb breathing (durationDefault transition)
+2. User taps mic toggle → orb morphs to waveform (durationDefault)
+3. User speaks → STT live transcript appears in text input (faded)
+4. 1.5s silence → orb pulses (durationFast) → AI parses → commits
+5. Banner confirmation slides down from top (durationDefault), dismisses in 2s
+6. Orb returns to breathing
+```
+
+**Cancel:** Tap mic again during listening → orb returns to idle immediately. No commit.
+
+**STT failure:** Orb returns to idle silently. No error toast.
+
+**Ambiguous parse:** Orb stays active, AI follow-up question appears as one line above the bottom bar: *"For tonight or tomorrow?"* User taps or speaks the answer.
+
+### Home Screen — Carousel + Bottom Bar
+
+**Carousel (V1):** One slide — Practice. (Expenses placeholder removed in V1; deferred to V1.5.) Carousel infrastructure remains so V1.5 ships without refactor.
+
+**Active dot pill** at top of slide adopts the active accent color.
+
+**Persistent bottom bar:**
+- Same layout as Glance Screen bottom bar: quick-add, text input, mic toggle
+- Tap text input → expands into full chat sheet (modal route)
+- Tap mic → voice capture pipeline
+- Tap quick-add → bottom sheet with three options: add event, add session, add skill
+
+### Evening Session — Tag Interaction
+
+Each highlight card:
+
+```
+┌─────────────────────────────────────────────┐
+│  ⓘ Practice                                  │
+│  Japanese · 35 min · 7:12pm                  │
+│  "Worked through chapter 4, kanji review."   │
+│                                              │
+│  [ ● significant ]  [ × dismiss ]  [ ⌃ expand ]
+└─────────────────────────────────────────────┘
+```
+
+- **Significant** — accent dot fills, card scales 0.98 then back (durationFast), persists
+- **Dismiss** — card slides out left (durationDefault), next highlight slides in
+- **Expand** — card animates to full-screen detail with notes, related sessions, edit options
+- **Voice** — speak "significant", "dismiss", "expand" while card is focused
+
+### Confirmation Sheet — Open / Close
+
+- Slides up from bottom (durationSlow with custom curve — feels deliberate)
+- Backdrop fades to 60% opacity
+- Tap backdrop = dismiss (same as "Not now")
+- Stale slot check runs synchronously before render
+
+### Theme Swap — Runtime
+
+- Theme picker in settings shows seven presets as cards with live orb preview
+- Tap a card → entire app rebuilds with new tokens (durationDefault crossfade)
+- No app restart
+- Custom accent picker accessible from the same screen via "Custom" card
+
+---
+
+## Accessibility
+
+- **WCAG AA contrast** for all semantic tokens in both modes
+- **44dp minimum touch targets** for all interactive elements
+- **Voice as equal input** — every action achievable via voice
+- **Screen reader labels** on orb, lock state, all icons
+- **Reduced motion respect** — `MediaQuery.disableAnimations` disables breathing/waveform; orb becomes a static solid color
+- **High-contrast outdoor light mode** — designed for direct Abidjan sun, not retrofitted from dark
+
+---
+
+## Locale & Internationalization
+
+- **XOF currency** — no decimal places, thin-space thousands separator: `15 000 F`
+- **Dates** — DD/MM/YYYY everywhere visible, ISO in storage
+- **Times** — 24-hour by default (locale-appropriate), `HH:mm`
+- **Timezone** — UTC+0 throughout storage; display in user's local zone (Abidjan = UTC+0, no shift)
+- **Languages V1** — French primary, English fallback. UI strings only. AI responses English-only in V1; French AI responses ship in V1.5.
+
+---
+
+## Visual Anti-Patterns
+
+What OdO is not, made explicit:
+
+1. **Notification inflation** — multiple proactive AI messages per day. The "one AI voice per day" principle is the direct counter.
+2. **Reactive-only AI** — waiting for the user to ask. The 8pm session and throughout-day suggestions are the differentiator.
+3. **Form-filling friction** — session and event creation should feel like completion, not data entry.
+4. **Blank-state intimidation** — empty screens with no guidance. The first-launch question, the persistent strip, and the chat quick commands solve this.
+5. **Gamification** — XP, levels, achievement badges. The streak speaks for itself.
+6. **Chatty AI** — "Good morning! How's your day?" The AI never initiates inside the chat. Only the 8pm session speaks first.
+7. **Why-fields** — asking the user to explain dismissals. The system learns from the dismissal itself, not from prose.
+
+---
+
+## Design Validation Checklist (Pre-Ship)
+
+- [ ] All seven themes preserve WCAG AA contrast on both surface and text tokens
+- [ ] Light mode tested in direct outdoor sun
+- [ ] Glance Screen renders all three lock states cleanly
+- [ ] Agenda strip handles all three states (events / no more today / nothing scheduled)
+- [ ] Confirmation sheet renders the stale-slot fallback correctly
+- [ ] Evening session resumes correctly after interruption between 8pm and midnight
+- [ ] Evening session shows the wrap-up shortcut at all times
+- [ ] First-launch experience: install → Glance setup → skill prompt → first home screen in under 2 minutes
+- [ ] Voice capture pipeline: idle → listening → parsing → commit → return to idle, with orb states matched
+- [ ] Offline state: chat retry preserves message, orb continues breathing, agenda updates locally
+- [ ] All animations respect `MediaQuery.disableAnimations`
+- [ ] XOF formatting correct: `15 000 F` (no decimal, thin space)
+- [ ] DD/MM/YYYY everywhere visible
+- [ ] French UI strings reviewed by a francophone speaker
+
+---
+
+**Document Status:** Locked for V1 MVP Implementation
+**Last Updated:** May 13, 2026
+**Owner:** Lokki (Solo Developer, Abidjan)
