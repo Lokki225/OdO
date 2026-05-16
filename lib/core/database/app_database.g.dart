@@ -2337,6 +2337,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $EveningSessionsTable(this);
   late final $EveningHighlightsTable eveningHighlights =
       $EveningHighlightsTable(this);
+  late final AgendaDao agendaDao = AgendaDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

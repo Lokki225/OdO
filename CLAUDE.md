@@ -371,6 +371,94 @@ Stop immediately and ask if:
 
 ---
 
+### Hotfix — Notification blocking event save + blank initial screen
+**Date:** 2026-05-16
+
+**Problem 1:** Saving new events silently failed. `AgendaNotifier.addEvent()` called `NotificationService.scheduleEventReminder()` inside the `success:` callback with no try/catch. On Android, `zonedSchedule` with `AndroidScheduleMode.exactAllowWhileIdle` requires `SCHEDULE_EXACT_ALARM` permission — if missing, it throws a `PlatformException`. The exception propagated past `state = AsyncData(null)` and past `context.pop()`, leaving the sheet open and the user unable to save.
+
+**Fix:** Wrapped both `scheduleEventReminder` (in `addEvent`) and `cancelReminder` (in `deleteEvent`) in try/catch with empty catch bodies. Notifications are best-effort — a scheduling failure must never block a database write.
+
+**Problem 2:** App launched to blank Glance placeholder (Epic 5, not yet built). Changed `initialLocation` from `/glance` to `/home` in `lib/app/router.dart`.
+
+**Files changed:**
+- `lib/features/agenda/presentation/agenda_providers.dart` — try/catch around notification calls in `addEvent` and `deleteEvent`
+- `lib/app/router.dart` — `initialLocation: '/home'`
+
+**Rule going forward:** Any call to `NotificationService` inside a Notifier must be wrapped in try/catch. Notification permission/scheduling is always best-effort.
+
+---
+
+### Story 2-5 — Monthly Calendar
+**Completed:** 2026-05-16 | **Confidence:** 93/100
+
+**Files created/modified:**
+- `lib/features/agenda/presentation/pages/calendar_page.dart` — `TableCalendar<Event>`, custom `markerBuilder` (coloured dots, max 3, work > practice > personal priority), day-tap navigates to `/home/agenda` via `go_router` with selected day/time
+- `lib/features/agenda/presentation/agenda_providers.dart` (extended) — `focusedDayProvider` (`NotifierProvider<_FocusedDayNotifier, DateTime>`), `monthEventsProvider` (`FutureProvider.family<Map<DateTime, List<Event>>, DateTime>`) grouping by `_stripTime` key
+
+**Key decisions:**
+- `AsyncValue.valueOrNull` removed in Riverpod 3.x — replaced with pattern matching: `switch (monthEventsAsync) { AsyncData(:final value) => value, _ => <DateTime, List<Event>>{} }`
+- `ref.invalidate(monthEventsProvider(focused))` on page-change instead of holding an open stream per month (avoids unbounded stream subscriptions)
+- `rowHeight: 52, daysOfWeekHeight: AppSpacing.sp32` for comfortable touch targets
+
+---
+
+### Story 2-4 — Event CRUD with Three Categories
+**Completed:** 2026-05-16 | **Confidence:** 95/100
+
+**Files created/modified:**
+- `lib/features/agenda/presentation/pages/add_event_sheet.dart` — `ConsumerStatefulWidget`; `RadioGroup<EventCategory>` wrapping `RadioListTile` values (Flutter 3.32+ API, replacing removed `groupValue`/`onChanged` on `RadioListTile`); `context.canPop()` guard before `context.pop()` prevents `GoError` in single-route test contexts
+- `lib/features/agenda/presentation/pages/event_detail_page.dart` — `FutureProvider.family` loading, delete with 5-s undo snackbar, re-insert via `event.copyWith(clearId: true)` on undo
+- `lib/features/agenda/presentation/agenda_providers.dart` (extended) — `AgendaNotifier` (`AsyncNotifier<void>`): add/update/delete with `NotificationService` scheduling/cancellation
+
+**Key gotcha:** `RadioGroup<T>` requires Flutter ≥ 3.32. Wrap the column of `RadioListTile` values inside a single `RadioGroup` widget providing `groupValue` and `onChanged` — the `RadioListTile` no longer accepts those at the tile level.
+
+---
+
+### Story 2-3 — Day Timeline View
+**Completed:** 2026-05-16 | **Confidence:** 92/100
+
+**Files created/modified:**
+- `lib/features/agenda/presentation/pages/agenda_page.dart` — Scaffold with `_DayHeader`, swipe GestureDetector (`HorizontalDragEnd` → `notifier.setDay()`), `AgendaStrip` at top of home, FAB opens `AddEventSheet`
+- `lib/features/agenda/presentation/widgets/day_timeline.dart` — `StatefulWidget`, 34 slots (6am–11pm, 32dp each, 1088dp total), `ScrollController` auto-scrolling to current hour, `Stack` with positioned `EventBlock`/`FreeSlotBlock`/`CurrentTimeIndicator`
+- `lib/features/agenda/presentation/widgets/event_block.dart` — `Positioned`, 4dp left border by category colour, min-height 32dp, `InkWell` tap → event detail push
+- `lib/features/agenda/presentation/widgets/free_slot_block.dart` — dashed border, muted tint, tap → `AddEventSheet` with `prefillStartTime`
+- `lib/features/agenda/presentation/widgets/current_time_indicator.dart` — `Timer.periodic(const Duration(minutes: 1))` refresh, accent dot+line
+- `lib/features/agenda/presentation/agenda_providers.dart` (extended) — `selectedDayProvider` (`NotifierProvider` with `setDay` method), `dayEventsProvider` (`StreamProvider<List<Event>>`)
+
+**Timeline math:** `pixelsPerMinute = 32.0/30.0` (32dp per 30-min slot); `topOffset = (startMin - 360) * pixelsPerMinute` where 360 = 6am in minutes.
+
+**Free-slot detection:** boundary-pair algorithm — collect `[dayStart, …event starts/ends…, dayEnd]`, iterate adjacent pairs, emit slot if gap ≥ 30 min.
+
+**Key gotcha:** `Notifier.state` is a protected setter — never access it from outside the notifier. All day-selection mutations go through `notifier.setDay(day)`.
+
+---
+
+### Story 2-2 — Persistent Agenda Strip
+**Completed:** 2026-05-16 | **Confidence:** 94/100
+
+**Files created/modified:**
+- `lib/features/agenda/presentation/widgets/agenda_strip.dart` — `ConsumerWidget`, `GestureDetector` (tap → `/home/agenda`, longPress → `/home/agenda/calendar`), 3-state rendering, 20-char title truncation with `…`, loading skeleton `Container`
+- `lib/features/agenda/presentation/agenda_providers.dart` (extended) — `AgendaStripState` sealed class (`EventsToday`, `NextTomorrow`, `NothingScheduled`); `agendaStripProvider` (`StreamProvider`) async* body wrapped in try/catch
+
+**Critical Riverpod 3.x discovery:** `StreamProvider` does NOT propagate stream errors as `AsyncError`. Instead errors cause `AsyncLoading` (with or without embedded previous value). The `when()` error callback is never reached via stream errors. Fix: wrap the `async*` body in try/catch and yield `NothingScheduled()` — stream errors become `AsyncData(NothingScheduled())`. Test for this uses `agendaRepositoryProvider` override (not `agendaStripProvider` override) so the real provider's error handling is exercised.
+
+---
+
+### Story 2-1 — Agenda Repository and DAO
+**Completed:** 2026-05-16 | **Confidence:** 97/100
+
+**Files created/modified:**
+- `lib/features/agenda/domain/entities/event.dart` — `Event` immutable entity, `EventCategory` enum (personal/work/practice with `.value` getter), `validate()` returning `Result<Event>`, `copyWith({..., bool clearId = false})`
+- `lib/features/agenda/domain/repositories/agenda_repository.dart` — abstract interface (6 methods; `watchEventsForDay` returns raw `Stream<List<Event>>`, NOT wrapped in `Result`)
+- `lib/features/agenda/data/mappers/event_mapper.dart` — `abstract final class EventMapper`; `fromRow` → throws `ArgumentError` on unknown category; `toCompanion` maps epoch ms correctly
+- `lib/features/agenda/data/agenda_dao.dart` — `@DriftAccessor(tables: [Events])`, UTC epoch ms storage, `watchEventsForDay` day-boundary query using `.isBiggerOrEqualValue` / `.isSmallerThanValue`
+- `lib/features/agenda/data/repositories/agenda_repository_impl.dart` — all DAO calls wrapped in try/catch → `Failure(AppError.databaseWriteFailed)`; stream NOT wrapped (caller receives raw stream)
+- `lib/core/database/app_database.dart` — `AgendaDao` added to `@DriftDatabase(daos: [...])`
+
+**Key gotcha:** `AgendaDao` getter must be added to both the `@DriftDatabase` annotation and the `AppDatabase` class body — missing either causes a code-gen mismatch at runtime.
+
+---
+
 ### Story 1-8 — Router and Project Structure
 **Completed:** 2026-05-15 | **Confidence:** 95/100
 

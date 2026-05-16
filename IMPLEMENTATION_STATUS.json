@@ -2,11 +2,11 @@
   "projectName": "OdO",
   "platformType": "mobile",
   "status": "IN_PROGRESS",
-  "date": "2026-05-15",
-  "currentEpic": 1,
+  "date": "2026-05-16",
+  "currentEpic": 2,
   "currentStory": null,
   "totalStories": 41,
-  "completionPercentage": 20,
+  "completionPercentage": 32,
   "performanceThresholds": {
     "mobileUIInteractions": "500ms",
     "claudeAPIResponse": "3000ms",
@@ -36,8 +36,8 @@
     {
       "id": 2,
       "name": "Agenda Module",
-      "status": "NOT_STARTED",
-      "storiesComplete": 0,
+      "status": "COMPLETE",
+      "storiesComplete": 5,
       "storiesTotal": 5,
       "stories": [
         "2-1-agenda-repository-and-dao",
@@ -113,6 +113,31 @@
     }
   ],
   "completedStories": [
+    {
+      "id": "2-1-agenda-repository-and-dao",
+      "completedDate": "2026-05-16",
+      "notes": "Event entity (pure Dart, immutable, validate() returns Result<Event>), EventCategory enum (personal/work/practice), AgendaRepository abstract interface, AgendaDao (@DriftAccessor on Events table, 6 DAO methods, UTC epoch ms storage, watchEventsForDay with day-boundary query), EventMapper (fromRow/toCompanion with ArgumentError on unknown category), AgendaRepositoryImpl (try/catch wrapping all DAO calls → AppError.databaseWriteFailed). AppDatabase.agendaDao added. 12 tests pass (TS-001 to TS-012) using in-memory NativeDatabase with PRAGMA foreign_keys=ON."
+    },
+    {
+      "id": "2-2-persistent-agenda-strip-three-states",
+      "completedDate": "2026-05-16",
+      "notes": "AgendaStripState sealed class (EventsToday, NextTomorrow, NothingScheduled). agendaStripProvider: async* StreamProvider watching today's events, computing upcoming (≤2 sorted), falling back to tomorrow query, falling back to NothingScheduled. try/catch yields NothingScheduled on any stream error (Riverpod 3.x doesn't propagate stream errors as AsyncError). AgendaStrip ConsumerWidget with 3-state rendering, 20-char truncation, loading skeleton Container. 7 tests pass (TS-013 to TS-019). Key discovery: Riverpod 3.x StreamProvider converts stream errors to AsyncLoading (not AsyncError) — error handling must be inside the async* body."
+    },
+    {
+      "id": "2-3-day-timeline-view",
+      "completedDate": "2026-05-16",
+      "notes": "AgendaPage with day-header date display, swipe navigation (left/right GestureDetector calling notifier.setDay()), FAB opening AddEventSheet. DayTimeline StatefulWidget: 34 hour-slots (6am–11pm, 32dp each, total 1088dp), ScrollController auto-scrolling to current hour on init, Stack with EventBlock/FreeSlotBlock/CurrentTimeIndicator Positioned widgets. EventBlock: 4dp left border colored by category, min-height 32dp, Ink tap to event detail. FreeSlotBlock: dashed border, muted tint, tap opens AddEventSheet with prefillStartTime. CurrentTimeIndicator: Timer.periodic 1-minute refresh, accent dot+line. selectedDayProvider (NotifierProvider with setDay method), dayEventsProvider (StreamProvider). Tests: TS-020 to TS-030 covered by DAO and integration tests."
+    },
+    {
+      "id": "2-4-event-crud-with-three-categories",
+      "completedDate": "2026-05-16",
+      "notes": "AddEventSheet ConsumerStatefulWidget: title/time/category/notes form, RadioGroup<EventCategory> (Flutter 3.41.9 API replacing deprecated RadioListTile.groupValue), prefillEvent and prefillStartTime optional params, endAfterStart() validation, context.canPop() guard before pop (fixes GoError in single-route tests). EventDetailPage: FutureProvider.family loading, delete with undo snackbar (5s ScaffoldMessenger), re-insert via copyWith(clearId:true) on undo. AgendaNotifier (AsyncNotifier): addEvent/updateEvent/deleteEvent with notification scheduling/cancelling. 5 tests pass (TS-031 to TS-036). Key fix: RadioGroup<T> wrapping RadioListTile<T> values required for Flutter 3.32+."
+    },
+    {
+      "id": "2-5-monthly-calendar",
+      "completedDate": "2026-05-16",
+      "notes": "CalendarPage with TableCalendar<Event>: month format, event dot markers (max 3, work>practice>personal priority), custom markerBuilder, day-tap navigates to /home/agenda with selected day/time. focusedDayProvider (NotifierProvider), monthEventsProvider (FutureProvider.family<Map<DateTime, List<Event>>, DateTime>) grouping events by stripped date. Pattern matching for AsyncValue: switch(monthEventsAsync) { AsyncData(:final value) => value, _ => <DateTime, List<Event>>{} } — required because AsyncValue.valueOrNull removed in Riverpod 3.x. CalendarStyle uses Material3 colorScheme tokens. Tests covered via integration (events appear as markers when inserted)."
+    },
     {
       "id": "1-1-project-setup-and-dependency-configuration",
       "completedDate": "2026-05-15",

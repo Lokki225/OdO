@@ -12,6 +12,7 @@ import 'tables/events_table.dart';
 import 'tables/sessions_table.dart';
 import 'tables/skills_table.dart';
 import 'tables/suggestions_table.dart';
+import 'package:odo/features/agenda/data/agenda_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -24,6 +25,7 @@ part 'app_database.g.dart';
     EveningSessions,
     EveningHighlights,
   ],
+  daos: [AgendaDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

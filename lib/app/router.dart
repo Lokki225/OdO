@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:odo/core/constants/app_durations.dart';
+import 'package:odo/features/agenda/domain/entities/event.dart';
+import 'package:odo/features/agenda/presentation/pages/add_event_sheet.dart';
+import 'package:odo/features/agenda/presentation/pages/agenda_page.dart';
+import 'package:odo/features/agenda/presentation/pages/calendar_page.dart';
+import 'package:odo/features/agenda/presentation/pages/event_detail_page.dart';
+import 'package:odo/features/home/presentation/home_screen.dart';
 import 'package:odo/features/home/presentation/placeholder_screen.dart';
 import 'package:odo/features/home/presentation/scaffold_with_nav_bar.dart';
 
 final routerProvider = Provider<GoRouter>((ref) => router);
 
 final router = GoRouter(
-  initialLocation: '/glance',
+  initialLocation: '/home',
   routes: [
     GoRoute(
       path: '/glance',
@@ -32,39 +39,44 @@ final router = GoRouter(
       path: '/confirm-suggestion/:id',
       pageBuilder: (context, state) => _slideUpSheet(
         state,
-        PlaceholderScreen(title: 'Confirm Suggestion ${state.pathParameters['id']}'),
+        PlaceholderScreen(
+            title: 'Confirm Suggestion ${state.pathParameters['id']}'),
       ),
     ),
     ShellRoute(
-      builder: (context, state, child) =>
-          ScaffoldWithNavBar(child: child),
+      builder: (context, state, child) => ScaffoldWithNavBar(child: child),
       routes: [
         GoRoute(
           path: '/home',
-          builder: (_, __) => const PlaceholderScreen(title: 'Home'),
+          builder: (_, __) => const HomeScreen(),
           routes: [
             GoRoute(
               path: 'agenda',
-              builder: (_, __) =>
-                  const PlaceholderScreen(title: 'Agenda'),
+              builder: (_, __) => const AgendaPage(),
               routes: [
                 GoRoute(
                   path: 'event/:id',
-                  builder: (context, state) => PlaceholderScreen(
-                    title: 'Event ${state.pathParameters['id']}',
-                  ),
+                  builder: (context, state) {
+                    final id = int.parse(state.pathParameters['id']!);
+                    return EventDetailPage(eventId: id);
+                  },
                 ),
                 GoRoute(
                   path: 'calendar',
-                  builder: (_, __) =>
-                      const PlaceholderScreen(title: 'Calendar'),
+                  builder: (_, __) => const CalendarPage(),
                 ),
                 GoRoute(
                   path: 'add-event',
-                  pageBuilder: (context, state) => _slideUpSheet(
-                    state,
-                    const PlaceholderScreen(title: 'Add Event'),
-                  ),
+                  pageBuilder: (context, state) {
+                    final extra = state.extra as Map<String, dynamic>?;
+                    return _slideUpSheet(
+                      state,
+                      AddEventSheet(
+                        prefillEvent: extra?['event'] as Event?,
+                        prefillStartTime: extra?['startTime'] as DateTime?,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -91,8 +103,7 @@ final router = GoRouter(
                   pageBuilder: (context, state) => _slideUpSheet(
                     state,
                     PlaceholderScreen(
-                      title:
-                          'Log Session ${state.pathParameters['id']}',
+                      title: 'Log Session ${state.pathParameters['id']}',
                     ),
                   ),
                 ),
