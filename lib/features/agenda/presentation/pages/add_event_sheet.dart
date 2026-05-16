@@ -80,7 +80,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
     if (!_formKey.currentState!.validate()) return;
     if (!_endAfterStart()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End time must be after start time')),
+        const SnackBar(
+          content: Text("L'heure de fin doit être après l'heure de début"),
+        ),
       );
       return;
     }
@@ -121,55 +123,50 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) context.pop();
+          },
+        ),
+        title: Text(
+          widget.prefillEvent != null ? 'Modifier' : 'Nouvel événement',
+        ),
+        centerTitle: true,
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.sp24),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: AppSpacing.sp24,
+          right: AppSpacing.sp24,
+          top: AppSpacing.sp16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.sp24,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.sp20),
-                  decoration: BoxDecoration(
-                    color: colorScheme.outline,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
+              const _SectionLabel(label: 'TITRE'),
+              TextFormField(
+                controller: _titleCtrl,
+                decoration: const InputDecoration(
+                  hintText: "Nom de l'événement",
                 ),
-              ),
-
-              Text(
-                widget.prefillEvent != null ? 'Edit Event' : 'New Event',
-                style: Theme.of(context).textTheme.titleLarge,
+                textCapitalization: TextCapitalization.sentences,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Le titre est requis' : null,
               ),
               const SizedBox(height: AppSpacing.sp20),
 
-              // Title
-              TextFormField(
-                controller: _titleCtrl,
-                decoration: const InputDecoration(labelText: 'Title'),
-                textCapitalization: TextCapitalization.sentences,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Title is required' : null,
-              ),
-              const SizedBox(height: AppSpacing.sp16),
-
-              // Times
+              const _SectionLabel(label: 'DURÉE'),
               Row(
                 children: [
                   Expanded(
                     child: _TimeTile(
-                      label: 'Start',
+                      label: 'DÉBUT',
                       time: _startTime,
                       onTap: () => _pickTime(isStart: true),
                     ),
@@ -177,48 +174,65 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                   const SizedBox(width: AppSpacing.sp12),
                   Expanded(
                     child: _TimeTile(
-                      label: 'End',
+                      label: 'FIN',
                       time: _endTime,
                       onTap: () => _pickTime(isStart: false),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.sp16),
+              const SizedBox(height: AppSpacing.sp20),
 
-              // Category
-              Text(
-                'Category',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              _CategorySelector(
+              const _SectionLabel(label: 'CATÉGORIE'),
+              _CategoryChips(
                 selected: _category,
                 onChanged: (c) => setState(() => _category = c),
               ),
-              const SizedBox(height: AppSpacing.sp16),
+              const SizedBox(height: AppSpacing.sp20),
 
-              // Notes
+              const _SectionLabel(label: 'NOTE (OPTIONNEL)'),
               TextFormField(
                 controller: _notesCtrl,
-                decoration: const InputDecoration(labelText: 'Notes (optional)'),
+                decoration: const InputDecoration(
+                  hintText: 'Ajouter une note...',
+                ),
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
               ),
-              const SizedBox(height: AppSpacing.sp24),
+              const SizedBox(height: AppSpacing.sp32),
 
-              // Save button
               FilledButton(
                 onPressed: _save,
-                child: const Text('Save'),
+                child: const Text('Enregistrer'),
               ),
               const SizedBox(height: AppSpacing.sp12),
-              OutlinedButton(
-                onPressed: () => context.pop(),
-                child: const Text('Cancel'),
+              TextButton(
+                onPressed: () {
+                  if (context.canPop()) context.pop();
+                },
+                child: const Text('Annuler'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sp8),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              letterSpacing: 0.8,
+            ),
       ),
     );
   }
@@ -257,7 +271,9 @@ class _TimeTile extends StatelessWidget {
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    letterSpacing: 0.5,
+                  ),
             ),
             Text(
               formatted,
@@ -270,41 +286,74 @@ class _TimeTile extends StatelessWidget {
   }
 }
 
-class _CategorySelector extends StatelessWidget {
-  const _CategorySelector({required this.selected, required this.onChanged});
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({required this.selected, required this.onChanged});
 
   final EventCategory selected;
   final void Function(EventCategory) onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return RadioGroup<EventCategory>(
-      groupValue: selected,
-      onChanged: (v) {
-        if (v != null) onChanged(v);
-      },
-      child: Column(
-        children: EventCategory.values.map((cat) {
-          return RadioListTile<EventCategory>(
-            value: cat,
-            title: Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  margin: const EdgeInsets.only(right: AppSpacing.sp8),
-                  decoration: BoxDecoration(
-                    color: _categoryColor(cat),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                Text(_categoryLabel(cat)),
-              ],
+    return Row(
+      children: [
+        for (int i = 0; i < EventCategory.values.length; i++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: i < EventCategory.values.length - 1 ? AppSpacing.sp8 : 0,
+              ),
+              child: _buildChip(EventCategory.values[i], context),
             ),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-          );
-        }).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildChip(EventCategory cat, BuildContext context) {
+    final isSelected = cat == selected;
+    final catColor = _categoryColor(cat);
+    return GestureDetector(
+      onTap: () => onChanged(cat),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sp8,
+          vertical: AppSpacing.sp12,
+        ),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color:
+              isSelected ? catColor.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: isSelected
+                ? catColor
+                : Theme.of(context).colorScheme.outline,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: catColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sp4),
+            Text(
+              _categoryLabel(cat),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: isSelected
+                        ? catColor
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -316,8 +365,8 @@ class _CategorySelector extends StatelessWidget {
       };
 
   static String _categoryLabel(EventCategory cat) => switch (cat) {
-        EventCategory.personal => 'Personal',
-        EventCategory.work => 'Work',
-        EventCategory.practice => 'Practice',
+        EventCategory.personal => 'Personnel',
+        EventCategory.work => 'Travail',
+        EventCategory.practice => 'Pratique',
       };
 }

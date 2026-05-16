@@ -6,8 +6,8 @@ import 'package:odo/core/constants/odo_theme.dart';
 
 abstract final class AppTheme {
   /// Builds a [ThemeData] from an [OdoTheme] semantic token set.
-  /// [textThemeOverride] skips the google_fonts construction — pass
-  /// `const TextTheme()` in unit tests to avoid font-loading async side-effects.
+  /// [textThemeOverride] replaces the default text theme — pass
+  /// `const TextTheme()` in unit tests for lightweight theme construction.
   static ThemeData fromOdoTheme(OdoTheme theme, {TextTheme? textThemeOverride}) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: theme.colorAccent,

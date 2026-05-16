@@ -9,10 +9,12 @@ import 'package:odo/features/agenda/presentation/pages/add_event_sheet.dart';
 
 class _FakeAgendaNotifier extends AgendaNotifier {
   bool addEventCalled = false;
+  Event? lastEvent;
 
   @override
   Future<void> addEvent(Event event) async {
     addEventCalled = true;
+    lastEvent = event;
     state = const AsyncData(null);
   }
 }
@@ -29,10 +31,10 @@ void main() {
     ));
     await tester.pump();
 
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Enregistrer'));
     await tester.pump();
 
-    expect(find.text('Title is required'), findsOneWidget);
+    expect(find.text('Le titre est requis'), findsOneWidget);
   });
 
   // TS-034
@@ -45,7 +47,7 @@ void main() {
     ));
     await tester.pump();
 
-    await tester.tap(find.text('Cancel'));
+    await tester.tap(find.text('Annuler'));
     await tester.pump();
 
     expect(fakeNotifier.addEventCalled, isFalse);
@@ -53,15 +55,22 @@ void main() {
 
   // TS-035
   testWidgets('Category defaults to Personal', (tester) async {
+    final fakeNotifier = _FakeAgendaNotifier();
+
     await tester.pumpWidget(ProviderScope(
+      overrides: [agendaNotifierProvider.overrideWith(() => fakeNotifier)],
       child: MaterialApp.router(routerConfig: _sheetRouter(const AddEventSheet())),
     ));
     await tester.pump();
 
-    final radioGroup = tester.widget<RadioGroup<EventCategory>>(
-      find.byType(RadioGroup<EventCategory>),
-    );
-    expect(radioGroup.groupValue, EventCategory.personal);
+    await tester.enterText(find.byType(TextFormField).first, 'Test');
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pump();
+
+    // Consume GoError from context.pop() — expected in single-route test context
+    tester.takeException();
+
+    expect(fakeNotifier.lastEvent?.category, EventCategory.personal);
   });
 
   // TS-033
@@ -77,13 +86,13 @@ void main() {
     await tester.enterText(find.byType(TextFormField).first, 'Team Standup');
     await tester.pump();
 
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Enregistrer'));
     await tester.pump();
 
     // Consume GoError from context.pop() — expected in single-route test context
     tester.takeException();
 
-    expect(find.text('Title is required'), findsNothing);
+    expect(find.text('Le titre est requis'), findsNothing);
     expect(fakeNotifier.addEventCalled, isTrue);
   });
 

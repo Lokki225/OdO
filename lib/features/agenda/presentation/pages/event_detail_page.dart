@@ -19,7 +19,7 @@ class EventDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Event'),
+        title: const Text('Événement'),
         leading: BackButton(onPressed: () => context.pop()),
       ),
       body: eventAsync.when(
@@ -27,7 +27,7 @@ class EventDetailPage extends ConsumerWidget {
           if (event == null) {
             return Center(
               child: Text(
-                'Event not found',
+                'Événement introuvable',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             );
@@ -37,7 +37,7 @@ class EventDetailPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => Center(
           child: Text(
-            'Could not load event',
+            'Impossible de charger l\'événement',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
@@ -54,123 +54,118 @@ class _EventBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = LocaleService();
-    final colorScheme = Theme.of(context).colorScheme;
+    final catColor = _categoryColor(event.category);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.sp24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Category bar
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: _categoryColor(event.category),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sp12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Full-width category color bar
+        Container(height: 3, color: catColor),
 
-          Text(
-            event.title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.sp8),
-
-          Row(
-            children: [
-              Icon(
-                Icons.access_time,
-                size: 16,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              const SizedBox(width: AppSpacing.sp8),
-              Text(
-                '${locale.formatTime(event.startTime.toLocal())} – '
-                '${locale.formatTime(event.endTime.toLocal())}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sp4),
-
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 16,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              const SizedBox(width: AppSpacing.sp8),
-              Text(
-                locale.formatDate(event.startTime.toLocal()),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sp4),
-
-          Row(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: _categoryColor(event.category),
-                  shape: BoxShape.circle,
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.sp24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  event.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sp8),
-              Text(
-                _categoryLabel(event.category),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
+                const SizedBox(height: AppSpacing.sp16),
 
-          if (event.notes != null && event.notes!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sp16),
-            Text(
-              'Notes',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            const SizedBox(height: AppSpacing.sp4),
-            Text(
-              event.notes!,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
+                // Time row
+                _MetaRow(
+                  icon: Icons.access_time,
+                  text:
+                      '${locale.formatTime(event.startTime.toLocal())} – '
+                      '${locale.formatTime(event.endTime.toLocal())}',
+                ),
+                const SizedBox(height: AppSpacing.sp8),
 
-          const SizedBox(height: AppSpacing.sp32),
+                // Date row
+                _MetaRow(
+                  icon: Icons.calendar_today_outlined,
+                  text: locale.formatDate(event.startTime.toLocal()),
+                ),
+                const SizedBox(height: AppSpacing.sp16),
 
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text('Edit'),
-                  onPressed: () => context.push(
-                    '/home/agenda/add-event',
-                    extra: {'event': event},
+                // Category badge
+                _CategoryBadge(category: event.category, color: catColor),
+                const SizedBox(height: AppSpacing.sp24),
+
+                // Notes section (always visible)
+                Text(
+                  'NOTES',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        letterSpacing: 0.8,
+                      ),
+                ),
+                const SizedBox(height: AppSpacing.sp8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.sp16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerLow,
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  child: Text(
+                    (event.notes != null && event.notes!.isNotEmpty)
+                        ? event.notes!
+                        : 'Aucune note',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: (event.notes == null ||
+                                  event.notes!.isEmpty)
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.4)
+                              : null,
+                        ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sp12),
-              Expanded(
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: colorScheme.error,
-                  ),
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete'),
-                  onPressed: () => _confirmDelete(context, ref),
+                const SizedBox(height: AppSpacing.sp32),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ActionButton(
+                        icon: Icons.edit_outlined,
+                        label: 'Modifier',
+                        color: Theme.of(context).colorScheme.primary,
+                        onPressed: () => context.push(
+                          '/home/agenda/add-event',
+                          extra: {'event': event},
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sp12),
+                    Expanded(
+                      child: _ActionButton(
+                        icon: Icons.delete_outline,
+                        label: 'Supprimer',
+                        color: Theme.of(context).colorScheme.error,
+                        onPressed: () => _confirmDelete(context, ref),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -182,10 +177,10 @@ class _EventBody extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Event deleted'),
+        content: const Text('Événement supprimé'),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: 'Undo',
+          label: 'Annuler',
           onPressed: () {
             notifier.addEvent(savedEvent.copyWith(clearId: true));
           },
@@ -201,10 +196,111 @@ class _EventBody extends ConsumerWidget {
         EventCategory.work => AppColors.colorCategoryWork,
         EventCategory.practice => AppColors.colorCategoryPractice,
       };
+}
 
-  static String _categoryLabel(EventCategory cat) => switch (cat) {
-        EventCategory.personal => 'Personal',
-        EventCategory.work => 'Work',
-        EventCategory.practice => 'Practice',
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+        const SizedBox(width: AppSpacing.sp8),
+        Text(text, style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    );
+  }
+}
+
+class _CategoryBadge extends StatelessWidget {
+  const _CategoryBadge({required this.category, required this.color});
+  final EventCategory category;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sp12,
+        vertical: AppSpacing.sp4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: AppSpacing.sp8),
+          Text(
+            _label(category).toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  letterSpacing: 0.6,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _label(EventCategory cat) => switch (cat) {
+        EventCategory.personal => 'Personnel',
+        EventCategory.work => 'Travail',
+        EventCategory.practice => 'Pratique',
       };
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sp12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: AppSpacing.sp8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: color,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

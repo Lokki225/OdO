@@ -371,6 +371,29 @@ Stop immediately and ask if:
 
 ---
 
+### UI Redesign — Agenda Module (Prototype v2)
+**Date:** 2026-05-16
+
+**Scope:** Visual-only redesign of all 5 Agenda screens to match the HTML prototype. No logic or data layer changes. 153/153 tests pass.
+
+**Files modified:**
+- `lib/core/constants/app_colors.dart` — `colorCategoryWork` changed from `#5B8BD4` (blue) to `#00C2D4` (cyan) per new spec
+- `lib/core/constants/app_typography.dart` — Removed Google Fonts (Fraunces + DM Sans); switched to system defaults (SF Pro/Roboto) using plain `const TextStyle()`
+- `lib/main.dart` — Removed `GoogleFonts.config.allowRuntimeFetching = false` (no longer needed)
+- `lib/features/agenda/presentation/pages/add_event_sheet.dart` — Replaced drag handle + RadioGroup with: Scaffold AppBar with back button, ALL-CAPS French section labels (TITRE/DURÉE/CATÉGORIE/NOTE), animated category chip row (GestureDetector + AnimatedContainer), French action buttons (Enregistrer/Annuler)
+- `lib/features/agenda/presentation/pages/agenda_page.dart` — Added 7-day horizontal strip (Mon–Sun of selected week, today/selected = violet circle, category dots per day from `monthEventsProvider`); French header (full day name + "16 mai 2026" format); FAB with violet background
+- `lib/features/agenda/presentation/widgets/event_block.dart` — Tinted backgrounds per category (`catColor.withValues(alpha: 0.15)`); 3px accent bar (down from 4px); removed border
+- `lib/features/agenda/presentation/pages/event_detail_page.dart` — Full-width 3px color bar at content top; French strings throughout; category badge (tinted chip with dot + label); Notes section always visible ("Aucune note" when empty); Edit/Delete as tinted action buttons
+- `lib/features/agenda/presentation/pages/calendar_page.dart` — Title changed to "Calendrier"
+
+**Tests updated:**
+- `test/core/constants/app_typography_test.dart` — Removed google_fonts, converted to synchronous tests
+- `test/core/constants/app_colors_test.dart` — Updated `colorCategoryWork` expectation to cyan `#00C2D4`
+- `test/widget_test.dart` — Removed google_fonts import and `allowRuntimeFetching` setup
+- `test/features/agenda/presentation/pages/add_event_sheet_test.dart` — Updated all string finders to French, replaced RadioGroup finder with behavior-based category test
+
+---
+
 ### Hotfix — Notification blocking event save + blank initial screen
 **Date:** 2026-05-16
 

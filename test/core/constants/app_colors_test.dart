@@ -42,8 +42,8 @@ void main() {
       expect(AppColors.colorCategoryPersonal, const Color(0xFF7C4DFF));
     });
 
-    test('colorCategoryWork is blue #5B8BD4', () {
-      expect(AppColors.colorCategoryWork, const Color(0xFF5B8BD4));
+    test('colorCategoryWork is cyan #00C2D4', () {
+      expect(AppColors.colorCategoryWork, const Color(0xFF00C2D4));
     });
 
     test('colorCategoryPractice is green #1D9E75', () {

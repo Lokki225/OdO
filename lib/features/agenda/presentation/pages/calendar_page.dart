@@ -26,7 +26,7 @@ class CalendarPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendar'),
+        title: const Text('Calendrier'),
         leading: BackButton(onPressed: () => context.pop()),
       ),
       body: TableCalendar<Event>(

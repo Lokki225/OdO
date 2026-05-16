@@ -19,13 +19,14 @@ class EventBlock extends StatelessWidget {
   final double height;
 
   static const double _minHeight = 32.0;
-  static const double _categoryBarWidth = 4.0;
+  static const double _categoryBarWidth = 3.0;
 
   @override
   Widget build(BuildContext context) {
     final effectiveHeight = height.clamp(_minHeight, double.infinity);
-    final colorScheme = Theme.of(context).colorScheme;
     final locale = LocaleService();
+    final catColor = _categoryColor(event.category);
+    final surfaceColor = catColor.withValues(alpha: 0.15);
 
     return Positioned(
       top: topOffset,
@@ -36,16 +37,15 @@ class EventBlock extends StatelessWidget {
         onTap: () => context.push('/home/agenda/event/${event.id}'),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            border: Border.all(color: colorScheme.outline),
           ),
           child: Row(
             children: [
               Container(
                 width: _categoryBarWidth,
                 decoration: BoxDecoration(
-                  color: _categoryColor(event.category),
+                  color: catColor,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(AppSpacing.radiusSm),
                     bottomLeft: Radius.circular(AppSpacing.radiusSm),

@@ -28,7 +28,7 @@ abstract final class AppColors {
   // --- Fixed category semantic tokens (Layer 2, not remapped by theme) ---
 
   static const Color colorCategoryPersonal = Color(0xFF7C4DFF);
-  static const Color colorCategoryWork = Color(0xFF5B8BD4);
+  static const Color colorCategoryWork = Color(0xFF00C2D4);
   static const Color colorCategoryPractice = Color(0xFF1D9E75);
 
   // Agenda-semantic aliases used by event blocks and strip dots
