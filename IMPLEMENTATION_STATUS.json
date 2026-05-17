@@ -4,9 +4,9 @@
   "status": "IN_PROGRESS",
   "date": "2026-05-17",
   "currentEpic": 3,
-  "currentStory": "3-2-first-launch-skill-prompt",
+  "currentStory": "3-3-skill-card",
   "totalStories": 46,
-  "completionPercentage": 30,
+  "completionPercentage": 32,
   "performanceThresholds": {
     "mobileUIInteractions": "500ms",
     "claudeAPIResponse": "3000ms",
@@ -51,7 +51,7 @@
       "id": 3,
       "name": "Practice Module",
       "status": "IN_PROGRESS",
-      "storiesComplete": 1,
+      "storiesComplete": 2,
       "storiesTotal": 9,
       "stories": [
         "3-1-practice-repository-and-dao",
@@ -117,6 +117,11 @@
     }
   ],
   "completedStories": [
+    {
+      "id": "3-2-first-launch-skill-prompt",
+      "completedDate": "2026-05-17",
+      "notes": "SkillTypeDetector (abstract final class, static detect() with 5 keyword lists, defaults to personal; NO short substrings 'ai'/'ia' to avoid false positives in e.g. 'japonais'/'piano'). PracticeNotifier (AsyncNotifier<void> with addSkill/updateSkill/deleteSkill delegating to repo). PracticePage (ConsumerStatefulWidget, _hasShownFirstLaunch guard, initState postFrameCallback check + ref.listen for async data; shows FirstLaunchSheet via showModalBottomSheet when skills empty on load). FirstLaunchSheet (ConsumerStatefulWidget, TextEditingController, auto-detects SkillType via SkillTypeDetector, Navigator.of(context).pop() — NOT go_router context.pop() to allow test without GoRouter). Router updated: practice route → PracticePage, add-skill → FirstLaunchSheet. 19 tests (13 unit + 6 widget), 201/201 total tests pass, analyze clean."
+    },
     {
       "id": "3-1-practice-repository-and-dao",
       "completedDate": "2026-05-17",

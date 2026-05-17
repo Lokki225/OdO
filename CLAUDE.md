@@ -371,6 +371,22 @@ Stop immediately and ask if:
 
 ---
 
+### Story 3.2 — First-Launch Skill Prompt
+**Completed:** 2026-05-17 | **Confidence:** 96/100
+
+**Files created/modified:**
+- `lib/features/practice/domain/usecases/skill_type_detector.dart` — `abstract final class SkillTypeDetector`, static `detect(String name) → SkillType` with 5 keyword lists; defaults to `personal`. Keywords min ~4 chars — no `'ai'`/`'ia'` (false positives: "japonais" contains "ai", "piano" contains "ia"); uses multi-word phrases for broad concepts: `'artificial intelligence'`, `'data science'`, `'machine learning'`
+- `lib/features/practice/presentation/practice_providers.dart` — Added `PracticeNotifier` (`AsyncNotifier<void>`) with `addSkill`, `updateSkill`, `deleteSkill` delegating to repository; `practiceNotifierProvider`
+- `lib/features/practice/presentation/pages/practice_page.dart` — `ConsumerStatefulWidget`; `_hasShownFirstLaunch` bool guard; `initState` post-frame callback reads `allSkillsProvider` and shows `FirstLaunchSheet` if empty; `ref.listen` watches stream for async data arrival; FAB navigates to `/home/practice/add-skill`; handles loading/error/empty/data states
+- `lib/features/practice/presentation/pages/first_launch_sheet.dart` — `ConsumerStatefulWidget`; `TextEditingController`; calls `SkillTypeDetector.detect(name)` for auto-type; `Navigator.of(context).pop()` (NOT `context.pop()` from go_router — plain Navigator works for modal bottom sheets and is testable without GoRouter)
+- `lib/app/router.dart` — `practice` route: `PlaceholderScreen` → `PracticePage()`; `add-skill` route: placeholder → `FirstLaunchSheet()` via `_slideUpSheet`
+
+**Tests:** 13 unit (SkillTypeDetector) + 6 widget (FirstLaunchSheet) = 19 new tests. 201/201 total pass, analyze clean.
+
+**Key rule going forward:** Bottom sheets opened via `showModalBottomSheet` always use `Navigator.of(context).pop()` — never `context.pop()` (go_router). Makes them testable with plain `MaterialApp`.
+
+---
+
 ### Story 3-1 — Practice Repository and DAO
 **Completed:** 2026-05-17 | **Confidence:** 96/100
 

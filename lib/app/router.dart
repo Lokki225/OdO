@@ -11,6 +11,8 @@ import 'package:odo/features/agenda/presentation/pages/event_detail_page.dart';
 import 'package:odo/features/home/presentation/home_screen.dart';
 import 'package:odo/features/home/presentation/placeholder_screen.dart';
 import 'package:odo/features/home/presentation/scaffold_with_nav_bar.dart';
+import 'package:odo/features/practice/presentation/pages/first_launch_sheet.dart';
+import 'package:odo/features/practice/presentation/pages/practice_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) => router);
 
@@ -82,8 +84,7 @@ final router = GoRouter(
             ),
             GoRoute(
               path: 'practice',
-              builder: (_, __) =>
-                  const PlaceholderScreen(title: 'Practice'),
+              builder: (_, __) => const PracticePage(),
               routes: [
                 GoRoute(
                   path: 'skill/:id',
@@ -95,7 +96,7 @@ final router = GoRouter(
                   path: 'add-skill',
                   pageBuilder: (context, state) => _slideUpSheet(
                     state,
-                    const PlaceholderScreen(title: 'Add Skill'),
+                    const FirstLaunchSheet(),
                   ),
                 ),
                 GoRoute(
