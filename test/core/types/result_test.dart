@@ -51,8 +51,8 @@ void main() {
   });
 
   group('AppError enum (AC2)', () {
-    test('has exactly 8 variants', () {
-      expect(AppError.values.length, 8);
+    test('has exactly 9 variants', () {
+      expect(AppError.values.length, 9);
     });
 
     test('all variants have non-empty messages', () {

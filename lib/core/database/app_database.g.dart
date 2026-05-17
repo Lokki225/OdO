@@ -22,6 +22,37 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _metricConfigMeta =
+      const VerificationMeta('metricConfig');
+  @override
+  late final GeneratedColumn<String> metricConfig = GeneratedColumn<String>(
+      'metric_config', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _levelLabelMeta =
+      const VerificationMeta('levelLabel');
+  @override
+  late final GeneratedColumn<String> levelLabel = GeneratedColumn<String>(
+      'level_label', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _levelUpdatedAtMeta =
+      const VerificationMeta('levelUpdatedAt');
+  @override
+  late final GeneratedColumn<int> levelUpdatedAt = GeneratedColumn<int>(
+      'level_updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _sessionsSinceLevelUpdateMeta =
+      const VerificationMeta('sessionsSinceLevelUpdate');
+  @override
+  late final GeneratedColumn<int> sessionsSinceLevelUpdate =
+      GeneratedColumn<int>('sessions_since_level_update', aliasedName, false,
+          type: DriftSqlType.int,
+          requiredDuringInsert: false,
+          defaultValue: const Constant(0));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -34,8 +65,36 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
   late final GeneratedColumn<int> lastSessionAt = GeneratedColumn<int>(
       'last_session_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _isArchivedMeta =
+      const VerificationMeta('isArchived');
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt, lastSessionAt];
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+      'is_archived', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_archived" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _suppressedUntilMeta =
+      const VerificationMeta('suppressedUntil');
+  @override
+  late final GeneratedColumn<int> suppressedUntil = GeneratedColumn<int>(
+      'suppressed_until', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        type,
+        metricConfig,
+        levelLabel,
+        levelUpdatedAt,
+        sessionsSinceLevelUpdate,
+        createdAt,
+        lastSessionAt,
+        isArchived,
+        suppressedUntil
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -55,6 +114,37 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('metric_config')) {
+      context.handle(
+          _metricConfigMeta,
+          metricConfig.isAcceptableOrUnknown(
+              data['metric_config']!, _metricConfigMeta));
+    }
+    if (data.containsKey('level_label')) {
+      context.handle(
+          _levelLabelMeta,
+          levelLabel.isAcceptableOrUnknown(
+              data['level_label']!, _levelLabelMeta));
+    }
+    if (data.containsKey('level_updated_at')) {
+      context.handle(
+          _levelUpdatedAtMeta,
+          levelUpdatedAt.isAcceptableOrUnknown(
+              data['level_updated_at']!, _levelUpdatedAtMeta));
+    }
+    if (data.containsKey('sessions_since_level_update')) {
+      context.handle(
+          _sessionsSinceLevelUpdateMeta,
+          sessionsSinceLevelUpdate.isAcceptableOrUnknown(
+              data['sessions_since_level_update']!,
+              _sessionsSinceLevelUpdateMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -66,6 +156,18 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
           _lastSessionAtMeta,
           lastSessionAt.isAcceptableOrUnknown(
               data['last_session_at']!, _lastSessionAtMeta));
+    }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+          _isArchivedMeta,
+          isArchived.isAcceptableOrUnknown(
+              data['is_archived']!, _isArchivedMeta));
+    }
+    if (data.containsKey('suppressed_until')) {
+      context.handle(
+          _suppressedUntilMeta,
+          suppressedUntil.isAcceptableOrUnknown(
+              data['suppressed_until']!, _suppressedUntilMeta));
     }
     return context;
   }
@@ -80,10 +182,25 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      metricConfig: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}metric_config']),
+      levelLabel: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}level_label']),
+      levelUpdatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}level_updated_at']),
+      sessionsSinceLevelUpdate: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sessions_since_level_update'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
       lastSessionAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}last_session_at']),
+      isArchived: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
+      suppressedUntil: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}suppressed_until']),
     );
   }
 
@@ -96,21 +213,51 @@ class $SkillsTable extends Skills with TableInfo<$SkillsTable, SkillRow> {
 class SkillRow extends DataClass implements Insertable<SkillRow> {
   final int id;
   final String name;
+  final String type;
+  final String? metricConfig;
+  final String? levelLabel;
+  final int? levelUpdatedAt;
+  final int sessionsSinceLevelUpdate;
   final int createdAt;
   final int? lastSessionAt;
+  final bool isArchived;
+  final int? suppressedUntil;
   const SkillRow(
       {required this.id,
       required this.name,
+      required this.type,
+      this.metricConfig,
+      this.levelLabel,
+      this.levelUpdatedAt,
+      required this.sessionsSinceLevelUpdate,
       required this.createdAt,
-      this.lastSessionAt});
+      this.lastSessionAt,
+      required this.isArchived,
+      this.suppressedUntil});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    map['type'] = Variable<String>(type);
+    if (!nullToAbsent || metricConfig != null) {
+      map['metric_config'] = Variable<String>(metricConfig);
+    }
+    if (!nullToAbsent || levelLabel != null) {
+      map['level_label'] = Variable<String>(levelLabel);
+    }
+    if (!nullToAbsent || levelUpdatedAt != null) {
+      map['level_updated_at'] = Variable<int>(levelUpdatedAt);
+    }
+    map['sessions_since_level_update'] =
+        Variable<int>(sessionsSinceLevelUpdate);
     map['created_at'] = Variable<int>(createdAt);
     if (!nullToAbsent || lastSessionAt != null) {
       map['last_session_at'] = Variable<int>(lastSessionAt);
+    }
+    map['is_archived'] = Variable<bool>(isArchived);
+    if (!nullToAbsent || suppressedUntil != null) {
+      map['suppressed_until'] = Variable<int>(suppressedUntil);
     }
     return map;
   }
@@ -119,10 +266,25 @@ class SkillRow extends DataClass implements Insertable<SkillRow> {
     return SkillsCompanion(
       id: Value(id),
       name: Value(name),
+      type: Value(type),
+      metricConfig: metricConfig == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricConfig),
+      levelLabel: levelLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(levelLabel),
+      levelUpdatedAt: levelUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(levelUpdatedAt),
+      sessionsSinceLevelUpdate: Value(sessionsSinceLevelUpdate),
       createdAt: Value(createdAt),
       lastSessionAt: lastSessionAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSessionAt),
+      isArchived: Value(isArchived),
+      suppressedUntil: suppressedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(suppressedUntil),
     );
   }
 
@@ -132,8 +294,16 @@ class SkillRow extends DataClass implements Insertable<SkillRow> {
     return SkillRow(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      type: serializer.fromJson<String>(json['type']),
+      metricConfig: serializer.fromJson<String?>(json['metricConfig']),
+      levelLabel: serializer.fromJson<String?>(json['levelLabel']),
+      levelUpdatedAt: serializer.fromJson<int?>(json['levelUpdatedAt']),
+      sessionsSinceLevelUpdate:
+          serializer.fromJson<int>(json['sessionsSinceLevelUpdate']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       lastSessionAt: serializer.fromJson<int?>(json['lastSessionAt']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
+      suppressedUntil: serializer.fromJson<int?>(json['suppressedUntil']),
     );
   }
   @override
@@ -142,31 +312,75 @@ class SkillRow extends DataClass implements Insertable<SkillRow> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(type),
+      'metricConfig': serializer.toJson<String?>(metricConfig),
+      'levelLabel': serializer.toJson<String?>(levelLabel),
+      'levelUpdatedAt': serializer.toJson<int?>(levelUpdatedAt),
+      'sessionsSinceLevelUpdate':
+          serializer.toJson<int>(sessionsSinceLevelUpdate),
       'createdAt': serializer.toJson<int>(createdAt),
       'lastSessionAt': serializer.toJson<int?>(lastSessionAt),
+      'isArchived': serializer.toJson<bool>(isArchived),
+      'suppressedUntil': serializer.toJson<int?>(suppressedUntil),
     };
   }
 
   SkillRow copyWith(
           {int? id,
           String? name,
+          String? type,
+          Value<String?> metricConfig = const Value.absent(),
+          Value<String?> levelLabel = const Value.absent(),
+          Value<int?> levelUpdatedAt = const Value.absent(),
+          int? sessionsSinceLevelUpdate,
           int? createdAt,
-          Value<int?> lastSessionAt = const Value.absent()}) =>
+          Value<int?> lastSessionAt = const Value.absent(),
+          bool? isArchived,
+          Value<int?> suppressedUntil = const Value.absent()}) =>
       SkillRow(
         id: id ?? this.id,
         name: name ?? this.name,
+        type: type ?? this.type,
+        metricConfig:
+            metricConfig.present ? metricConfig.value : this.metricConfig,
+        levelLabel: levelLabel.present ? levelLabel.value : this.levelLabel,
+        levelUpdatedAt:
+            levelUpdatedAt.present ? levelUpdatedAt.value : this.levelUpdatedAt,
+        sessionsSinceLevelUpdate:
+            sessionsSinceLevelUpdate ?? this.sessionsSinceLevelUpdate,
         createdAt: createdAt ?? this.createdAt,
         lastSessionAt:
             lastSessionAt.present ? lastSessionAt.value : this.lastSessionAt,
+        isArchived: isArchived ?? this.isArchived,
+        suppressedUntil: suppressedUntil.present
+            ? suppressedUntil.value
+            : this.suppressedUntil,
       );
   SkillRow copyWithCompanion(SkillsCompanion data) {
     return SkillRow(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      metricConfig: data.metricConfig.present
+          ? data.metricConfig.value
+          : this.metricConfig,
+      levelLabel:
+          data.levelLabel.present ? data.levelLabel.value : this.levelLabel,
+      levelUpdatedAt: data.levelUpdatedAt.present
+          ? data.levelUpdatedAt.value
+          : this.levelUpdatedAt,
+      sessionsSinceLevelUpdate: data.sessionsSinceLevelUpdate.present
+          ? data.sessionsSinceLevelUpdate.value
+          : this.sessionsSinceLevelUpdate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastSessionAt: data.lastSessionAt.present
           ? data.lastSessionAt.value
           : this.lastSessionAt,
+      isArchived:
+          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      suppressedUntil: data.suppressedUntil.present
+          ? data.suppressedUntil.value
+          : this.suppressedUntil,
     );
   }
 
@@ -175,66 +389,143 @@ class SkillRow extends DataClass implements Insertable<SkillRow> {
     return (StringBuffer('SkillRow(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('metricConfig: $metricConfig, ')
+          ..write('levelLabel: $levelLabel, ')
+          ..write('levelUpdatedAt: $levelUpdatedAt, ')
+          ..write('sessionsSinceLevelUpdate: $sessionsSinceLevelUpdate, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastSessionAt: $lastSessionAt')
+          ..write('lastSessionAt: $lastSessionAt, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('suppressedUntil: $suppressedUntil')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, createdAt, lastSessionAt);
+  int get hashCode => Object.hash(
+      id,
+      name,
+      type,
+      metricConfig,
+      levelLabel,
+      levelUpdatedAt,
+      sessionsSinceLevelUpdate,
+      createdAt,
+      lastSessionAt,
+      isArchived,
+      suppressedUntil);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SkillRow &&
           other.id == this.id &&
           other.name == this.name &&
+          other.type == this.type &&
+          other.metricConfig == this.metricConfig &&
+          other.levelLabel == this.levelLabel &&
+          other.levelUpdatedAt == this.levelUpdatedAt &&
+          other.sessionsSinceLevelUpdate == this.sessionsSinceLevelUpdate &&
           other.createdAt == this.createdAt &&
-          other.lastSessionAt == this.lastSessionAt);
+          other.lastSessionAt == this.lastSessionAt &&
+          other.isArchived == this.isArchived &&
+          other.suppressedUntil == this.suppressedUntil);
 }
 
 class SkillsCompanion extends UpdateCompanion<SkillRow> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String> type;
+  final Value<String?> metricConfig;
+  final Value<String?> levelLabel;
+  final Value<int?> levelUpdatedAt;
+  final Value<int> sessionsSinceLevelUpdate;
   final Value<int> createdAt;
   final Value<int?> lastSessionAt;
+  final Value<bool> isArchived;
+  final Value<int?> suppressedUntil;
   const SkillsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.metricConfig = const Value.absent(),
+    this.levelLabel = const Value.absent(),
+    this.levelUpdatedAt = const Value.absent(),
+    this.sessionsSinceLevelUpdate = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastSessionAt = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.suppressedUntil = const Value.absent(),
   });
   SkillsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    required String type,
+    this.metricConfig = const Value.absent(),
+    this.levelLabel = const Value.absent(),
+    this.levelUpdatedAt = const Value.absent(),
+    this.sessionsSinceLevelUpdate = const Value.absent(),
     required int createdAt,
     this.lastSessionAt = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.suppressedUntil = const Value.absent(),
   })  : name = Value(name),
+        type = Value(type),
         createdAt = Value(createdAt);
   static Insertable<SkillRow> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? type,
+    Expression<String>? metricConfig,
+    Expression<String>? levelLabel,
+    Expression<int>? levelUpdatedAt,
+    Expression<int>? sessionsSinceLevelUpdate,
     Expression<int>? createdAt,
     Expression<int>? lastSessionAt,
+    Expression<bool>? isArchived,
+    Expression<int>? suppressedUntil,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (metricConfig != null) 'metric_config': metricConfig,
+      if (levelLabel != null) 'level_label': levelLabel,
+      if (levelUpdatedAt != null) 'level_updated_at': levelUpdatedAt,
+      if (sessionsSinceLevelUpdate != null)
+        'sessions_since_level_update': sessionsSinceLevelUpdate,
       if (createdAt != null) 'created_at': createdAt,
       if (lastSessionAt != null) 'last_session_at': lastSessionAt,
+      if (isArchived != null) 'is_archived': isArchived,
+      if (suppressedUntil != null) 'suppressed_until': suppressedUntil,
     });
   }
 
   SkillsCompanion copyWith(
       {Value<int>? id,
       Value<String>? name,
+      Value<String>? type,
+      Value<String?>? metricConfig,
+      Value<String?>? levelLabel,
+      Value<int?>? levelUpdatedAt,
+      Value<int>? sessionsSinceLevelUpdate,
       Value<int>? createdAt,
-      Value<int?>? lastSessionAt}) {
+      Value<int?>? lastSessionAt,
+      Value<bool>? isArchived,
+      Value<int?>? suppressedUntil}) {
     return SkillsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      type: type ?? this.type,
+      metricConfig: metricConfig ?? this.metricConfig,
+      levelLabel: levelLabel ?? this.levelLabel,
+      levelUpdatedAt: levelUpdatedAt ?? this.levelUpdatedAt,
+      sessionsSinceLevelUpdate:
+          sessionsSinceLevelUpdate ?? this.sessionsSinceLevelUpdate,
       createdAt: createdAt ?? this.createdAt,
       lastSessionAt: lastSessionAt ?? this.lastSessionAt,
+      isArchived: isArchived ?? this.isArchived,
+      suppressedUntil: suppressedUntil ?? this.suppressedUntil,
     );
   }
 
@@ -247,11 +538,33 @@ class SkillsCompanion extends UpdateCompanion<SkillRow> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (metricConfig.present) {
+      map['metric_config'] = Variable<String>(metricConfig.value);
+    }
+    if (levelLabel.present) {
+      map['level_label'] = Variable<String>(levelLabel.value);
+    }
+    if (levelUpdatedAt.present) {
+      map['level_updated_at'] = Variable<int>(levelUpdatedAt.value);
+    }
+    if (sessionsSinceLevelUpdate.present) {
+      map['sessions_since_level_update'] =
+          Variable<int>(sessionsSinceLevelUpdate.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
     if (lastSessionAt.present) {
       map['last_session_at'] = Variable<int>(lastSessionAt.value);
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<bool>(isArchived.value);
+    }
+    if (suppressedUntil.present) {
+      map['suppressed_until'] = Variable<int>(suppressedUntil.value);
     }
     return map;
   }
@@ -261,8 +574,15 @@ class SkillsCompanion extends UpdateCompanion<SkillRow> {
     return (StringBuffer('SkillsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('metricConfig: $metricConfig, ')
+          ..write('levelLabel: $levelLabel, ')
+          ..write('levelUpdatedAt: $levelUpdatedAt, ')
+          ..write('sessionsSinceLevelUpdate: $sessionsSinceLevelUpdate, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastSessionAt: $lastSessionAt')
+          ..write('lastSessionAt: $lastSessionAt, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('suppressedUntil: $suppressedUntil')
           ..write(')'))
         .toString();
   }
@@ -304,6 +624,24 @@ class $SessionsTable extends Sessions
   late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
       'duration_minutes', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _modeTagsMeta =
+      const VerificationMeta('modeTags');
+  @override
+  late final GeneratedColumn<String> modeTags = GeneratedColumn<String>(
+      'mode_tags', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _performanceMetricMeta =
+      const VerificationMeta('performanceMetric');
+  @override
+  late final GeneratedColumn<double> performanceMetric =
+      GeneratedColumn<double>('performance_metric', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _feelScoreMeta =
+      const VerificationMeta('feelScore');
+  @override
+  late final GeneratedColumn<int> feelScore = GeneratedColumn<int>(
+      'feel_score', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -325,15 +663,36 @@ class $SessionsTable extends Sessions
   late final GeneratedColumn<int> suggestedTime = GeneratedColumn<int>(
       'suggested_time', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _isMilestoneMeta =
+      const VerificationMeta('isMilestone');
+  @override
+  late final GeneratedColumn<bool> isMilestone = GeneratedColumn<bool>(
+      'is_milestone', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_milestone" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _milestoneLabelMeta =
+      const VerificationMeta('milestoneLabel');
+  @override
+  late final GeneratedColumn<String> milestoneLabel = GeneratedColumn<String>(
+      'milestone_label', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         skillId,
         startedAt,
         durationMinutes,
+        modeTags,
+        performanceMetric,
+        feelScore,
         notes,
         isAnchored,
-        suggestedTime
+        suggestedTime,
+        isMilestone,
+        milestoneLabel
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -368,6 +727,20 @@ class $SessionsTable extends Sessions
     } else if (isInserting) {
       context.missing(_durationMinutesMeta);
     }
+    if (data.containsKey('mode_tags')) {
+      context.handle(_modeTagsMeta,
+          modeTags.isAcceptableOrUnknown(data['mode_tags']!, _modeTagsMeta));
+    }
+    if (data.containsKey('performance_metric')) {
+      context.handle(
+          _performanceMetricMeta,
+          performanceMetric.isAcceptableOrUnknown(
+              data['performance_metric']!, _performanceMetricMeta));
+    }
+    if (data.containsKey('feel_score')) {
+      context.handle(_feelScoreMeta,
+          feelScore.isAcceptableOrUnknown(data['feel_score']!, _feelScoreMeta));
+    }
     if (data.containsKey('notes')) {
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
@@ -383,6 +756,18 @@ class $SessionsTable extends Sessions
           _suggestedTimeMeta,
           suggestedTime.isAcceptableOrUnknown(
               data['suggested_time']!, _suggestedTimeMeta));
+    }
+    if (data.containsKey('is_milestone')) {
+      context.handle(
+          _isMilestoneMeta,
+          isMilestone.isAcceptableOrUnknown(
+              data['is_milestone']!, _isMilestoneMeta));
+    }
+    if (data.containsKey('milestone_label')) {
+      context.handle(
+          _milestoneLabelMeta,
+          milestoneLabel.isAcceptableOrUnknown(
+              data['milestone_label']!, _milestoneLabelMeta));
     }
     return context;
   }
@@ -401,12 +786,22 @@ class $SessionsTable extends Sessions
           .read(DriftSqlType.int, data['${effectivePrefix}started_at'])!,
       durationMinutes: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}duration_minutes'])!,
+      modeTags: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mode_tags']),
+      performanceMetric: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}performance_metric']),
+      feelScore: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}feel_score']),
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
       isAnchored: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_anchored'])!,
       suggestedTime: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}suggested_time']),
+      isMilestone: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_milestone'])!,
+      milestoneLabel: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}milestone_label']),
     );
   }
 
@@ -421,17 +816,27 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
   final int skillId;
   final int startedAt;
   final int durationMinutes;
+  final String? modeTags;
+  final double? performanceMetric;
+  final int? feelScore;
   final String? notes;
   final bool isAnchored;
   final int? suggestedTime;
+  final bool isMilestone;
+  final String? milestoneLabel;
   const SessionRow(
       {required this.id,
       required this.skillId,
       required this.startedAt,
       required this.durationMinutes,
+      this.modeTags,
+      this.performanceMetric,
+      this.feelScore,
       this.notes,
       required this.isAnchored,
-      this.suggestedTime});
+      this.suggestedTime,
+      required this.isMilestone,
+      this.milestoneLabel});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -439,12 +844,25 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
     map['skill_id'] = Variable<int>(skillId);
     map['started_at'] = Variable<int>(startedAt);
     map['duration_minutes'] = Variable<int>(durationMinutes);
+    if (!nullToAbsent || modeTags != null) {
+      map['mode_tags'] = Variable<String>(modeTags);
+    }
+    if (!nullToAbsent || performanceMetric != null) {
+      map['performance_metric'] = Variable<double>(performanceMetric);
+    }
+    if (!nullToAbsent || feelScore != null) {
+      map['feel_score'] = Variable<int>(feelScore);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
     map['is_anchored'] = Variable<bool>(isAnchored);
     if (!nullToAbsent || suggestedTime != null) {
       map['suggested_time'] = Variable<int>(suggestedTime);
+    }
+    map['is_milestone'] = Variable<bool>(isMilestone);
+    if (!nullToAbsent || milestoneLabel != null) {
+      map['milestone_label'] = Variable<String>(milestoneLabel);
     }
     return map;
   }
@@ -455,12 +873,25 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
       skillId: Value(skillId),
       startedAt: Value(startedAt),
       durationMinutes: Value(durationMinutes),
+      modeTags: modeTags == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modeTags),
+      performanceMetric: performanceMetric == null && nullToAbsent
+          ? const Value.absent()
+          : Value(performanceMetric),
+      feelScore: feelScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(feelScore),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
       isAnchored: Value(isAnchored),
       suggestedTime: suggestedTime == null && nullToAbsent
           ? const Value.absent()
           : Value(suggestedTime),
+      isMilestone: Value(isMilestone),
+      milestoneLabel: milestoneLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(milestoneLabel),
     );
   }
 
@@ -472,9 +903,15 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
       skillId: serializer.fromJson<int>(json['skillId']),
       startedAt: serializer.fromJson<int>(json['startedAt']),
       durationMinutes: serializer.fromJson<int>(json['durationMinutes']),
+      modeTags: serializer.fromJson<String?>(json['modeTags']),
+      performanceMetric:
+          serializer.fromJson<double?>(json['performanceMetric']),
+      feelScore: serializer.fromJson<int?>(json['feelScore']),
       notes: serializer.fromJson<String?>(json['notes']),
       isAnchored: serializer.fromJson<bool>(json['isAnchored']),
       suggestedTime: serializer.fromJson<int?>(json['suggestedTime']),
+      isMilestone: serializer.fromJson<bool>(json['isMilestone']),
+      milestoneLabel: serializer.fromJson<String?>(json['milestoneLabel']),
     );
   }
   @override
@@ -485,9 +922,14 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
       'skillId': serializer.toJson<int>(skillId),
       'startedAt': serializer.toJson<int>(startedAt),
       'durationMinutes': serializer.toJson<int>(durationMinutes),
+      'modeTags': serializer.toJson<String?>(modeTags),
+      'performanceMetric': serializer.toJson<double?>(performanceMetric),
+      'feelScore': serializer.toJson<int?>(feelScore),
       'notes': serializer.toJson<String?>(notes),
       'isAnchored': serializer.toJson<bool>(isAnchored),
       'suggestedTime': serializer.toJson<int?>(suggestedTime),
+      'isMilestone': serializer.toJson<bool>(isMilestone),
+      'milestoneLabel': serializer.toJson<String?>(milestoneLabel),
     };
   }
 
@@ -496,18 +938,31 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
           int? skillId,
           int? startedAt,
           int? durationMinutes,
+          Value<String?> modeTags = const Value.absent(),
+          Value<double?> performanceMetric = const Value.absent(),
+          Value<int?> feelScore = const Value.absent(),
           Value<String?> notes = const Value.absent(),
           bool? isAnchored,
-          Value<int?> suggestedTime = const Value.absent()}) =>
+          Value<int?> suggestedTime = const Value.absent(),
+          bool? isMilestone,
+          Value<String?> milestoneLabel = const Value.absent()}) =>
       SessionRow(
         id: id ?? this.id,
         skillId: skillId ?? this.skillId,
         startedAt: startedAt ?? this.startedAt,
         durationMinutes: durationMinutes ?? this.durationMinutes,
+        modeTags: modeTags.present ? modeTags.value : this.modeTags,
+        performanceMetric: performanceMetric.present
+            ? performanceMetric.value
+            : this.performanceMetric,
+        feelScore: feelScore.present ? feelScore.value : this.feelScore,
         notes: notes.present ? notes.value : this.notes,
         isAnchored: isAnchored ?? this.isAnchored,
         suggestedTime:
             suggestedTime.present ? suggestedTime.value : this.suggestedTime,
+        isMilestone: isMilestone ?? this.isMilestone,
+        milestoneLabel:
+            milestoneLabel.present ? milestoneLabel.value : this.milestoneLabel,
       );
   SessionRow copyWithCompanion(SessionsCompanion data) {
     return SessionRow(
@@ -517,12 +972,22 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
       durationMinutes: data.durationMinutes.present
           ? data.durationMinutes.value
           : this.durationMinutes,
+      modeTags: data.modeTags.present ? data.modeTags.value : this.modeTags,
+      performanceMetric: data.performanceMetric.present
+          ? data.performanceMetric.value
+          : this.performanceMetric,
+      feelScore: data.feelScore.present ? data.feelScore.value : this.feelScore,
       notes: data.notes.present ? data.notes.value : this.notes,
       isAnchored:
           data.isAnchored.present ? data.isAnchored.value : this.isAnchored,
       suggestedTime: data.suggestedTime.present
           ? data.suggestedTime.value
           : this.suggestedTime,
+      isMilestone:
+          data.isMilestone.present ? data.isMilestone.value : this.isMilestone,
+      milestoneLabel: data.milestoneLabel.present
+          ? data.milestoneLabel.value
+          : this.milestoneLabel,
     );
   }
 
@@ -533,16 +998,32 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
           ..write('skillId: $skillId, ')
           ..write('startedAt: $startedAt, ')
           ..write('durationMinutes: $durationMinutes, ')
+          ..write('modeTags: $modeTags, ')
+          ..write('performanceMetric: $performanceMetric, ')
+          ..write('feelScore: $feelScore, ')
           ..write('notes: $notes, ')
           ..write('isAnchored: $isAnchored, ')
-          ..write('suggestedTime: $suggestedTime')
+          ..write('suggestedTime: $suggestedTime, ')
+          ..write('isMilestone: $isMilestone, ')
+          ..write('milestoneLabel: $milestoneLabel')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, skillId, startedAt, durationMinutes,
-      notes, isAnchored, suggestedTime);
+  int get hashCode => Object.hash(
+      id,
+      skillId,
+      startedAt,
+      durationMinutes,
+      modeTags,
+      performanceMetric,
+      feelScore,
+      notes,
+      isAnchored,
+      suggestedTime,
+      isMilestone,
+      milestoneLabel);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -551,9 +1032,14 @@ class SessionRow extends DataClass implements Insertable<SessionRow> {
           other.skillId == this.skillId &&
           other.startedAt == this.startedAt &&
           other.durationMinutes == this.durationMinutes &&
+          other.modeTags == this.modeTags &&
+          other.performanceMetric == this.performanceMetric &&
+          other.feelScore == this.feelScore &&
           other.notes == this.notes &&
           other.isAnchored == this.isAnchored &&
-          other.suggestedTime == this.suggestedTime);
+          other.suggestedTime == this.suggestedTime &&
+          other.isMilestone == this.isMilestone &&
+          other.milestoneLabel == this.milestoneLabel);
 }
 
 class SessionsCompanion extends UpdateCompanion<SessionRow> {
@@ -561,26 +1047,41 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
   final Value<int> skillId;
   final Value<int> startedAt;
   final Value<int> durationMinutes;
+  final Value<String?> modeTags;
+  final Value<double?> performanceMetric;
+  final Value<int?> feelScore;
   final Value<String?> notes;
   final Value<bool> isAnchored;
   final Value<int?> suggestedTime;
+  final Value<bool> isMilestone;
+  final Value<String?> milestoneLabel;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.skillId = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.durationMinutes = const Value.absent(),
+    this.modeTags = const Value.absent(),
+    this.performanceMetric = const Value.absent(),
+    this.feelScore = const Value.absent(),
     this.notes = const Value.absent(),
     this.isAnchored = const Value.absent(),
     this.suggestedTime = const Value.absent(),
+    this.isMilestone = const Value.absent(),
+    this.milestoneLabel = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
     required int skillId,
     required int startedAt,
     required int durationMinutes,
+    this.modeTags = const Value.absent(),
+    this.performanceMetric = const Value.absent(),
+    this.feelScore = const Value.absent(),
     this.notes = const Value.absent(),
     this.isAnchored = const Value.absent(),
     this.suggestedTime = const Value.absent(),
+    this.isMilestone = const Value.absent(),
+    this.milestoneLabel = const Value.absent(),
   })  : skillId = Value(skillId),
         startedAt = Value(startedAt),
         durationMinutes = Value(durationMinutes);
@@ -589,18 +1090,28 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
     Expression<int>? skillId,
     Expression<int>? startedAt,
     Expression<int>? durationMinutes,
+    Expression<String>? modeTags,
+    Expression<double>? performanceMetric,
+    Expression<int>? feelScore,
     Expression<String>? notes,
     Expression<bool>? isAnchored,
     Expression<int>? suggestedTime,
+    Expression<bool>? isMilestone,
+    Expression<String>? milestoneLabel,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (skillId != null) 'skill_id': skillId,
       if (startedAt != null) 'started_at': startedAt,
       if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (modeTags != null) 'mode_tags': modeTags,
+      if (performanceMetric != null) 'performance_metric': performanceMetric,
+      if (feelScore != null) 'feel_score': feelScore,
       if (notes != null) 'notes': notes,
       if (isAnchored != null) 'is_anchored': isAnchored,
       if (suggestedTime != null) 'suggested_time': suggestedTime,
+      if (isMilestone != null) 'is_milestone': isMilestone,
+      if (milestoneLabel != null) 'milestone_label': milestoneLabel,
     });
   }
 
@@ -609,17 +1120,27 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
       Value<int>? skillId,
       Value<int>? startedAt,
       Value<int>? durationMinutes,
+      Value<String?>? modeTags,
+      Value<double?>? performanceMetric,
+      Value<int?>? feelScore,
       Value<String?>? notes,
       Value<bool>? isAnchored,
-      Value<int?>? suggestedTime}) {
+      Value<int?>? suggestedTime,
+      Value<bool>? isMilestone,
+      Value<String?>? milestoneLabel}) {
     return SessionsCompanion(
       id: id ?? this.id,
       skillId: skillId ?? this.skillId,
       startedAt: startedAt ?? this.startedAt,
       durationMinutes: durationMinutes ?? this.durationMinutes,
+      modeTags: modeTags ?? this.modeTags,
+      performanceMetric: performanceMetric ?? this.performanceMetric,
+      feelScore: feelScore ?? this.feelScore,
       notes: notes ?? this.notes,
       isAnchored: isAnchored ?? this.isAnchored,
       suggestedTime: suggestedTime ?? this.suggestedTime,
+      isMilestone: isMilestone ?? this.isMilestone,
+      milestoneLabel: milestoneLabel ?? this.milestoneLabel,
     );
   }
 
@@ -638,6 +1159,15 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
     if (durationMinutes.present) {
       map['duration_minutes'] = Variable<int>(durationMinutes.value);
     }
+    if (modeTags.present) {
+      map['mode_tags'] = Variable<String>(modeTags.value);
+    }
+    if (performanceMetric.present) {
+      map['performance_metric'] = Variable<double>(performanceMetric.value);
+    }
+    if (feelScore.present) {
+      map['feel_score'] = Variable<int>(feelScore.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -646,6 +1176,12 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
     }
     if (suggestedTime.present) {
       map['suggested_time'] = Variable<int>(suggestedTime.value);
+    }
+    if (isMilestone.present) {
+      map['is_milestone'] = Variable<bool>(isMilestone.value);
+    }
+    if (milestoneLabel.present) {
+      map['milestone_label'] = Variable<String>(milestoneLabel.value);
     }
     return map;
   }
@@ -657,9 +1193,14 @@ class SessionsCompanion extends UpdateCompanion<SessionRow> {
           ..write('skillId: $skillId, ')
           ..write('startedAt: $startedAt, ')
           ..write('durationMinutes: $durationMinutes, ')
+          ..write('modeTags: $modeTags, ')
+          ..write('performanceMetric: $performanceMetric, ')
+          ..write('feelScore: $feelScore, ')
           ..write('notes: $notes, ')
           ..write('isAnchored: $isAnchored, ')
-          ..write('suggestedTime: $suggestedTime')
+          ..write('suggestedTime: $suggestedTime, ')
+          ..write('isMilestone: $isMilestone, ')
+          ..write('milestoneLabel: $milestoneLabel')
           ..write(')'))
         .toString();
   }
@@ -1065,6 +1606,12 @@ class $SuggestionsTable extends Suggestions
   late final GeneratedColumn<int> suppressedUntil = GeneratedColumn<int>(
       'suppressed_until', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1075,7 +1622,8 @@ class $SuggestionsTable extends Suggestions
         acceptedAt,
         dismissedAt,
         thumbsDownAt,
-        suppressedUntil
+        suppressedUntil,
+        category
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1140,6 +1688,10 @@ class $SuggestionsTable extends Suggestions
           suppressedUntil.isAcceptableOrUnknown(
               data['suppressed_until']!, _suppressedUntilMeta));
     }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
     return context;
   }
 
@@ -1167,6 +1719,8 @@ class $SuggestionsTable extends Suggestions
           .read(DriftSqlType.int, data['${effectivePrefix}thumbs_down_at']),
       suppressedUntil: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}suppressed_until']),
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
     );
   }
 
@@ -1186,6 +1740,7 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
   final int? dismissedAt;
   final int? thumbsDownAt;
   final int? suppressedUntil;
+  final String? category;
   const SuggestionRow(
       {required this.id,
       this.skillId,
@@ -1195,7 +1750,8 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
       this.acceptedAt,
       this.dismissedAt,
       this.thumbsDownAt,
-      this.suppressedUntil});
+      this.suppressedUntil,
+      this.category});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1217,6 +1773,9 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
     }
     if (!nullToAbsent || suppressedUntil != null) {
       map['suppressed_until'] = Variable<int>(suppressedUntil);
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
     }
     return map;
   }
@@ -1242,6 +1801,9 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
       suppressedUntil: suppressedUntil == null && nullToAbsent
           ? const Value.absent()
           : Value(suppressedUntil),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -1258,6 +1820,7 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
       dismissedAt: serializer.fromJson<int?>(json['dismissedAt']),
       thumbsDownAt: serializer.fromJson<int?>(json['thumbsDownAt']),
       suppressedUntil: serializer.fromJson<int?>(json['suppressedUntil']),
+      category: serializer.fromJson<String?>(json['category']),
     );
   }
   @override
@@ -1273,6 +1836,7 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
       'dismissedAt': serializer.toJson<int?>(dismissedAt),
       'thumbsDownAt': serializer.toJson<int?>(thumbsDownAt),
       'suppressedUntil': serializer.toJson<int?>(suppressedUntil),
+      'category': serializer.toJson<String?>(category),
     };
   }
 
@@ -1285,7 +1849,8 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
           Value<int?> acceptedAt = const Value.absent(),
           Value<int?> dismissedAt = const Value.absent(),
           Value<int?> thumbsDownAt = const Value.absent(),
-          Value<int?> suppressedUntil = const Value.absent()}) =>
+          Value<int?> suppressedUntil = const Value.absent(),
+          Value<String?> category = const Value.absent()}) =>
       SuggestionRow(
         id: id ?? this.id,
         skillId: skillId.present ? skillId.value : this.skillId,
@@ -1299,6 +1864,7 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
         suppressedUntil: suppressedUntil.present
             ? suppressedUntil.value
             : this.suppressedUntil,
+        category: category.present ? category.value : this.category,
       );
   SuggestionRow copyWithCompanion(SuggestionsCompanion data) {
     return SuggestionRow(
@@ -1320,6 +1886,7 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
       suppressedUntil: data.suppressedUntil.present
           ? data.suppressedUntil.value
           : this.suppressedUntil,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -1334,14 +1901,24 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
           ..write('acceptedAt: $acceptedAt, ')
           ..write('dismissedAt: $dismissedAt, ')
           ..write('thumbsDownAt: $thumbsDownAt, ')
-          ..write('suppressedUntil: $suppressedUntil')
+          ..write('suppressedUntil: $suppressedUntil, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, skillId, slotStart, slotDuration,
-      suggestedAt, acceptedAt, dismissedAt, thumbsDownAt, suppressedUntil);
+  int get hashCode => Object.hash(
+      id,
+      skillId,
+      slotStart,
+      slotDuration,
+      suggestedAt,
+      acceptedAt,
+      dismissedAt,
+      thumbsDownAt,
+      suppressedUntil,
+      category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1354,7 +1931,8 @@ class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
           other.acceptedAt == this.acceptedAt &&
           other.dismissedAt == this.dismissedAt &&
           other.thumbsDownAt == this.thumbsDownAt &&
-          other.suppressedUntil == this.suppressedUntil);
+          other.suppressedUntil == this.suppressedUntil &&
+          other.category == this.category);
 }
 
 class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
@@ -1367,6 +1945,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
   final Value<int?> dismissedAt;
   final Value<int?> thumbsDownAt;
   final Value<int?> suppressedUntil;
+  final Value<String?> category;
   const SuggestionsCompanion({
     this.id = const Value.absent(),
     this.skillId = const Value.absent(),
@@ -1377,6 +1956,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
     this.dismissedAt = const Value.absent(),
     this.thumbsDownAt = const Value.absent(),
     this.suppressedUntil = const Value.absent(),
+    this.category = const Value.absent(),
   });
   SuggestionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1388,6 +1968,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
     this.dismissedAt = const Value.absent(),
     this.thumbsDownAt = const Value.absent(),
     this.suppressedUntil = const Value.absent(),
+    this.category = const Value.absent(),
   })  : slotStart = Value(slotStart),
         slotDuration = Value(slotDuration),
         suggestedAt = Value(suggestedAt);
@@ -1401,6 +1982,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
     Expression<int>? dismissedAt,
     Expression<int>? thumbsDownAt,
     Expression<int>? suppressedUntil,
+    Expression<String>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1412,6 +1994,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
       if (dismissedAt != null) 'dismissed_at': dismissedAt,
       if (thumbsDownAt != null) 'thumbs_down_at': thumbsDownAt,
       if (suppressedUntil != null) 'suppressed_until': suppressedUntil,
+      if (category != null) 'category': category,
     });
   }
 
@@ -1424,7 +2007,8 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
       Value<int?>? acceptedAt,
       Value<int?>? dismissedAt,
       Value<int?>? thumbsDownAt,
-      Value<int?>? suppressedUntil}) {
+      Value<int?>? suppressedUntil,
+      Value<String?>? category}) {
     return SuggestionsCompanion(
       id: id ?? this.id,
       skillId: skillId ?? this.skillId,
@@ -1435,6 +2019,7 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
       dismissedAt: dismissedAt ?? this.dismissedAt,
       thumbsDownAt: thumbsDownAt ?? this.thumbsDownAt,
       suppressedUntil: suppressedUntil ?? this.suppressedUntil,
+      category: category ?? this.category,
     );
   }
 
@@ -1468,6 +2053,9 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
     if (suppressedUntil.present) {
       map['suppressed_until'] = Variable<int>(suppressedUntil.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     return map;
   }
 
@@ -1482,7 +2070,8 @@ class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
           ..write('acceptedAt: $acceptedAt, ')
           ..write('dismissedAt: $dismissedAt, ')
           ..write('thumbsDownAt: $thumbsDownAt, ')
-          ..write('suppressedUntil: $suppressedUntil')
+          ..write('suppressedUntil: $suppressedUntil, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -2338,6 +2927,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $EveningHighlightsTable eveningHighlights =
       $EveningHighlightsTable(this);
   late final AgendaDao agendaDao = AgendaDao(this as AppDatabase);
+  late final PracticeDao practiceDao = PracticeDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2381,14 +2971,28 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$SkillsTableCreateCompanionBuilder = SkillsCompanion Function({
   Value<int> id,
   required String name,
+  required String type,
+  Value<String?> metricConfig,
+  Value<String?> levelLabel,
+  Value<int?> levelUpdatedAt,
+  Value<int> sessionsSinceLevelUpdate,
   required int createdAt,
   Value<int?> lastSessionAt,
+  Value<bool> isArchived,
+  Value<int?> suppressedUntil,
 });
 typedef $$SkillsTableUpdateCompanionBuilder = SkillsCompanion Function({
   Value<int> id,
   Value<String> name,
+  Value<String> type,
+  Value<String?> metricConfig,
+  Value<String?> levelLabel,
+  Value<int?> levelUpdatedAt,
+  Value<int> sessionsSinceLevelUpdate,
   Value<int> createdAt,
   Value<int?> lastSessionAt,
+  Value<bool> isArchived,
+  Value<int?> suppressedUntil,
 });
 
 final class $$SkillsTableReferences
@@ -2440,11 +3044,35 @@ class $$SkillsTableFilterComposer
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get metricConfig => $composableBuilder(
+      column: $table.metricConfig, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get levelLabel => $composableBuilder(
+      column: $table.levelLabel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get levelUpdatedAt => $composableBuilder(
+      column: $table.levelUpdatedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sessionsSinceLevelUpdate => $composableBuilder(
+      column: $table.sessionsSinceLevelUpdate,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get lastSessionAt => $composableBuilder(
       column: $table.lastSessionAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get suppressedUntil => $composableBuilder(
+      column: $table.suppressedUntil,
+      builder: (column) => ColumnFilters(column));
 
   Expression<bool> sessionsRefs(
       Expression<bool> Function($$SessionsTableFilterComposer f) f) {
@@ -2504,11 +3132,36 @@ class $$SkillsTableOrderingComposer
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get metricConfig => $composableBuilder(
+      column: $table.metricConfig,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get levelLabel => $composableBuilder(
+      column: $table.levelLabel, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get levelUpdatedAt => $composableBuilder(
+      column: $table.levelUpdatedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sessionsSinceLevelUpdate => $composableBuilder(
+      column: $table.sessionsSinceLevelUpdate,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get lastSessionAt => $composableBuilder(
       column: $table.lastSessionAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get suppressedUntil => $composableBuilder(
+      column: $table.suppressedUntil,
       builder: (column) => ColumnOrderings(column));
 }
 
@@ -2527,11 +3180,32 @@ class $$SkillsTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get metricConfig => $composableBuilder(
+      column: $table.metricConfig, builder: (column) => column);
+
+  GeneratedColumn<String> get levelLabel => $composableBuilder(
+      column: $table.levelLabel, builder: (column) => column);
+
+  GeneratedColumn<int> get levelUpdatedAt => $composableBuilder(
+      column: $table.levelUpdatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get sessionsSinceLevelUpdate => $composableBuilder(
+      column: $table.sessionsSinceLevelUpdate, builder: (column) => column);
+
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<int> get lastSessionAt => $composableBuilder(
       column: $table.lastSessionAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+      column: $table.isArchived, builder: (column) => column);
+
+  GeneratedColumn<int> get suppressedUntil => $composableBuilder(
+      column: $table.suppressedUntil, builder: (column) => column);
 
   Expression<T> sessionsRefs<T extends Object>(
       Expression<T> Function($$SessionsTableAnnotationComposer a) f) {
@@ -2601,26 +3275,54 @@ class $$SkillsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String?> metricConfig = const Value.absent(),
+            Value<String?> levelLabel = const Value.absent(),
+            Value<int?> levelUpdatedAt = const Value.absent(),
+            Value<int> sessionsSinceLevelUpdate = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
             Value<int?> lastSessionAt = const Value.absent(),
+            Value<bool> isArchived = const Value.absent(),
+            Value<int?> suppressedUntil = const Value.absent(),
           }) =>
               SkillsCompanion(
             id: id,
             name: name,
+            type: type,
+            metricConfig: metricConfig,
+            levelLabel: levelLabel,
+            levelUpdatedAt: levelUpdatedAt,
+            sessionsSinceLevelUpdate: sessionsSinceLevelUpdate,
             createdAt: createdAt,
             lastSessionAt: lastSessionAt,
+            isArchived: isArchived,
+            suppressedUntil: suppressedUntil,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String name,
+            required String type,
+            Value<String?> metricConfig = const Value.absent(),
+            Value<String?> levelLabel = const Value.absent(),
+            Value<int?> levelUpdatedAt = const Value.absent(),
+            Value<int> sessionsSinceLevelUpdate = const Value.absent(),
             required int createdAt,
             Value<int?> lastSessionAt = const Value.absent(),
+            Value<bool> isArchived = const Value.absent(),
+            Value<int?> suppressedUntil = const Value.absent(),
           }) =>
               SkillsCompanion.insert(
             id: id,
             name: name,
+            type: type,
+            metricConfig: metricConfig,
+            levelLabel: levelLabel,
+            levelUpdatedAt: levelUpdatedAt,
+            sessionsSinceLevelUpdate: sessionsSinceLevelUpdate,
             createdAt: createdAt,
             lastSessionAt: lastSessionAt,
+            isArchived: isArchived,
+            suppressedUntil: suppressedUntil,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
@@ -2686,18 +3388,28 @@ typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
   required int skillId,
   required int startedAt,
   required int durationMinutes,
+  Value<String?> modeTags,
+  Value<double?> performanceMetric,
+  Value<int?> feelScore,
   Value<String?> notes,
   Value<bool> isAnchored,
   Value<int?> suggestedTime,
+  Value<bool> isMilestone,
+  Value<String?> milestoneLabel,
 });
 typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
   Value<int> skillId,
   Value<int> startedAt,
   Value<int> durationMinutes,
+  Value<String?> modeTags,
+  Value<double?> performanceMetric,
+  Value<int?> feelScore,
   Value<String?> notes,
   Value<bool> isAnchored,
   Value<int?> suggestedTime,
+  Value<bool> isMilestone,
+  Value<String?> milestoneLabel,
 });
 
 final class $$SessionsTableReferences
@@ -2738,6 +3450,16 @@ class $$SessionsTableFilterComposer
       column: $table.durationMinutes,
       builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get modeTags => $composableBuilder(
+      column: $table.modeTags, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get performanceMetric => $composableBuilder(
+      column: $table.performanceMetric,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get feelScore => $composableBuilder(
+      column: $table.feelScore, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
 
@@ -2746,6 +3468,13 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<int> get suggestedTime => $composableBuilder(
       column: $table.suggestedTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isMilestone => $composableBuilder(
+      column: $table.isMilestone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get milestoneLabel => $composableBuilder(
+      column: $table.milestoneLabel,
+      builder: (column) => ColumnFilters(column));
 
   $$SkillsTableFilterComposer get skillId {
     final $$SkillsTableFilterComposer composer = $composerBuilder(
@@ -2787,6 +3516,16 @@ class $$SessionsTableOrderingComposer
       column: $table.durationMinutes,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get modeTags => $composableBuilder(
+      column: $table.modeTags, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get performanceMetric => $composableBuilder(
+      column: $table.performanceMetric,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get feelScore => $composableBuilder(
+      column: $table.feelScore, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
 
@@ -2795,6 +3534,13 @@ class $$SessionsTableOrderingComposer
 
   ColumnOrderings<int> get suggestedTime => $composableBuilder(
       column: $table.suggestedTime,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isMilestone => $composableBuilder(
+      column: $table.isMilestone, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get milestoneLabel => $composableBuilder(
+      column: $table.milestoneLabel,
       builder: (column) => ColumnOrderings(column));
 
   $$SkillsTableOrderingComposer get skillId {
@@ -2836,6 +3582,15 @@ class $$SessionsTableAnnotationComposer
   GeneratedColumn<int> get durationMinutes => $composableBuilder(
       column: $table.durationMinutes, builder: (column) => column);
 
+  GeneratedColumn<String> get modeTags =>
+      $composableBuilder(column: $table.modeTags, builder: (column) => column);
+
+  GeneratedColumn<double> get performanceMetric => $composableBuilder(
+      column: $table.performanceMetric, builder: (column) => column);
+
+  GeneratedColumn<int> get feelScore =>
+      $composableBuilder(column: $table.feelScore, builder: (column) => column);
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
@@ -2844,6 +3599,12 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<int> get suggestedTime => $composableBuilder(
       column: $table.suggestedTime, builder: (column) => column);
+
+  GeneratedColumn<bool> get isMilestone => $composableBuilder(
+      column: $table.isMilestone, builder: (column) => column);
+
+  GeneratedColumn<String> get milestoneLabel => $composableBuilder(
+      column: $table.milestoneLabel, builder: (column) => column);
 
   $$SkillsTableAnnotationComposer get skillId {
     final $$SkillsTableAnnotationComposer composer = $composerBuilder(
@@ -2893,36 +3654,56 @@ class $$SessionsTableTableManager extends RootTableManager<
             Value<int> skillId = const Value.absent(),
             Value<int> startedAt = const Value.absent(),
             Value<int> durationMinutes = const Value.absent(),
+            Value<String?> modeTags = const Value.absent(),
+            Value<double?> performanceMetric = const Value.absent(),
+            Value<int?> feelScore = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> isAnchored = const Value.absent(),
             Value<int?> suggestedTime = const Value.absent(),
+            Value<bool> isMilestone = const Value.absent(),
+            Value<String?> milestoneLabel = const Value.absent(),
           }) =>
               SessionsCompanion(
             id: id,
             skillId: skillId,
             startedAt: startedAt,
             durationMinutes: durationMinutes,
+            modeTags: modeTags,
+            performanceMetric: performanceMetric,
+            feelScore: feelScore,
             notes: notes,
             isAnchored: isAnchored,
             suggestedTime: suggestedTime,
+            isMilestone: isMilestone,
+            milestoneLabel: milestoneLabel,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int skillId,
             required int startedAt,
             required int durationMinutes,
+            Value<String?> modeTags = const Value.absent(),
+            Value<double?> performanceMetric = const Value.absent(),
+            Value<int?> feelScore = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> isAnchored = const Value.absent(),
             Value<int?> suggestedTime = const Value.absent(),
+            Value<bool> isMilestone = const Value.absent(),
+            Value<String?> milestoneLabel = const Value.absent(),
           }) =>
               SessionsCompanion.insert(
             id: id,
             skillId: skillId,
             startedAt: startedAt,
             durationMinutes: durationMinutes,
+            modeTags: modeTags,
+            performanceMetric: performanceMetric,
+            feelScore: feelScore,
             notes: notes,
             isAnchored: isAnchored,
             suggestedTime: suggestedTime,
+            isMilestone: isMilestone,
+            milestoneLabel: milestoneLabel,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
@@ -3163,6 +3944,7 @@ typedef $$SuggestionsTableCreateCompanionBuilder = SuggestionsCompanion
   Value<int?> dismissedAt,
   Value<int?> thumbsDownAt,
   Value<int?> suppressedUntil,
+  Value<String?> category,
 });
 typedef $$SuggestionsTableUpdateCompanionBuilder = SuggestionsCompanion
     Function({
@@ -3175,6 +3957,7 @@ typedef $$SuggestionsTableUpdateCompanionBuilder = SuggestionsCompanion
   Value<int?> dismissedAt,
   Value<int?> thumbsDownAt,
   Value<int?> suppressedUntil,
+  Value<String?> category,
 });
 
 final class $$SuggestionsTableReferences
@@ -3229,6 +4012,9 @@ class $$SuggestionsTableFilterComposer
   ColumnFilters<int> get suppressedUntil => $composableBuilder(
       column: $table.suppressedUntil,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
 
   $$SkillsTableFilterComposer get skillId {
     final $$SkillsTableFilterComposer composer = $composerBuilder(
@@ -3287,6 +4073,9 @@ class $$SuggestionsTableOrderingComposer
       column: $table.suppressedUntil,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
+
   $$SkillsTableOrderingComposer get skillId {
     final $$SkillsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -3341,6 +4130,9 @@ class $$SuggestionsTableAnnotationComposer
   GeneratedColumn<int> get suppressedUntil => $composableBuilder(
       column: $table.suppressedUntil, builder: (column) => column);
 
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
   $$SkillsTableAnnotationComposer get skillId {
     final $$SkillsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -3394,6 +4186,7 @@ class $$SuggestionsTableTableManager extends RootTableManager<
             Value<int?> dismissedAt = const Value.absent(),
             Value<int?> thumbsDownAt = const Value.absent(),
             Value<int?> suppressedUntil = const Value.absent(),
+            Value<String?> category = const Value.absent(),
           }) =>
               SuggestionsCompanion(
             id: id,
@@ -3405,6 +4198,7 @@ class $$SuggestionsTableTableManager extends RootTableManager<
             dismissedAt: dismissedAt,
             thumbsDownAt: thumbsDownAt,
             suppressedUntil: suppressedUntil,
+            category: category,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -3416,6 +4210,7 @@ class $$SuggestionsTableTableManager extends RootTableManager<
             Value<int?> dismissedAt = const Value.absent(),
             Value<int?> thumbsDownAt = const Value.absent(),
             Value<int?> suppressedUntil = const Value.absent(),
+            Value<String?> category = const Value.absent(),
           }) =>
               SuggestionsCompanion.insert(
             id: id,
@@ -3427,6 +4222,7 @@ class $$SuggestionsTableTableManager extends RootTableManager<
             dismissedAt: dismissedAt,
             thumbsDownAt: thumbsDownAt,
             suppressedUntil: suppressedUntil,
+            category: category,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

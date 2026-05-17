@@ -371,6 +371,41 @@ Stop immediately and ask if:
 
 ---
 
+### Story 3-1 — Practice Repository and DAO
+**Completed:** 2026-05-17 | **Confidence:** 96/100
+
+**Files created:**
+- `lib/features/practice/domain/entities/skill_type.dart` — `SkillType` enum (6 values, `.value = name`)
+- `lib/features/practice/domain/entities/skill.dart` — `Skill` immutable entity, `validate()` → `Result<Skill>`, `copyWith`
+- `lib/features/practice/domain/entities/session.dart` — `Session` immutable entity, `copyWith`
+- `lib/features/practice/domain/repositories/practice_repository.dart` — abstract interface (8 methods)
+- `lib/features/practice/data/practice_dao.dart` — `@DriftAccessor(tables: [Skills, Sessions])`, 9 methods including `insertSessionAtomic` (transaction via `transaction(() async {...})` inside DAO)
+- `lib/features/practice/data/mappers/skill_mapper.dart` — `fromRow` throws `ArgumentError` on unknown type; `toCompanion` with `Value(nullable)` pattern
+- `lib/features/practice/data/mappers/session_mapper.dart` — `fromRow` deserializes JSON `mode_tags` (null→[], malformed→[]); `toCompanion` with `jsonEncode`
+- `lib/features/practice/data/repositories/practice_repository_impl.dart` — all writes try/catch → `databaseWriteFailed`
+- `lib/features/practice/presentation/practice_providers.dart` — `practiceDaoProvider`, `practiceRepositoryProvider`, `allSkillsProvider`
+- `lib/core/domain/app_error.dart` — added `validationFailed` variant (9 total)
+- `test/features/practice/domain/skill_test.dart` — 12 unit tests (TS-037 to TS-041+)
+- `test/features/practice/data/practice_dao_test.dart` — 17 integration tests (TS-042 to TS-057)
+
+**Files modified:**
+- `lib/core/database/tables/skills_table.dart` — +7 columns (type, metric_config, level_label, level_updated_at, sessions_since_level_update, is_archived, suppressed_until)
+- `lib/core/database/tables/sessions_table.dart` — +5 columns (mode_tags, performance_metric, feel_score, is_milestone, milestone_label)
+- `lib/core/database/tables/suggestions_table.dart` — +category column
+- `lib/core/database/app_database.dart` — schemaVersion 1→2, `onUpgrade` migration with `m.addColumn` for all 13 new columns, `PracticeDao` added to `@DriftDatabase(daos: [...])`
+- `test/core/database/app_database_test.dart` — added `type:` to all skill inserts
+- `test/core/types/result_test.dart` — updated variant count from 8 to 9
+
+**Key decisions:**
+- `insertSessionAtomic` in the DAO handles the transaction (insert session + increment counter + update lastSessionAt) using `transaction(() async {...})` — this keeps the transaction logic inside the `DatabaseAccessor` where `transaction()` is accessible, avoiding the need to expose `db` to the repository
+- `customUpdate` for `sessions_since_level_update = sessions_since_level_update + 1` — Drift's typed API can't express a column-increment without loading the current value first
+- `_FailInsertPracticeDao` helper class in tests (extends `PracticeDao`, overrides `insertSkill` to throw) — cleaner than closing the DB to test EH1, avoids race conditions with Drift's in-memory close behavior
+- Stream reactivity test (TS-042) uses `.where(rows => rows.any(...)).first` instead of `.skip(1).first` — avoids timeout race condition when initial empty emission timing is uncertain
+
+**182/182 tests passing. flutter analyze clean.**
+
+---
+
 ### UI Redesign — Agenda Module (Prototype v2)
 **Date:** 2026-05-16
 

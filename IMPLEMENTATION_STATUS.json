@@ -2,11 +2,11 @@
   "projectName": "OdO",
   "platformType": "mobile",
   "status": "IN_PROGRESS",
-  "date": "2026-05-16",
-  "currentEpic": 2,
-  "currentStory": null,
-  "totalStories": 41,
-  "completionPercentage": 32,
+  "date": "2026-05-17",
+  "currentEpic": 3,
+  "currentStory": "3-2-first-launch-skill-prompt",
+  "totalStories": 46,
+  "completionPercentage": 30,
   "performanceThresholds": {
     "mobileUIInteractions": "500ms",
     "claudeAPIResponse": "3000ms",
@@ -50,16 +50,19 @@
     {
       "id": 3,
       "name": "Practice Module",
-      "status": "NOT_STARTED",
-      "storiesComplete": 0,
-      "storiesTotal": 6,
+      "status": "IN_PROGRESS",
+      "storiesComplete": 1,
+      "storiesTotal": 9,
       "stories": [
         "3-1-practice-repository-and-dao",
         "3-2-first-launch-skill-prompt",
         "3-3-skill-card",
         "3-4-session-logging",
         "3-5-streak-computation",
-        "3-6-pattern-detection-unanchored-sessions"
+        "3-6-skill-type-auto-detection",
+        "3-7-evolution-view",
+        "3-8-level-check-in-system",
+        "3-9-unanchored-session-detection"
       ]
     },
     {
@@ -81,17 +84,18 @@
       "name": "Glance + Evening + Proactive",
       "status": "NOT_STARTED",
       "storiesComplete": 0,
-      "storiesTotal": 9,
+      "storiesTotal": 10,
       "stories": [
         "5-1-glance-screen-layout-and-states",
         "5-2-glance-screen-authentication",
         "5-3-orb-widget",
-        "5-4-evening-session-orchestration",
-        "5-5-evening-session-persistence-until-midnight",
-        "5-6-suggestion-engine-on-device",
-        "5-7-confirmation-sheet",
-        "5-8-background-tasks",
-        "5-9-suppression-algorithm"
+        "5-4-weekly-planning",
+        "5-5-evening-session-orchestration",
+        "5-6-evening-session-persistence-until-midnight",
+        "5-7-suggestion-engine-on-device",
+        "5-8-confirmation-sheet",
+        "5-9-background-tasks",
+        "5-10-suppression-algorithm"
       ]
     },
     {
@@ -113,6 +117,11 @@
     }
   ],
   "completedStories": [
+    {
+      "id": "3-1-practice-repository-and-dao",
+      "completedDate": "2026-05-17",
+      "notes": "SkillType enum (6 values, .value = name), Skill entity (@immutable, validate() → Result<Skill>, copyWith), Session entity (@immutable, copyWith). Skills table +7 columns (type/metric_config/level_label/level_updated_at/sessions_since_level_update/is_archived/suppressed_until). Sessions table +5 columns (mode_tags JSON/performance_metric/feel_score/is_milestone/milestone_label). Suggestions table +category. schemaVersion 1→2 with onUpgrade m.addColumn for all 13 new columns. PracticeDao (@DriftAccessor, 9 methods including insertSessionAtomic for transactional insert+counter update via customUpdate). SkillMapper (fromRow throws ArgumentError on unknown type, toCompanion with Value(nullable)). SessionMapper (fromRow deserializes JSON mode_tags, handles null→[], malformed→[]; toCompanion jsonEncode). PracticeRepositoryImpl (all writes try/catch → databaseWriteFailed, addSession uses insertSessionAtomic). AppError +validationFailed (9 variants total). 29 tests pass (TS-037 to TS-057). Key: inserted_session_atomic pattern in DAO to avoid exposing db.transaction() outside the accessor."
+    },
     {
       "id": "2-1-agenda-repository-and-dao",
       "completedDate": "2026-05-16",

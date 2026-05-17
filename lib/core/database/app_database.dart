@@ -13,6 +13,7 @@ import 'tables/sessions_table.dart';
 import 'tables/skills_table.dart';
 import 'tables/suggestions_table.dart';
 import 'package:odo/features/agenda/data/agenda_dao.dart';
+import 'package:odo/features/practice/data/practice_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -25,7 +26,7 @@ part 'app_database.g.dart';
     EveningSessions,
     EveningHighlights,
   ],
-  daos: [AgendaDao],
+  daos: [AgendaDao, PracticeDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -34,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +58,23 @@ class AppDatabase extends _$AppDatabase {
             'CREATE INDEX idx_evening_sessions_date '
             'ON evening_sessions(session_date)',
           );
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.addColumn(skills, skills.type);
+            await m.addColumn(skills, skills.metricConfig);
+            await m.addColumn(skills, skills.levelLabel);
+            await m.addColumn(skills, skills.levelUpdatedAt);
+            await m.addColumn(skills, skills.sessionsSinceLevelUpdate);
+            await m.addColumn(skills, skills.isArchived);
+            await m.addColumn(skills, skills.suppressedUntil);
+            await m.addColumn(sessions, sessions.modeTags);
+            await m.addColumn(sessions, sessions.performanceMetric);
+            await m.addColumn(sessions, sessions.feelScore);
+            await m.addColumn(sessions, sessions.isMilestone);
+            await m.addColumn(sessions, sessions.milestoneLabel);
+            await m.addColumn(suggestions, suggestions.category);
+          }
         },
       );
 }

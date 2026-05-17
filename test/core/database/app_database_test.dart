@@ -23,6 +23,7 @@ void main() {
       final id = await db.into(db.skills).insert(
             SkillsCompanion.insert(
               name: 'Chess',
+              type: 'strategy',
               createdAt: 1700000000000,
             ),
           );
@@ -42,6 +43,7 @@ void main() {
       final skillId = await db.into(db.skills).insert(
             SkillsCompanion.insert(
               name: 'Piano',
+              type: 'creative',
               createdAt: 1700000000000,
             ),
           );
@@ -66,6 +68,7 @@ void main() {
       final skillId = await db.into(db.skills).insert(
             SkillsCompanion.insert(
               name: 'Painting',
+              type: 'creative',
               createdAt: 1700000000000,
             ),
           );

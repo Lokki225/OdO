@@ -15,4 +15,5 @@ class Suggestions extends Table {
   IntColumn get dismissedAt => integer().nullable()();
   IntColumn get thumbsDownAt => integer().nullable()();
   IntColumn get suppressedUntil => integer().nullable()();
+  TextColumn get category => text().nullable()();
 }
