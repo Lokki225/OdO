@@ -12,6 +12,7 @@ import 'package:odo/features/home/presentation/home_screen.dart';
 import 'package:odo/features/home/presentation/placeholder_screen.dart';
 import 'package:odo/features/home/presentation/scaffold_with_nav_bar.dart';
 import 'package:odo/features/practice/presentation/pages/first_launch_sheet.dart';
+import 'package:odo/features/practice/presentation/pages/log_session_sheet.dart';
 import 'package:odo/features/practice/presentation/pages/practice_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) => router);
@@ -101,12 +102,13 @@ final router = GoRouter(
                 ),
                 GoRoute(
                   path: 'log-session/:id',
-                  pageBuilder: (context, state) => _slideUpSheet(
-                    state,
-                    PlaceholderScreen(
-                      title: 'Log Session ${state.pathParameters['id']}',
-                    ),
-                  ),
+                  pageBuilder: (context, state) {
+                    final id = int.parse(state.pathParameters['id']!);
+                    return _slideUpSheet(
+                      state,
+                      LogSessionSheet(skillId: id),
+                    );
+                  },
                 ),
               ],
             ),

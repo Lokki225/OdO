@@ -371,6 +371,23 @@ Stop immediately and ask if:
 
 ---
 
+### Story 3.4 — Session Logging
+**Completed:** 2026-05-17 | **Confidence:** 95/100
+
+**Files created/modified:**
+- `lib/features/practice/presentation/pages/log_session_sheet.dart` — `ConsumerStatefulWidget` + `SingleTickerProviderStateMixin`; duration chips (15/25/45/60 min + Autre); custom chip reveals inline `TextField` (autofocus, numeric keyboard); `started_at` editable via `showTimePicker`; optional notes `TextField`; `AnimationController` + flutter_animate `.fadeOut().scaleXY(end: 0.9)` on save success → `Navigator.of(context).pop()`
+- `lib/features/practice/presentation/practice_providers.dart` — `logSession()`: queries `agendaRepositoryProvider.getEventsBetween()` to compute `isAnchored` (any overlapping `EventCategory.practice` event); creates Session, calls `addSession()`, `ref.invalidateSelf()` on success. Added `skillByIdProvider` (Provider.family<Skill?, int>) — looks up skill by id from `allSkillsProvider`
+- `lib/app/router.dart` — `log-session/:id` → `LogSessionSheet(skillId: int.parse(id))`
+
+**Tests:** 6 widget tests. 215/215 total pass, analyze clean.
+
+**Key patterns:**
+- `switch (result) { case Success<int>(): ... case Failure<int>(:final error): ... }` — exhaustive sealed-class matching for async result handling with await inside the success branch
+- `find.byType(TextField).first` for custom duration input (appears before notes field in tree when custom chip selected)
+- Cross-feature import of `agendaRepositoryProvider` in `practice_providers.dart` is acceptable (presentation layer)
+
+---
+
 ### Story 3.3 — Skill Card
 **Completed:** 2026-05-17 | **Confidence:** 95/100
 

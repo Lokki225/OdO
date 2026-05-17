@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:odo/core/database/database_providers.dart';
 import 'package:odo/core/types/result.dart';
+import 'package:odo/features/agenda/domain/entities/event.dart';
+import 'package:odo/features/agenda/presentation/agenda_providers.dart';
 import 'package:odo/features/practice/data/practice_dao.dart';
 import 'package:odo/features/practice/data/repositories/practice_repository_impl.dart';
 import 'package:odo/features/practice/domain/entities/session.dart';
@@ -20,6 +22,14 @@ final practiceRepositoryProvider = Provider<PracticeRepository>((ref) {
 
 final allSkillsProvider = StreamProvider<List<Skill>>((ref) {
   return ref.watch(practiceRepositoryProvider).watchAllSkills();
+});
+
+final skillByIdProvider = Provider.family<Skill?, int>((ref, id) {
+  final asyncSkills = ref.watch(allSkillsProvider);
+  return switch (asyncSkills) {
+    AsyncData(:final value) => value.where((s) => s.id == id).firstOrNull,
+    _ => null,
+  };
 });
 
 class PracticeNotifier extends AsyncNotifier<List<SkillWithStats>> {
@@ -80,6 +90,39 @@ class PracticeNotifier extends AsyncNotifier<List<SkillWithStats>> {
   Future<Result<void>> deleteSkill(int id) async {
     final result =
         await ref.read(practiceRepositoryProvider).deleteSkill(id);
+    if (result.isSuccess) ref.invalidateSelf();
+    return result;
+  }
+
+  Future<Result<int>> logSession({
+    required int skillId,
+    required int durationMinutes,
+    required DateTime startedAt,
+    String? notes,
+  }) async {
+    final agendaRepo = ref.read(agendaRepositoryProvider);
+    final endMs =
+        startedAt.millisecondsSinceEpoch + durationMinutes * 60 * 1000;
+    final eventsResult = await agendaRepo.getEventsBetween(
+      startedAt.millisecondsSinceEpoch,
+      endMs,
+    );
+    final events = eventsResult.getOrNull() ?? [];
+    final isAnchored =
+        events.any((e) => e.category == EventCategory.practice);
+
+    final session = Session(
+      skillId: skillId,
+      startedAt: startedAt.toUtc(),
+      durationMinutes: durationMinutes,
+      modeTags: const [],
+      isAnchored: isAnchored,
+      isMilestone: false,
+      notes: notes?.isEmpty == true ? null : notes,
+    );
+
+    final result =
+        await ref.read(practiceRepositoryProvider).addSession(session);
     if (result.isSuccess) ref.invalidateSelf();
     return result;
   }

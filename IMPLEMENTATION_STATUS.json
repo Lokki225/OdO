@@ -4,9 +4,9 @@
   "status": "IN_PROGRESS",
   "date": "2026-05-17",
   "currentEpic": 3,
-  "currentStory": "3-4-session-logging",
+  "currentStory": "3-5-streak-computation",
   "totalStories": 46,
-  "completionPercentage": 35,
+  "completionPercentage": 37,
   "performanceThresholds": {
     "mobileUIInteractions": "500ms",
     "claudeAPIResponse": "3000ms",
@@ -51,7 +51,7 @@
       "id": 3,
       "name": "Practice Module",
       "status": "IN_PROGRESS",
-      "storiesComplete": 3,
+      "storiesComplete": 4,
       "storiesTotal": 9,
       "stories": [
         "3-1-practice-repository-and-dao",
@@ -117,6 +117,11 @@
     }
   ],
   "completedStories": [
+    {
+      "id": "3-4-session-logging",
+      "completedDate": "2026-05-17",
+      "notes": "LogSessionSheet: ConsumerStatefulWidget with SingleTickerProviderStateMixin; duration chips (15/25/45/60 + Autre); custom chip reveals inline TextField (autofocus, numeric); started_at editable via showTimePicker; notes optional TextFormField; save button disabled until duration > 0; completion animation via flutter_animate + AnimationController (fadeOut+scaleXY durationSlow) then Navigator.pop(). PracticeNotifier.logSession(): queries agendaRepositoryProvider.getEventsBetween() to compute isAnchored (overlapping 'practice' category event); creates Session, calls repo.addSession(), invalidateSelf() on success. skillByIdProvider (Provider.family<Skill?, int>) for sheet to look up skill name. Router updated: log-session/:id → LogSessionSheet(skillId: int.parse(id)). 6 widget tests (save disabled, chip enables, save calls addSession correctly, custom 90min, skill name shown, custom 0 stays disabled). 215/215 total pass, analyze clean."
+    },
     {
       "id": "3-3-skill-card",
       "completedDate": "2026-05-17",
