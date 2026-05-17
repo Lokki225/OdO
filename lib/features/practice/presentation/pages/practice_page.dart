@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import 'package:odo/core/constants/app_spacing.dart';
 import 'package:odo/core/constants/app_typography.dart';
-import 'package:odo/features/practice/domain/entities/skill.dart';
+import 'package:odo/features/practice/domain/entities/skill_with_stats.dart';
 import 'package:odo/features/practice/presentation/pages/first_launch_sheet.dart';
 import 'package:odo/features/practice/presentation/practice_providers.dart';
+import 'package:odo/features/practice/presentation/widgets/skill_card.dart';
 
 class PracticePage extends ConsumerStatefulWidget {
   const PracticePage({super.key});
@@ -23,9 +24,9 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final async = ref.read(allSkillsProvider);
-      async.whenData((skills) {
-        if (skills.isEmpty && !_hasShownFirstLaunch) {
+      final async = ref.read(practiceNotifierProvider);
+      async.whenData((stats) {
+        if (stats.isEmpty && !_hasShownFirstLaunch) {
           _hasShownFirstLaunch = true;
           _showFirstLaunchSheet();
         }
@@ -44,17 +45,20 @@ class _PracticePageState extends ConsumerState<PracticePage> {
 
   @override
   Widget build(BuildContext context) {
-    final skillsAsync = ref.watch(allSkillsProvider);
+    final statsAsync = ref.watch(practiceNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    ref.listen<AsyncValue<List<Skill>>>(allSkillsProvider, (_, next) {
-      if (!_hasShownFirstLaunch &&
-          next is AsyncData<List<Skill>> &&
-          next.value.isEmpty) {
-        _hasShownFirstLaunch = true;
-        _showFirstLaunchSheet();
-      }
-    });
+    ref.listen<AsyncValue<List<SkillWithStats>>>(
+      practiceNotifierProvider,
+      (_, next) {
+        if (!_hasShownFirstLaunch &&
+            next is AsyncData<List<SkillWithStats>> &&
+            next.value.isEmpty) {
+          _hasShownFirstLaunch = true;
+          _showFirstLaunchSheet();
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -73,7 +77,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
         backgroundColor: colorScheme.primary,
         child: Icon(Icons.add, color: colorScheme.onPrimary),
       ),
-      body: skillsAsync.when(
+      body: statsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => Center(
           child: Text(
@@ -83,11 +87,11 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             ),
           ),
         ),
-        data: (skills) {
-          if (skills.isEmpty) {
+        data: (stats) {
+          if (stats.isEmpty) {
             return _EmptyState(onAdd: _showFirstLaunchSheet);
           }
-          return _SkillList(skills: skills);
+          return _SkillList(stats: stats);
         },
       ),
     );
@@ -143,40 +147,17 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _SkillList extends StatelessWidget {
-  const _SkillList({required this.skills});
+  const _SkillList({required this.stats});
 
-  final List<Skill> skills;
+  final List<SkillWithStats> stats;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.sp16),
-      itemCount: skills.length,
-      separatorBuilder: (_, __) =>
-          const SizedBox(height: AppSpacing.sp8),
-      itemBuilder: (context, index) {
-        final skill = skills[index];
-        return Card(
-          child: ListTile(
-            title: Text(
-              skill.name,
-              style: AppTypography.textBody.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-            subtitle: Text(
-              skill.type.value,
-              style: AppTypography.textCaption.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () =>
-                context.push('/home/practice/skill/${skill.id}'),
-          ),
-        );
-      },
+      itemCount: stats.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sp8),
+      itemBuilder: (_, i) => SkillCard(stats: stats[i]),
     );
   }
 }

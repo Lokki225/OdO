@@ -4,9 +4,9 @@
   "status": "IN_PROGRESS",
   "date": "2026-05-17",
   "currentEpic": 3,
-  "currentStory": "3-3-skill-card",
+  "currentStory": "3-4-session-logging",
   "totalStories": 46,
-  "completionPercentage": 32,
+  "completionPercentage": 35,
   "performanceThresholds": {
     "mobileUIInteractions": "500ms",
     "claudeAPIResponse": "3000ms",
@@ -51,7 +51,7 @@
       "id": 3,
       "name": "Practice Module",
       "status": "IN_PROGRESS",
-      "storiesComplete": 2,
+      "storiesComplete": 3,
       "storiesTotal": 9,
       "stories": [
         "3-1-practice-repository-and-dao",
@@ -117,6 +117,11 @@
     }
   ],
   "completedStories": [
+    {
+      "id": "3-3-skill-card",
+      "completedDate": "2026-05-17",
+      "notes": "SkillWithStats entity (Skill + int currentStreak + Session? lastSession + List<bool> activityLast7Days). StreakCalculator stub (returns 0 — full impl in 3.5). PracticeNotifier changed from AsyncNotifier<void> to AsyncNotifier<List<SkillWithStats>>: build() watches allSkillsProvider.future, for each skill fetches getSessionsForSkill(since=6daysAgo) + getLastSession, computes 7-day activity via _sameDay helper, calls StreakCalculator.compute. addSkill/updateSkill/deleteSkill now invalidateSelf() on success. SkillCard widget: GestureDetector (onTap→go skill detail, onLongPress→go log-session), Container with surfaceContainerHighest+outline+radiusLg, top row name+streak badge (only shown when >0), _ActivityBar (Row of 7 AnimatedContainers), bottom row last session text (Aucune session / today→aujourd'hui / 1→hier / N→il y a N jours). PracticePage updated to watch practiceNotifierProvider instead of allSkillsProvider; _SkillList now shows SkillCard. 8 new widget tests. 209/209 total pass, analyze clean."
+    },
     {
       "id": "3-2-first-launch-skill-prompt",
       "completedDate": "2026-05-17",

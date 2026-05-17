@@ -371,6 +371,22 @@ Stop immediately and ask if:
 
 ---
 
+### Story 3.3 — Skill Card
+**Completed:** 2026-05-17 | **Confidence:** 95/100
+
+**Files created/modified:**
+- `lib/features/practice/domain/entities/skill_with_stats.dart` — `@immutable SkillWithStats` (Skill + int currentStreak + Session? lastSession + List<bool> activityLast7Days)
+- `lib/features/practice/domain/usecases/streak_calculator.dart` — stub returning 0; full implementation in Story 3.5
+- `lib/features/practice/presentation/practice_providers.dart` — `PracticeNotifier` changed to `AsyncNotifier<List<SkillWithStats>>`; `build()` watches `allSkillsProvider.future`, fetches sessions per skill, computes 7-day activity + streak (stub); methods now call `ref.invalidateSelf()` on success
+- `lib/features/practice/presentation/widgets/skill_card.dart` — `GestureDetector` (onTap→go skill detail, onLongPress→go log-session); Container with `surfaceContainerHighest`+`outline`+`radiusLg`; streak badge only shown when > 0; `_ActivityBar` with 7 `AnimatedContainer`s; relative date: 0→aujourd'hui, 1→hier, N→il y a N jours
+- `lib/features/practice/presentation/pages/practice_page.dart` — watches `practiceNotifierProvider` instead of `allSkillsProvider`; `_SkillList` now shows `SkillCard` widgets
+
+**Tests:** 8 widget tests for SkillCard. 209/209 total pass, analyze clean.
+
+**Key rule going forward:** `StreakCalculator.compute()` returns 0 until Story 3.5. All callers of `PracticeNotifier.addSkill/updateSkill/deleteSkill` get `Result<T>` back — they can handle errors themselves.
+
+---
+
 ### Story 3.2 — First-Launch Skill Prompt
 **Completed:** 2026-05-17 | **Confidence:** 96/100
 
